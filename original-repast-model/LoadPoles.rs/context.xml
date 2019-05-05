@@ -1,0 +1,8 @@
+<context id="loadPoles"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://repast.org/scenario/context">
+	<projection type="grid" id="dwellingsGrid"></projection>
+	<projection type="network" id="livingin"></projection>
+	<projection type="grid" id="parkingspacesGrid"></projection>
+
+</context>
