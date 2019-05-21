@@ -16,8 +16,8 @@ import repast.simphony.util.SimUtilities;
 
 public class Human {
 
-	boolean carUser, hasParked;
-	String carType,name;
+	boolean carUser, hasParked, bikeUser;
+	String carType,name, bikeType;
 	Context<Object> context;
 	float happiness;
 	
@@ -37,6 +37,16 @@ public class Human {
 			// Electric car user
 			carType = "b";
 		}
+		
+		//Uses bike? 
+		bikeUser = true; 
+		//10% is electric		
+		if (RandomHelper.nextDoubleFromTo(0, 1) >0.9) {
+			bikeType = "c";
+		} else {
+			bikeType = "d";
+		}
+		
 		name = String.valueOf(RandomHelper.nextDoubleFromTo(0, 2));
 		name = String.valueOf(context.getObjects(Human.class).size());
 		happiness = 1;
