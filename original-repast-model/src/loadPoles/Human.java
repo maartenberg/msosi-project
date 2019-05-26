@@ -1,5 +1,6 @@
 package loadPoles;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -47,6 +48,11 @@ public class Human {
 	public Human(Context<Object> context) {
 
 		this.context = context;
+		
+		vehicles = new ArrayList<Vehicle>();
+		vehicles.add(new Bicycle("normal"));
+		vehicles.add(new Car("normal"));
+		vehicles.add(new Car("electric", 2));		
 
 		//Uses cars?
 		carUser = true;
