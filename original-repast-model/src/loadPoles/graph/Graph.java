@@ -10,7 +10,7 @@ public class Graph {
 		nodes = new HashMap<Integer, Vertex>();
 	}
 	
-	public void addVertex(int id, Vertex v) {
+	public void updateVertex(int id, Vertex v) {
 		nodes.put(id, v);
 	}
 	

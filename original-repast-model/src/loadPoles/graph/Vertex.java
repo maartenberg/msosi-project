@@ -1,5 +1,6 @@
 package loadPoles.graph;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Vertex {
@@ -11,6 +12,7 @@ public class Vertex {
 		this.id = id;
 		this.x = x;
 		this.y = y;
+		this.edges = new ArrayList<Edge>();
 	}
 	
 	public void addEdge(Edge e) {
@@ -19,5 +21,9 @@ public class Vertex {
 	
 	public List<Edge> getEdges(){
 		return edges;
+	}
+	
+	public int returnId() {
+		return id;
 	}
 }
