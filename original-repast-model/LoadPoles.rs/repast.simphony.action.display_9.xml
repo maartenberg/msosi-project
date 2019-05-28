@@ -1,13 +1,21 @@
-<repast.simphony.visualization.engine.CartesianDisplayDescriptor simphonyVersion="2.5.0">
+<repast.simphony.visualization.engine.CartesianDisplayDescriptor simphonyVersion="2.6.0">
   <name>Dwellings_grid</name>
   <type>2D</type>
   <styles>
+    <entry>
+      <string>loadPoles.ParkingSpace</string>
+      <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
+    </entry>
     <entry>
       <string>loadPoles.Dwelling</string>
       <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
     </entry>
   </styles>
   <editedStyles>
+    <entry>
+      <string>loadPoles.ParkingSpace</string>
+      <string>loadPoles.ParkingSpace.style_2.xml</string>
+    </entry>
     <entry>
       <string>loadPoles.Dwelling</string>
       <string>loadPoles.Dwelling.style_2.xml</string>
@@ -23,15 +31,19 @@
     <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
-    <hashCode>52426624</hashCode>
+    <hashCode>-1291413043</hashCode>
   </schedParams>
   <layoutClassName>foo.bar.baz</layoutClassName>
   <layoutProjection>dwellingsGrid</layoutProjection>
   <layoutInterval>0</layoutInterval>
   <layerOrder>
     <entry>
-      <string>loadPoles.Dwelling</string>
+      <string>loadPoles.ParkingSpace</string>
       <int>0</int>
+    </entry>
+    <entry>
+      <string>loadPoles.Dwelling</string>
+      <int>1</int>
     </entry>
   </layerOrder>
   <projections>

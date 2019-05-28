@@ -50,7 +50,8 @@ public class LoadPolesBuilder implements ContextBuilder<Object> {
 		int dwellingcount = params.getInteger("dwellingcount");
 		
 		//build neighbourhood
-		Neighbourhood nbh = new Neighbourhood(context, humancount, dwellingcount);
+		Neighbourhood nbh = new Neighbourhood(context, "bunnik.wijk");
+		//Neighbourhood nbh = new Neighbourhood(context, humancount, dwellingcount);
 		
 		//Assign b types to parkingspace. Check from the params how we want to do it.
 		String assignTypeB = params.getString("assignTypeB");
