@@ -38,22 +38,37 @@ public class Human {
 	 * Represents the different vehicles available to this Human.
 	 */
 	List<Vehicle> vehicles;
+	
+	/*
+	 * Represents the gender of this person
+	 */
+	String gender;
+	
+	/*
+	 * Represents the age of this person
+	 */
+	int age;
+	
+	/*
+	 * Represents the current income of this person per year
+	 */
+	int income;
 
 	boolean carUser, hasParked;
 	String carType,name;
 	Context<Object> context;
 	float happiness;
 
-
 	public Human(Context<Object> context) {
 
 		this.context = context;
 		
-		vehicles = new ArrayList<Vehicle>();
-		vehicles.add(new Bicycle("normal"));
-		vehicles.add(new Car("normal"));
-		vehicles.add(new Car("electric", 2));		
+		//Initialise variables and vehicles belonging to this human
+		
+		initFeatures();
+		initVehicles();
 
+		//TODO: for now leaving this unchanged, but it needs to be changed eventually
 		//Uses cars?
 		carUser = true;
 		hasParked = false;
@@ -69,6 +84,129 @@ public class Human {
 		name = String.valueOf(context.getObjects(Human.class).size());
 		happiness = 1;
 
+	}
+	
+	private void initFeatures() {
+		//Choose a random gender with 50% chance
+		if(RandomHelper.nextDoubleFromTo(0, 1) > 0.5) {
+			gender = "female";
+		}
+		else {
+			gender = "male";
+		}
+		
+		//Choose a random age between 15 and 75
+		age = RandomHelper.nextIntFromTo(15, 75);
+		
+		//Different incomes for different age groups, based on data from CBS
+		if(15 <= age && age < 25) {
+			//Between the ages of 15 to 25, the employment rate is 68.9%, the income is between 600 and 1200
+			setIncome(0.689, 600, 1200);
+		}
+		else if(25 <= age && age < 55) {
+			//Between the ages of 15 to 25, the employment rate is 86.0%, the income is between 1600 and 3500
+			setIncome(0.860, 1600, 4500);
+		}
+		else if(55 <= age && age < 65) {
+			//Between the ages of 15 to 25, the employment rate is 70.9%, the income is between 1600 and 3500
+			setIncome(0.709, 1600, 4500);
+		}	
+		else {
+			//Between the ages 65 and up, the employment rate is 12.9%, the income is between 1600 and 300
+			setIncome(0.129, 1600, 3500);
+		}
+		
+		//Determine if person has car license or not, based on data from CBS
+		hasCarLicense = false;
+		if(18 <= age && age < 20) {
+			//Between the ages of 18 to 20, 40% chance of owning a car license
+			if(RandomHelper.nextDoubleFromTo(0, 1) > 0.6) {
+				hasCarLicense = true;
+			}
+		}
+		else if(20 <= age && age < 30) {
+			//Between the ages of 20 and 30, 75% chance of owning a car license
+			if(RandomHelper.nextDoubleFromTo(0, 1) > 0.25) {
+				hasCarLicense = true;
+			}
+		}
+		else if(30 <= age && age < 70) {
+			//Between the ages of 20 and 30, 86% chance of owning a car license
+			if(RandomHelper.nextDoubleFromTo(0, 1) > 0.14) {
+				hasCarLicense = true;
+			}
+		}
+		else {
+			//From ages 70 and up, 61% chance of owning a car license
+			if(RandomHelper.nextDoubleFromTo(0, 1) > 0.39) {
+				hasCarLicense = true;
+			}
+		}		
+	}
+	
+	private void setIncome(double employmentRate, int minIncome, int maxIncome) {
+		//If the person is employed, set income randomly between minimum and maximum income
+		if(RandomHelper.nextDoubleFromTo(0,1) > (1-employmentRate)) {
+			income = RandomHelper.nextIntFromTo(minIncome, maxIncome);
+		}
+		//Else, the person is unemployed, and thus the income is 0
+		else {
+			income = 0;
+		}
+	}
+	
+	private void initVehicles() {
+		//Add vehicles that this human already owns before the simulation
+		//For now, does not take into account social values etc. TODO ?
+		vehicles = new ArrayList<Vehicle>();
+		
+		// BICYCLE AND PUBLIC TRANSPORT
+		//Always have a normal bicycle and "public transport" available
+		vehicles.add(new Bicycle("normal"));				
+		vehicles.add(new PublicTransport());
+		
+		// MOTORBIKE:
+		//If age is over 26, 20% chance of owning a motor
+		if(age >= 26 && age <= 26) {
+			if(RandomHelper.nextDoubleFromTo(0, 1) > 0.8) {
+				vehicles.add(new Motor());
+			}
+		}	
+		
+		// ELECTRIC BICYCLE
+		//If age is under 55, 10% chance of owning an electric bicycle
+		if(age < 55) {
+			if(RandomHelper.nextDoubleFromTo(0, 1) > 0.9) {
+				vehicles.add(new Bicycle("electric"));
+			}
+		}
+		//If age is above 55, 20% chance of owning an electric bicycle
+		else {
+			if(RandomHelper.nextDoubleFromTo(0, 1) > 0.8) {
+				vehicles.add(new Bicycle("electric"));
+			}
+		}
+		
+		// CARS
+		//Person is age 18 or over
+		if(age >= 18) {			
+			//If the person has a car license, and a decent income
+			if(hasCarLicense && income > 1500) {		
+				//70% chance of owning a normal car, or own a normal car when income is on the lower side
+				if(RandomHelper.nextDoubleFromTo(0, 1) > 0.30 || income < 2000) {
+					vehicles.add(new Car("normal"));
+				}
+				//If income is high enough, and does not own a normal car, 70% chance of owning a hybrid car
+				else if(RandomHelper.nextDoubleFromTo(0, 1) > 0.30) {
+					vehicles.add(new Car("hybrid"));
+				}
+				//Else, own an electric car, with a random vehicle class
+				else {
+					int rndVehicleClass = RandomHelper.nextIntFromTo(1, 3);
+					vehicles.add(new Car("electric", rndVehicleClass));
+				}
+			}
+		}
 	}
 
 	//Park your car
@@ -200,7 +338,15 @@ public class Human {
 			System.out.println("Human: " + parkingSpots.getLocation(this));
 			System.out.println("No object at all at " + parkingSpots.getLocation(this).getX() + "," +parkingSpots.getLocation(this).getY());
 		}
-
+	}
+	
+	public void buyVehicle() {
+		// TODO: implement a method for deciding to buy a new vehicle based on multiple factors
+	}
+	
+	public void chooseVehicle() {
+		// TODO: implement a method of choosing a vehicle for a given route
+		
 	}
 
 	//Return the happiness
