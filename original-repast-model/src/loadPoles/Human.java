@@ -1,5 +1,6 @@
 package loadPoles;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -20,9 +21,11 @@ public class Human {
 	String carType,name;
 	Context<Object> context;
 	float happiness;
+	Workplace work;
+	Dwelling home;
 	
 	
-	public Human(Context<Object> context) {
+	public Human(Context<Object> context, ArrayList<Workplace> workplaces) {
 		
 		this.context = context;
 		
@@ -37,6 +40,7 @@ public class Human {
 			// Electric car user
 			carType = "b";
 		}
+		this.work = workplaces.get(RandomHelper.nextIntFromTo(0, workplaces.size()-1));
 		name = String.valueOf(RandomHelper.nextDoubleFromTo(0, 2));
 		name = String.valueOf(context.getObjects(Human.class).size());
 		happiness = 1;
