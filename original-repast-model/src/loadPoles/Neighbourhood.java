@@ -85,7 +85,9 @@ public class Neighbourhood {
 						break;
 						
 					case '.':
-						// TODO: Road
+						Road r = new Road();
+						context.add(r);
+						dwellingsGrid.moveTo(r, x, y);
 						break;
 						
 					case 'P':
@@ -96,7 +98,9 @@ public class Neighbourhood {
 						break;
 						
 					case 'W':
-						// TODO: Workplace
+						Workplace w = new Workplace();
+						context.add(w);
+						dwellingsGrid.moveTo(w, x, y);
 						break;
 						
 					default:
