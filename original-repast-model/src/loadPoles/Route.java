@@ -44,7 +44,7 @@ public class Route {
 public void getValues ()
 {
 	//determine the comfort of all vehicles
-	evArray[1] = ;
+	//evArray[1] = ;
 
 
 
