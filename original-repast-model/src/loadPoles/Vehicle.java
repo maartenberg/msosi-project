@@ -75,7 +75,7 @@ public abstract class Vehicle {
 		return actionRadius;
 	}
 	
-	public float getMaxSpeed() {
+	public float getSpeed() {
 		return speed;
 	}
 	

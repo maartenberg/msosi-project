@@ -341,12 +341,77 @@ public class Human {
 	}
 	
 	public void buyVehicle() {
-		// TODO: implement a method for deciding to buy a new vehicle based on multiple factors
+		// TODO: implement a method for deciding to buy a new vehicle based on multiple factors		
+
+		//Some temporary notes on the CONSUMAT model:
+		//CONSUMAT model; based on whether the agent is satisfied/uncertain  (~ = not)
+		
+		//satisfied, ~uncertain   (if the agent is satisfied and not uncertain)
+		//  -> repetition: repeat decision from before
+		//      ---Do what it did last time
+		
+		//~satisfied, ~uncertain  (if the agent is not satisfied and not uncertain)
+		//  -> deliberation: compare all possible options, choose option that leads to highest satisfaction
+		//      ---Calculate expected utility of consuming the product. Choose the one with the highest expected utility.
+		
+		//satisfied, uncertain    (if the agent is satisfied and uncertain)
+		//  -> imitation: will look what others do, and imitate them. Reduces uncertainty
+		//      ---Copy most popular product
+		
+		//~satisfied, uncertain   (if the agent is not satisfied and uncertain)
+		//  -> social comparison: look at other agents similar to itself, and see which choice will work out best
+		//     --Look at the most popular option in the neighbourhood,
+		//       choose this option if it increases its expected utility, compared with staying with the current choice
+		
 	}
 	
-	public void chooseVehicle() {
-		// TODO: implement a method of choosing a vehicle for a given route
+	public Vehicle chooseVehicle() {
+		//TODO: TEMPORARY PLACEHOLDER, REPLACE WITH DISTANCE OF ACTUAL ROUTE 
+		float distance = 10;
 		
+		//Keep track of the best vehicle
+		int bestUtility = 0;
+		Vehicle bestVehicle = null;
+		
+		//Calculate utility for each vehicle available to this human
+		for(Vehicle vehicle : vehicles) {
+			//TODO: find a good starting value
+			//Start with a utility of 1000
+			int utility = 1000;
+			
+			//The less comfortable, the less utility
+			utility *= vehicle.getComfort();
+			
+			//The slower it is, the less utility
+			utility *= vehicle.getSpeed();	
+			
+			//If the vehicle cannot travel this distance comfortably, subtract a lot from utility			
+			if(vehicle.getActionRadius() < distance) {
+				//Get the difference between the action radius and distance to travel, and use this as punishment
+				float punishment = distance - vehicle.getActionRadius();
+				utility -= punishment * 10;
+			}
+			
+			//The more emission of CO2, the worse the utility
+			//TODO: make this "punishment" of utility also depend on personal values of the environment
+			utility -= (distance * vehicle.getEmission());
+			
+			//The more the cost impacts the income, the worse the utility
+			utility *= (1 - (distance * vehicle.getKilometerCost())/income);
+			
+			//Make sure utility is not lower than 1, so at least one vehicle is always chosen
+			utility = Math.max(1, utility);			
+			
+			//Update best values
+			if(utility > bestUtility) {
+				bestUtility = utility;
+				bestVehicle = vehicle;
+			}
+			
+		}
+		
+		//TODO: also do something with happiness based on how high (or low) this utility is?
+		return bestVehicle;		
 	}
 
 	//Return the happiness
