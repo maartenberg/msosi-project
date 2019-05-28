@@ -1,8 +1,6 @@
 package loadPoles;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import repast.simphony.context.Context;
 import repast.simphony.context.space.graph.NetworkBuilder;
@@ -21,7 +19,6 @@ public class Neighbourhood {
 
 	Context<Object> context;
 	Grid<Object> dwellingsGrid,parkingspacesGrid;
-	ArrayList<Workplace> workplaces;
 	int gridX = 10, gridY = 10;
 	
 	//public Neighbourhood(Context<Object> context,Grid<Object> dwellingsGrid,Grid<Object> parkingspacesGrid)
@@ -32,7 +29,7 @@ public class Neighbourhood {
 	
 	public Neighbourhood(Context<Object> context, int humancount, int dwellingcount) 
 	{
-		this.workplaces = new ArrayList<Workplace>();
+		
 		this.context = context;
 		//this.dwellingsGrid = dwellingsGrid;
 		//this.parkingspacesGrid = parkingspacesGrid;
@@ -75,7 +72,7 @@ public class Neighbourhood {
 		//Add people
 		for(int i = 0; i < humancount; i++)
 		{
-			context.add(new Human(context,workplaces));
+			context.add(new Human(context));
 		}
 		
 		//make sure they have a home
