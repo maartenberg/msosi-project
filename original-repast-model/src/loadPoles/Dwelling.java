@@ -2,6 +2,7 @@ package loadPoles;
 
 import java.util.List;
 
+import loadPoles.graph.Vertex;
 import repast.simphony.context.Context;
 import repast.simphony.space.graph.Network;
 import repast.simphony.space.grid.Grid;
@@ -12,6 +13,7 @@ public class Dwelling {
 	private Grid<Object> dwellingsGrid;
 	Context<Object> context;
 	private String name;
+	private Vertex closestVertex;
 	
 	public Dwelling(Context<Object> context, Grid<Object> dwellingsGrid){
 		this.context = context;
@@ -47,6 +49,10 @@ public class Dwelling {
 	
 	public String getName() {
 		return this.name;
+	}
+
+	public void setClosestVertex(Vertex nearest) {
+		closestVertex = nearest;
 	}
 	
 }

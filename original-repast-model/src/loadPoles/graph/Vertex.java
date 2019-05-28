@@ -26,4 +26,12 @@ public class Vertex {
 	public int returnId() {
 		return id;
 	}
+	
+	public int getX() {
+		return x;
+	}
+	
+	public int getY() {
+		return y;
+	}
 }

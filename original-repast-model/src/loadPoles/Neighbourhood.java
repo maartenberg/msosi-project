@@ -2,6 +2,9 @@ package loadPoles;
 
 import java.util.Iterator;
 import java.util.stream.Stream;
+
+import loadPoles.graph.*;
+
 import java.nio.file.Files;
 import java.io.IOException;
 import java.nio.file.FileSystems;
@@ -25,6 +28,7 @@ public class Neighbourhood {
 	Context<Object> context;
 	Grid<Object> dwellingsGrid;
 	Grid<Object> parkingspacesGrid;
+	Graph g;
 	
 	/**
 	 * The width of this Neighborhood's Grid.
@@ -46,6 +50,8 @@ public class Neighbourhood {
 	 * @param fileName
 	 */
 	public Neighbourhood(Context<Object> context, String fileName) {
+		Reader reader = new Reader(null);
+		this.g = reader.getGraph();
 		Path p = FileSystems.getDefault().getPath("neighborhoods", fileName);
 		System.out.println(p.toAbsolutePath());
 
@@ -80,6 +86,7 @@ public class Neighbourhood {
 					switch (c) {
 					case '#':
 						Dwelling d = new Dwelling(context, dwellingsGrid);
+						d.setClosestVertex(g.findNearestVertex(x, y));
 						context.add(d);
 						dwellingsGrid.moveTo(d, x, y);
 						break;
