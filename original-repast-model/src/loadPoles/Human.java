@@ -69,7 +69,7 @@ public class Human {
 
 		initFeatures();
 		initVehicles();
-		this.preference = new Preferences(0.2f, 0.3f, 0.4f, 0.1f, 0.15f, 0.2f, 0.05f, 0.1f, 0.08f, 0.02f, this);
+		this.preference = new Preferences(0.103f, 0.023f, 0.14f, 0.132f, 0.133f, 0.136f, 0.092f, 0.112f, 0.053f, 0.088f, this);
 		initPreferences();
 
 		// TODO: for now leaving this unchanged, but it needs to be changed eventually
