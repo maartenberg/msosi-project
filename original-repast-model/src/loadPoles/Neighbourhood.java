@@ -49,7 +49,7 @@ public class Neighbourhood {
 	 * @param context
 	 * @param fileName
 	 */
-	public Neighbourhood(Context<Object> context, String fileName) {
+	public Neighbourhood(Context<Object> context, String fileName, int humanCount) {
 		Reader reader = new Reader(null);
 		this.g = reader.getGraph();
 		Path p = FileSystems.getDefault().getPath("neighborhoods", fileName);
@@ -137,6 +137,46 @@ public class Neighbourhood {
 
 			return;
 		}
+				
+		//Add people
+		for(int i = 0; i < humanCount; i++)
+		{
+			context.add(new Human(context));
+		}
+		
+		//make sure they have a home
+		NetworkBuilder<Object> netBuilder = new NetworkBuilder<Object> ("livingin", context, true);
+		Network<Object> livingin = netBuilder.buildNetwork();
+		
+		IndexedIterable humans = context.getObjects(Human.class);
+		Iterator humansIterator = humans.iterator();
+		IndexedIterable dwellings = context.getObjects(Dwelling.class);
+		
+		//And make someone live somewhere by adding an edge in the network.
+		while (humansIterator.hasNext())
+		{
+			livingin.addEdge(humansIterator.next(), dwellings.get(RandomHelper.nextIntFromTo(0, dwellings.size()-1)));
+		}
+		
+		//debugtesting
+		Iterator dwellingsIterator = dwellings.iterator();
+		
+		while(dwellingsIterator.hasNext()) {
+			Dwelling d = (Dwelling) dwellingsIterator.next();
+	
+			System.out.println("Dwelling " + d.getName() + "'s b types: " + d.getAmountOfParkingType("b"));			
+		}
+				
+		//fill the parkingspaceGrid with parkingspaces by adding to context and moving them to a location
+		int parkX = parkingspacesGrid.getDimensions().getWidth();
+		int parkY = parkingspacesGrid.getDimensions().getHeight();
+		for(int i_x = 0; i_x < parkX; i_x++) {
+			for(int i_y = 0; i_y < parkY; i_y++) {
+				ParkingSpace ps = new ParkingSpace(context);
+				context.add(ps);
+				parkingspacesGrid.moveTo(ps, i_x, i_y);
+			}
+		}		
 	}
 	
 	public Neighbourhood(Context<Object> context, int humancount, int dwellingcount) 
