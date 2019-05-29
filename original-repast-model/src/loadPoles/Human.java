@@ -40,6 +40,11 @@ public class Human {
 	List<Vehicle> vehicles;
 	
 	/*
+	 * Represents the list of all vehicles that can be bought
+	 */
+	List<Vehicle> products;
+	
+	/*
 	 * Represents the gender of this person
 	 */
 	String gender;
@@ -53,6 +58,23 @@ public class Human {
 	 * Represents the current income of this person per year
 	 */
 	int income;
+	
+	/*
+	 * Represents the action taken by this human
+	 */
+	String consumatAction;
+	
+	/*
+	 * Represents the current satisfaction and uncertainty levels for this agent
+	 */
+	float satisfaction;
+	float uncertainty;
+	
+	/*
+	 * Represents at what threshold the agent considers itself satisfied or uncertain
+	 */
+	float satisfactionThreshold;
+	float uncertaintyThreshold;
 
 	boolean carUser, hasParked;
 	String carType,name;
@@ -63,11 +85,21 @@ public class Human {
 
 		this.context = context;
 		
-		//Initialise variables and vehicles belonging to this human
+		//Initialise list of products
+		products = new ArrayList<Vehicle>();
+		products.add(new Bicycle("electric"));
+		products.add(new Motor());
+		products.add(new Car("normal"));
+		products.add(new Car("hybrid"));
+		products.add(new Car("electric", 1));
+		products.add(new Car("electric", 2));
+		products.add(new Car("electric", 3));
 		
+		
+		//Initialise variables and vehicles belonging to this human		
 		initFeatures();
 		initVehicles();
-
+	
 		//TODO: for now leaving this unchanged, but it needs to be changed eventually
 		//Uses cars?
 		carUser = true;
@@ -169,7 +201,9 @@ public class Human {
 		//If age is over 26, 20% chance of owning a motor
 		if(age >= 26 && age <= 26) {
 			if(RandomHelper.nextDoubleFromTo(0, 1) > 0.8) {
-				vehicles.add(new Motor());
+				buyProduct(new Motor(), true);
+				//vehicles.add(new Motor());
+				//products.removeIf(obj -> obj.getName().equals("motor"));
 			}
 		}	
 		
@@ -177,13 +211,17 @@ public class Human {
 		//If age is under 55, 10% chance of owning an electric bicycle
 		if(age < 55) {
 			if(RandomHelper.nextDoubleFromTo(0, 1) > 0.9) {
-				vehicles.add(new Bicycle("electric"));
+				buyProduct(new Bicycle("electric"), true);
+				//vehicles.add(new Bicycle("electric"));
+				//products.removeIf(obj -> obj.getName().equals("electric_bicycle"));
 			}
 		}
 		//If age is above 55, 20% chance of owning an electric bicycle
 		else {
 			if(RandomHelper.nextDoubleFromTo(0, 1) > 0.8) {
-				vehicles.add(new Bicycle("electric"));
+				buyProduct(new Bicycle("electric"), true);
+				//vehicles.add(new Bicycle("electric"));
+				//products.removeIf(obj -> obj.getName().equals("electric_bicycle"));
 			}
 		}
 		
@@ -194,20 +232,27 @@ public class Human {
 			if(hasCarLicense && income > 1500) {		
 				//70% chance of owning a normal car, or own a normal car when income is on the lower side
 				if(RandomHelper.nextDoubleFromTo(0, 1) > 0.30 || income < 2000) {
-					vehicles.add(new Car("normal"));
+					buyProduct(new Car("normal"), true);
+					//vehicles.add(new Car("normal"));
+					//products.removeIf(obj -> obj.getName().equals("normal_car"));
+					
 				}
 				//If income is high enough, and does not own a normal car, 70% chance of owning a hybrid car
 				else if(RandomHelper.nextDoubleFromTo(0, 1) > 0.30) {
-					vehicles.add(new Car("hybrid"));
+					buyProduct(new Car("hybrid"), true);
+					//vehicles.add(new Car("hybrid"));
+					//products.removeIf(obj -> obj.getName().equals("hybrid_car"));
 				}
 				//Else, own an electric car, with a random vehicle class
 				else {
 					int rndVehicleClass = RandomHelper.nextIntFromTo(1, 3);
-					vehicles.add(new Car("electric", rndVehicleClass));
+					buyProduct(new Car("electric", rndVehicleClass), true);
+					//vehicles.add(new Car("electric", rndVehicleClass));
+					//products.removeIf(obj -> (obj.getName().equals("electric_car") && obj.getVehicleClass() == rndVehicleClass));
 				}
 			}
 		}
-	}
+	}	
 
 	//Park your car
 	@ScheduledMethod(start = 1, interval = 1, priority = 2, shuffle = true)
@@ -340,31 +385,45 @@ public class Human {
 		}
 	}
 	
-	public void buyVehicle() {
-		// TODO: implement a method for deciding to buy a new vehicle based on multiple factors		
-
-		//Some temporary notes on the CONSUMAT model:
-		//CONSUMAT model; based on whether the agent is satisfied/uncertain  (~ = not)
+	//Buy a product
+	private void buyProduct(Vehicle vehicle, boolean initial) {		
+		//Remove product from list of products and add to available vehicles
+		for(Vehicle product : products) {
+			if(product == vehicle) {				
+				vehicles.add(vehicle);
+				products.removeIf(obj -> obj.equals(product));
+				break;
+			}
+		}
 		
-		//satisfied, ~uncertain   (if the agent is satisfied and not uncertain)
-		//  -> repetition: repeat decision from before
-		//      ---Do what it did last time
-		
-		//~satisfied, ~uncertain  (if the agent is not satisfied and not uncertain)
-		//  -> deliberation: compare all possible options, choose option that leads to highest satisfaction
-		//      ---Calculate expected utility of consuming the product. Choose the one with the highest expected utility.
-		
-		//satisfied, uncertain    (if the agent is satisfied and uncertain)
-		//  -> imitation: will look what others do, and imitate them. Reduces uncertainty
-		//      ---Copy most popular product
-		
-		//~satisfied, uncertain   (if the agent is not satisfied and uncertain)
-		//  -> social comparison: look at other agents similar to itself, and see which choice will work out best
-		//     --Look at the most popular option in the neighbourhood,
-		//       choose this option if it increases its expected utility, compared with staying with the current choice
-		
+		//If it is not the "initial" adding of the product
+		if(!initial) {
+			float cost = vehicle.getPurchaseCost();
+			//TODO: infect income based on this cost. 
+			//Perhaps divide cost by 12 and subtract from income for some limited amount of time
+			satisfaction += calcVehicleSatisfaction(vehicle);
+		}		
 	}
 	
+	//Find the most popular product in the social network
+	private Vehicle mostPopularProduct() {
+		int maxValue = 0;
+		Vehicle mostUsed = null;
+
+		//Find the most occurring vehicle in the neighbourhood
+		for(Vehicle product : products) 
+		{
+			int x = findVehicleUsage(product);			
+			if(x > maxValue) {
+				maxValue = x;
+				mostUsed = product;
+			}
+		}
+		
+		return mostUsed;
+	}
+	
+	//Decides which vehicle to use
 	public Vehicle chooseVehicle() {
 		//TODO: TEMPORARY PLACEHOLDER, REPLACE WITH DISTANCE OF ACTUAL ROUTE 
 		float distance = 10;
@@ -406,12 +465,149 @@ public class Human {
 			if(utility > bestUtility) {
 				bestUtility = utility;
 				bestVehicle = vehicle;
-			}
-			
+			}			
 		}
 		
 		//TODO: also do something with happiness based on how high (or low) this utility is?
 		return bestVehicle;		
+	}
+	
+	//Decides which vehicle to buy, if any
+	public void buyVehicle() {				
+		//For now, this is put here:
+		//TODO: Only calculate initial satisfaction and uncertainty after creation of all agents and networks
+		//      And let this carry over every tick, so we do not have to recalculate it every time
+		for(Vehicle vehicle : vehicles) {			
+			satisfaction += calcVehicleSatisfaction(vehicle);
+			
+			//Number of agents in the network that have this vehicle
+			int x = findVehicleUsage(vehicle);
+			uncertainty += (1 - socialFactor)*(1 - x);			
+		}
+		
+		//Decide whether the agent is satisfied and/or uncertain or not
+		boolean satisfied = (satisfaction >= satisfactionThreshold);
+		boolean uncertain = (uncertainty >= uncertaintyThreshold);
+		
+		//If the agent is satisfied and uncertain, perform imitation
+		if(satisfied && uncertain) {
+			imitate();
+		}
+		//If the agent is satisfied and not uncertain, perform repetition
+		else if(satisfied && !uncertain) {
+			repeat();			
+		}
+		//If the agent is not satisfied and uncertain, perform social comparison
+		else if(!satisfied && uncertain) {
+			compare();			
+		}
+		//If the agent is not satisfied and not uncertain, perform deliberation
+		else if(!satisfied && !uncertain) {
+			deliberate();
+		}
+	}
+	
+	//Repeat the action from before
+	public void repeat() {
+		//Simply choose the previous action
+		switch(consumatAction) {
+		case "imitate":
+			imitate();
+			break;
+		case "deliberate":
+			deliberate();
+			break;
+		case "compare":
+			compare();
+			break;
+		}
+	}
+
+	//Look at what others do, and imitate them. Copy most popular product
+	public void imitate() {
+		consumatAction = "imitate";				
+		Vehicle mostUsed = mostPopularProduct();
+		
+		//If we already have this product
+		for(Vehicle vehicle : vehicles) {
+			if(vehicle == mostUsed) {
+				//TODO: Do something?
+			}
+		}
+		
+		//TODO: Check if we can afford this product
+		boolean canAfford = false;
+		
+		//If we can afford it, buy it
+		if(canAfford) {			
+			buyProduct(mostUsed, false);
+		}
+	}
+
+	//Calculate expected utility of buying each product. Choose the one with the highest expected utility.
+	public void deliberate() {
+		consumatAction = "deliberate";
+		
+		//Find product with highest expected utility
+		float bestUtility = 0;
+		Vehicle bestProduct = null;
+		for(Vehicle product : products) {
+			float utility = calcVehicleSatisfaction(product);
+			if(utility > bestUtility) {
+				bestUtility = utility;
+				bestProduct = product;
+			}
+		}
+		
+		//Buy the best product
+		buyProduct(bestProduct, true);
+	}
+	
+	//Look at the most popular option in the neighbourhood, choose it if it increases the expected utility, compared with staying with the current choice
+	public void compare() {		
+		consumatAction = "compare";
+		
+		//Get most popular product
+		Vehicle mostUsed = mostPopularProduct();
+		
+		//If we already have this product
+		for(Vehicle vehicle : vehicles) {
+			if(vehicle == mostUsed) {
+				//TODO: Do something?
+			}
+		}
+		
+		//TODO: Check if we can afford this product
+		boolean canAfford = false;
+		
+		//If we can afford it, buy it if it increases utility
+		if(canAfford) {			
+			if(calcVehicleSatisfaction(mostUsed) > 0) {
+				buyProduct(mostUsed, false);
+			}
+		}
+	}
+	
+	//Find the satisfaction of the given vehicle
+	public float calcVehicleSatisfaction(Vehicle vehicle) {
+		//Number of agents in the network that have this vehicle
+		int x = findVehicleUsage(vehicle); 
+		
+		//Difference between vehicle characteristics and personal preferences
+		//TODO: placeholder value for now, convert to real value
+		float productSatisfaction = 10;
+		
+		//TODO: make this possibly also depend on other factors
+		
+		//Calculate expected satisfaction for this vehicle
+		float satisfaction = socialFactor * (1 - Math.abs(productSatisfaction)) + (1 - socialFactor) * x;
+		return satisfaction;
+	}
+	
+	//Find how often the given vehicle occurs in the social network
+	public int findVehicleUsage(Vehicle vehicle) {
+		//TODO: replace with actual implementation
+		return 10;
 	}
 
 	//Return the happiness

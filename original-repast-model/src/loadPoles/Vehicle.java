@@ -44,9 +44,26 @@ public abstract class Vehicle {
 	*/
 	protected float emission;
 	
+	/*
+	 * Represents the class of the vehicle, ranging from 1-3. The higher, the better the vehicle.
+	 * For now, only used by electric cars.
+	 */
+	protected int vehicleClass;
+	
     /*
      * TODO: Model impact on environment further by splitting emission, ability to transport cargo, others?
      */
+	
+	/*
+	 * Override equals 
+	 */
+	public boolean equals(Vehicle obj) 
+	{
+		if(this.getName() == obj.getName() && this.getVehicleClass() == obj.getVehicleClass()) {
+			return true;
+		}		
+		return false;
+	}
 	
 	/*
 	 * Getters
@@ -81,6 +98,11 @@ public abstract class Vehicle {
 	
 	public float getEmission() {
 		return emission;
+	}
+	
+	//Only relevant for electric cars for now
+	public int getVehicleClass() {
+		return vehicleClass;
 	}
 	
 }
@@ -147,12 +169,6 @@ class Car extends Vehicle {
 	 */
 	private String type;
 	
-	/*
-	 * Represents the class of the vehicle. Ranges from 1 to 3
-	 * The higher, the better (and more expensive) the car is
-	 * In the case of electric cars, this means more range
-	 */
-	private int vehicleClass;
 	
 	public Car(String type, int vehicleClass) {
 		this.type = type;
@@ -237,17 +253,6 @@ class Car extends Vehicle {
 			actionRadius = 525;		
 			break;
 		}		
-	}
-
-	/*
-	 * Getters
-	 */
-	public String getType() {
-		return type;
-	}
-	
-	public int getVehicleClass() {
-		return vehicleClass;
 	}
 }
 
