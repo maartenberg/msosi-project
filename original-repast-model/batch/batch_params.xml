@@ -1,3 +1,1 @@
-<?xml version="1.0"?>
-<sweep runs="1">
-</sweep>
+<?xml version="1.0" ?><sweep runs="1"><parameter name="dwellingcount" type="constant" constant_type="int" value="75"></parameter><parameter name="humancount" type="constant" constant_type="int" value="75"></parameter><parameter name="assignTypeB" type="constant" constant_type="java.lang.String" value="ratio"></parameter><parameter name="ratio_b" type="constant" constant_type="double" value="0.1"></parameter></sweep>
