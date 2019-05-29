@@ -54,6 +54,7 @@ public class Neighbourhood {
 		Path p = FileSystems.getDefault().getPath("neighborhoods", fileName);
 		System.out.println(p.toAbsolutePath());
 
+		//Read neighbourhood from file
 		try {
 			gridY = (int) Files.lines(p).count();
 			gridX = Files.lines(p)
@@ -114,7 +115,7 @@ public class Neighbourhood {
 						break;
 					}
 				}
-			}
+			} 
 
 		} catch (IOException e) {
 			// Build an empty neighbourhood as a fallback.
@@ -134,9 +135,9 @@ public class Neighbourhood {
 			dwellingsGrid = factory.createGrid("dwellingsGrid", context, gridParameters);
 			parkingspacesGrid = factory.createGrid("parkingspacesGrid", context, gridParameters);
 
-			return;
+			//return;
 		}
-				
+			
 		//Add people
 		for(int i = 0; i < humanCount; i++)
 		{
@@ -144,17 +145,30 @@ public class Neighbourhood {
 		}
 		
 		//make sure they have a home
-		NetworkBuilder<Object> netBuilder = new NetworkBuilder<Object> ("livingin", context, true);
-		Network<Object> livingin = netBuilder.buildNetwork();
+		NetworkBuilder<Object> dwellingNetBuilder = new NetworkBuilder<Object>("livingin", context, true);
+		Network<Object> livingin = dwellingNetBuilder.buildNetwork();
+		
+		//Make sure they have a workplace
+		NetworkBuilder<Object> workNetBuilder = new NetworkBuilder<Object>("workingin", context, true);
+		Network<Object> workingin = workNetBuilder.buildNetwork();
 		
 		IndexedIterable humans = context.getObjects(Human.class);
 		Iterator humansIterator = humans.iterator();
 		IndexedIterable dwellings = context.getObjects(Dwelling.class);
+		IndexedIterable workplaces = context.getObjects(Workplace.class);
 		
 		//And make someone live somewhere by adding an edge in the network.
+		//Also make someone work somewhere
 		while (humansIterator.hasNext())
 		{
-			livingin.addEdge(humansIterator.next(), dwellings.get(RandomHelper.nextIntFromTo(0, dwellings.size()-1)));
+			Human h = (Human)humansIterator.next();
+			livingin.addEdge(h, dwellings.get(RandomHelper.nextIntFromTo(0, dwellings.size()-1)));
+			
+			//TODO unemployed people should also go somewhere aside from work places
+			//If the human is employed, add a work place
+			if(h.isEmployed()) {
+				workingin.addEdge(h, workplaces.get(RandomHelper.nextIntFromTo(0, workplaces.size()-1)));
+			}
 		}
 		
 		//debugtesting

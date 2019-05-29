@@ -1,5 +1,6 @@
 package loadPoles;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,6 +81,8 @@ public class Human {
 	float happiness;
 	Preferences preference;
 	String pastVehicle;
+	Dwelling dwelling;
+	Workplace workplace;	
 
 	public Human(Context<Object> context) {
 
@@ -372,8 +375,7 @@ public class Human {
 			return;
 		}
 
-		//Grid<Object> parkingSpots = (Grid<Object>) context.getProjection("parkingspacesGrid");
-		//System.out.println("Is leaving: " + name);
+		System.out.println("Is leaving: " + name);
 		this.hasParked = false;
 
 		//Get the ParkingSpace object/agent at this location and tell it we have moved away.
@@ -642,6 +644,22 @@ public class Human {
 	public String getType() {
 		return this.carType;
 	}
+	
+	public boolean isEmployed() {
+		if(income == 0) {
+			return false;
+		}
+		return true;
+	}
+	
+	/*
+	public void setDwelling(Dwelling d) {
+		this.dwelling = d;
+	}
+	
+	public void setWorkplace(Workplace w) {
+		this.workplace = w;
+	}*/
 
 	//
 }

@@ -28,7 +28,9 @@ public class HappinessAggregateDataSourceA implements AggregateDataSource {
 		if(human.getType() == "a") {
 			return human.getHappiness();
 		}
-		return null;
+		//Crashes if it returns null. Return 0 for now
+		//return null
+		return 0;
 	}
 
 	@Override
