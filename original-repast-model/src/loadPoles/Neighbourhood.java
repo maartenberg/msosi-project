@@ -179,6 +179,13 @@ public class Neighbourhood {
 	
 			System.out.println("Dwelling " + d.getName() + "'s b types: " + d.getAmountOfParkingType("b"));			
 		}
+		
+		//Print characteristics and vehicles of humans to console
+		//plus what vehicle they would chose when traveling a random distance
+		for(Object obj : humans) {
+			Human h = (Human)obj;
+			h.Print();
+		}
 				
 		//fill the parkingspaceGrid with parkingspaces by adding to context and moving them to a location
 		int parkX = parkingspacesGrid.getDimensions().getWidth();

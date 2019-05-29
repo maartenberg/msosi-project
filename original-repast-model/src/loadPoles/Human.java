@@ -31,7 +31,7 @@ public class Human {
 	/**
 	 * Represents whether or not this Human has a license to drive a car.
 	 */
-	boolean hasCarLicense;
+	boolean hasCarLicense;	
 
 	/**
 	 * Represents the different vehicles available to this Human.
@@ -56,7 +56,12 @@ public class Human {
 	/*
 	 * Represents the current income of this person per year
 	 */
-	int income;
+	int income;	
+
+	/*
+	 * Represents whether or not this human is employed
+	 */
+	boolean isemployed;
 	
 	/*
 	 * Represents the action taken by this human
@@ -183,10 +188,11 @@ public class Human {
 		//If the person is employed, set income randomly between minimum and maximum income
 		if(RandomHelper.nextDoubleFromTo(0,1) > (1-employmentRate)) {
 			income = RandomHelper.nextIntFromTo(minIncome, maxIncome);
+			isemployed = true;
 		}
-		//Else, the person is unemployed, and thus the income is 0
+		//Else, the person is unemployed, and thus give a low income (so they can atleast travel a bit)
 		else {
-			income = 0;
+			income = 500;
 		}
 	}
 	
@@ -399,7 +405,7 @@ public class Human {
 	private void buyProduct(Vehicle vehicle, boolean initial) {		
 		//Remove product from list of products and add to available vehicles
 		for(Vehicle product : products) {
-			if(product == vehicle) {				
+			if(product.equals(vehicle)) {				
 				vehicles.add(vehicle);
 				products.removeIf(obj -> obj.equals(product));
 				break;
@@ -434,10 +440,7 @@ public class Human {
 	}
 	
 	//Decides which vehicle to use
-	public Vehicle chooseVehicle() {
-		//TODO: TEMPORARY PLACEHOLDER, REPLACE WITH DISTANCE OF ACTUAL ROUTE 
-		float distance = 10;
-		
+	public Vehicle chooseVehicle(float distance) {		
 		//Keep track of the best vehicle
 		int bestUtility = 0;
 		Vehicle bestVehicle = null;
@@ -446,7 +449,7 @@ public class Human {
 		for(Vehicle vehicle : vehicles) {
 			//TODO: find a good starting value
 			//Start with a utility of 1000
-			int utility = 1000;
+			int utility = 5000;
 			
 			//The less comfortable, the less utility
 			utility *= vehicle.getComfort();
@@ -463,13 +466,13 @@ public class Human {
 			
 			//The more emission of CO2, the worse the utility
 			//TODO: make this "punishment" of utility also depend on personal values of the environment
-			utility -= (distance * vehicle.getTravelEmission());
+			utility -= environmentFactor * (distance * vehicle.getTravelEmission());
 			
 			//The more the cost impacts the income, the worse the utility
 			utility *= (1 - (distance * vehicle.getKilometerCost())/income);
 			
 			//Make sure utility is not lower than 1, so at least one vehicle is always chosen
-			utility = Math.max(1, utility);			
+			utility = Math.max(1, utility);		
 			
 			//Update best values
 			if(utility > bestUtility) {
@@ -646,20 +649,25 @@ public class Human {
 	}
 	
 	public boolean isEmployed() {
-		if(income == 0) {
-			return false;
+		return isemployed;
+	}
+	
+	public void Print() {
+		//Print human characteristics and vehicles
+		System.out.println("\nHuman with: ");
+		System.out.println("  -age = " + this.age);
+		System.out.println("  -gender = " + this.gender);
+		System.out.println("  -income = " + this.income);
+		System.out.println("  -vehicles = ");
+		for(Vehicle v : vehicles) {
+			System.out.println("       -" + v.getName());
 		}
-		return true;
+		
+		//Print what vehicle this human would choose for a random route
+		float rndDistance = RandomHelper.nextIntFromTo(1, 100);
+		Vehicle bestVehicle = chooseVehicle(rndDistance);
+		System.out.println("If I were to travel " + rndDistance + " kilometers I would choose the " + bestVehicle.getName());
 	}
-	
-	/*
-	public void setDwelling(Dwelling d) {
-		this.dwelling = d;
-	}
-	
-	public void setWorkplace(Workplace w) {
-		this.workplace = w;
-	}*/
 
 	//
 }
