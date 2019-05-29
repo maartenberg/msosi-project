@@ -2,6 +2,13 @@ package loadPoles;
 
 import java.util.Iterator;
 
+import loadPoles.graph.*;
+
+import java.nio.file.Files;
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+
 import repast.simphony.context.Context;
 import repast.simphony.context.space.graph.NetworkBuilder;
 import repast.simphony.context.space.grid.GridFactory;
@@ -18,13 +25,157 @@ import repast.simphony.util.collections.IndexedIterable;
 public class Neighbourhood {
 
 	Context<Object> context;
-	Grid<Object> dwellingsGrid,parkingspacesGrid;
-	int gridX = 10, gridY = 10;
+	Grid<Object> dwellingsGrid;
+	Grid<Object> parkingspacesGrid;
+	Graph g;
 	
-	//public Neighbourhood(Context<Object> context,Grid<Object> dwellingsGrid,Grid<Object> parkingspacesGrid)
+	/**
+	 * The width of this Neighborhood's Grid.
+	 */
+	int gridX = 10; 
+	/**
+	 * The height of this Neighborhood's Grid.
+	 */
+	int gridY = 10;
+	
 	//Some default values
 	public Neighbourhood(Context<Object> context) {
 		this(context, 10, 10);
+	}
+	
+	/**
+	 * Load a Neighborhood from a file.
+	 * @param context
+	 * @param fileName
+	 */
+	public Neighbourhood(Context<Object> context, String fileName, int humanCount) {
+		Reader reader = new Reader(null);
+		this.g = reader.getGraph();
+		Path p = FileSystems.getDefault().getPath("neighborhoods", fileName);
+		System.out.println(p.toAbsolutePath());
+
+		try {
+			gridY = (int) Files.lines(p).count();
+			gridX = Files.lines(p)
+					  .map((String x) -> x.length())
+					  .max((i, j) -> i.compareTo(j))
+					  .orElse(10);
+			
+			GridFactory factory = GridFactoryFinder.createGridFactory(null);
+			
+			GridBuilderParameters<Object> gridParameters = new GridBuilderParameters<Object>(
+					new StrictBorders(),
+					new SimpleGridAdder<Object>(),
+					true,
+					gridX,
+					gridY
+			);
+
+			dwellingsGrid = factory.createGrid("dwellingsGrid", context, gridParameters);
+			parkingspacesGrid = factory.createGrid("parkingspacesGrid", context, gridParameters);
+			
+			Object[] lineContent = Files.lines(p).toArray();
+			int lineCount = lineContent.length - 1;
+
+			for (int y = 0; y < gridY; y++) {
+				String line = (String) lineContent[lineCount - y];
+				for (int x = 0; x < Math.min(gridX, line.length()); x++) {
+					char c = line.charAt(x);
+					
+					switch (c) {
+					case '#':
+						Dwelling d = new Dwelling(context, dwellingsGrid);
+						d.setClosestVertex(g.findNearestVertex(x, y));
+						context.add(d);
+						dwellingsGrid.moveTo(d, x, y);
+						break;
+						
+					case '.':
+						Road r = new Road();
+						context.add(r);
+						dwellingsGrid.moveTo(r, x, y);
+						break;
+						
+					case 'P':
+						ParkingSpace ps = new ParkingSpace(context);
+						context.add(ps);
+						parkingspacesGrid.moveTo(ps, x, y);
+						dwellingsGrid.moveTo(ps, x, y);
+						break;
+						
+					case 'W':
+						Workplace w = new Workplace();
+						context.add(w);
+						dwellingsGrid.moveTo(w, x, y);
+						break;
+						
+					default:
+						// We don't recognize this, too bad.
+						break;
+					}
+				}
+			}
+
+		} catch (IOException e) {
+			// Build an empty neighbourhood as a fallback.
+			gridX = 10;
+			gridY = 10;
+
+			GridFactory factory = GridFactoryFinder.createGridFactory(null);
+			
+			GridBuilderParameters<Object> gridParameters = new GridBuilderParameters<Object>(
+					new StrictBorders(),
+					new SimpleGridAdder<Object>(),
+					true,
+					gridX,
+					gridY
+			);
+
+			dwellingsGrid = factory.createGrid("dwellingsGrid", context, gridParameters);
+			parkingspacesGrid = factory.createGrid("parkingspacesGrid", context, gridParameters);
+
+			return;
+		}
+				
+		//Add people
+		for(int i = 0; i < humanCount; i++)
+		{
+			context.add(new Human(context));
+		}
+		
+		//make sure they have a home
+		NetworkBuilder<Object> netBuilder = new NetworkBuilder<Object> ("livingin", context, true);
+		Network<Object> livingin = netBuilder.buildNetwork();
+		
+		IndexedIterable humans = context.getObjects(Human.class);
+		Iterator humansIterator = humans.iterator();
+		IndexedIterable dwellings = context.getObjects(Dwelling.class);
+		
+		//And make someone live somewhere by adding an edge in the network.
+		while (humansIterator.hasNext())
+		{
+			livingin.addEdge(humansIterator.next(), dwellings.get(RandomHelper.nextIntFromTo(0, dwellings.size()-1)));
+		}
+		
+		//debugtesting
+		Iterator dwellingsIterator = dwellings.iterator();
+		
+		while(dwellingsIterator.hasNext()) {
+			Dwelling d = (Dwelling) dwellingsIterator.next();
+	
+			System.out.println("Dwelling " + d.getName() + "'s b types: " + d.getAmountOfParkingType("b"));			
+		}
+				
+		//fill the parkingspaceGrid with parkingspaces by adding to context and moving them to a location
+		int parkX = parkingspacesGrid.getDimensions().getWidth();
+		int parkY = parkingspacesGrid.getDimensions().getHeight();
+		for(int i_x = 0; i_x < parkX; i_x++) {
+			for(int i_y = 0; i_y < parkY; i_y++) {
+				ParkingSpace ps = new ParkingSpace(context);
+				context.add(ps);
+				parkingspacesGrid.moveTo(ps, i_x, i_y);
+			}
+		}		
 	}
 	
 	public Neighbourhood(Context<Object> context, int humancount, int dwellingcount) 
@@ -79,9 +230,9 @@ public class Neighbourhood {
 		NetworkBuilder<Object> netBuilder = new NetworkBuilder<Object> ("livingin", context, true);
 		Network<Object> livingin = netBuilder.buildNetwork();
 		
-		IndexedIterable humans = context.getObjects(Human.class);
-		Iterator humansIterator = humans.iterator();
-		IndexedIterable dwellings = context.getObjects(Dwelling.class);
+		IndexedIterable<Object> humans = context.getObjects(Human.class);
+		Iterator<Object> humansIterator = humans.iterator();
+		IndexedIterable<Object> dwellings = context.getObjects(Dwelling.class);
 		
 		//System.out.println(humans.size());
 		
@@ -92,7 +243,7 @@ public class Neighbourhood {
 		}
 		
 		//debugtesting
-		Iterator dwellingsIterator = dwellings.iterator();
+		Iterator<Object> dwellingsIterator = dwellings.iterator();
 		
 		while(dwellingsIterator.hasNext()) {
 			Dwelling d = (Dwelling) dwellingsIterator.next();

@@ -1,4 +1,4 @@
-<repast.simphony.chart2.engine.TimeSeriesChartDescriptor simphonyVersion="2.5.0">
+<repast.simphony.chart2.engine.TimeSeriesChartDescriptor simphonyVersion="2.6.0">
   <name>customA</name>
   <dataSet>CustomHappinessA</dataSet>
   <xAxisLabel>Tick Count</xAxisLabel>

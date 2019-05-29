@@ -1,14 +1,9 @@
 package loadPoles;
 
-
-
-import java.util.Iterator;
-
 import repast.simphony.context.Context;
 import repast.simphony.dataLoader.ContextBuilder;
 import repast.simphony.engine.environment.RunEnvironment;
 import repast.simphony.parameter.Parameters;
-import repast.simphony.util.collections.IndexedIterable;
 
 public class LoadPolesBuilder implements ContextBuilder<Object> {
 
@@ -50,7 +45,8 @@ public class LoadPolesBuilder implements ContextBuilder<Object> {
 		int dwellingcount = params.getInteger("dwellingcount");
 		
 		//build neighbourhood
-		Neighbourhood nbh = new Neighbourhood(context, humancount, dwellingcount);
+		Neighbourhood nbh = new Neighbourhood(context, "bunnik.wijk", humancount);
+		//Neighbourhood nbh = new Neighbourhood(context, humancount, dwellingcount);
 		
 		//Assign b types to parkingspace. Check from the params how we want to do it.
 		String assignTypeB = params.getString("assignTypeB");

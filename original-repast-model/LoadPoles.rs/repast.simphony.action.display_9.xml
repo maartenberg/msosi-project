@@ -1,16 +1,40 @@
-<repast.simphony.visualization.engine.CartesianDisplayDescriptor simphonyVersion="2.5.0">
+<repast.simphony.visualization.engine.CartesianDisplayDescriptor simphonyVersion="2.6.0">
   <name>Dwellings_grid</name>
   <type>2D</type>
   <styles>
     <entry>
+      <string>loadPoles.Workplace</string>
+      <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
+    </entry>
+    <entry>
+      <string>loadPoles.ParkingSpace</string>
+      <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
+    </entry>
+    <entry>
       <string>loadPoles.Dwelling</string>
+      <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
+    </entry>
+    <entry>
+      <string>loadPoles.Road</string>
       <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
     </entry>
   </styles>
   <editedStyles>
     <entry>
+      <string>loadPoles.Workplace</string>
+      <string>loadPoles.Workplace.style_0.xml</string>
+    </entry>
+    <entry>
+      <string>loadPoles.ParkingSpace</string>
+      <string>loadPoles.ParkingSpace.style_2.xml</string>
+    </entry>
+    <entry>
       <string>loadPoles.Dwelling</string>
       <string>loadPoles.Dwelling.style_2.xml</string>
+    </entry>
+    <entry>
+      <string>loadPoles.Road</string>
+      <string>loadPoles.Road.style_2.xml</string>
     </entry>
   </editedStyles>
   <netStyles/>
@@ -23,14 +47,26 @@
     <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
-    <hashCode>52426624</hashCode>
+    <hashCode>-2035991921</hashCode>
   </schedParams>
   <layoutClassName>foo.bar.baz</layoutClassName>
   <layoutProjection>dwellingsGrid</layoutProjection>
   <layoutInterval>0</layoutInterval>
   <layerOrder>
     <entry>
+      <string>loadPoles.Workplace</string>
+      <int>1</int>
+    </entry>
+    <entry>
+      <string>loadPoles.ParkingSpace</string>
+      <int>2</int>
+    </entry>
+    <entry>
       <string>loadPoles.Dwelling</string>
+      <int>3</int>
+    </entry>
+    <entry>
+      <string>loadPoles.Road</string>
       <int>0</int>
     </entry>
   </layerOrder>
