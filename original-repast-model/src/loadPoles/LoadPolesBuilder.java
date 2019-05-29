@@ -96,5 +96,4 @@ public class LoadPolesBuilder implements ContextBuilder<Object> {
 		
 		return context;
 	}
-
 }

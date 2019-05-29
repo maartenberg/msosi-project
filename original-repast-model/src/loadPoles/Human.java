@@ -57,7 +57,9 @@ public class Human {
 	boolean carUser, hasParked;
 	String carType,name;
 	Context<Object> context;
+	Preferences preference;
 	float happiness;
+	static String pastVehicle;
 
 	public Human(Context<Object> context) {
 
@@ -67,6 +69,9 @@ public class Human {
 		
 		initFeatures();
 		initVehicles();
+		Preferences preference = new Preferences(0.2f,0.3f,0.4f,0.1f,0.15f,0.2f,0.05f, 0.1f, 0.08f,0.02f);	
+		initPreferences();
+		 
 
 		//TODO: for now leaving this unchanged, but it needs to be changed eventually
 		//Uses cars?
@@ -84,6 +89,16 @@ public class Human {
 		name = String.valueOf(context.getObjects(Human.class).size());
 		happiness = 1;
 
+	}
+	
+	private void initPreferences() {
+		//TODO make values add up to 1
+		//TODO incorporate cultural dimension Hofstede 
+		//TODO make the 5 latter values dependent on the 5 first values 
+		//TODO make these values different with a normal distribution
+		
+		Preferences preference = new Preferences(0.2f,0.3f,0.4f,0.1f,0.15f,0.2f,0.05f, 0.1f, 0.08f,0.02f);		
+		
 	}
 	
 	private void initFeatures() {
@@ -373,30 +388,43 @@ public class Human {
 		int bestUtility = 0;
 		Vehicle bestVehicle = null;
 		
+		
 		//Calculate utility for each vehicle available to this human
 		for(Vehicle vehicle : vehicles) {
+						
 			//TODO: find a good starting value
 			//Start with a utility of 1000
 			int utility = 1000;
 			
+			//TODO update initial utility based on preferences 
+			preference.Update();
+			getPreferenceFactor(vehicle, utility);
+			
+
 			//The less comfortable, the less utility
 			utility *= vehicle.getComfort();
 			
 			//The slower it is, the less utility
-			utility *= vehicle.getSpeed();	
+			utility *= vehicle.getSpeed();
+			
+			//multiple factor based on the preferences
+			//is vehicle dependent
+			//utility *= ?;
 			
 			//If the vehicle cannot travel this distance comfortably, subtract a lot from utility			
 			if(vehicle.getActionRadius() < distance) {
 				//Get the difference between the action radius and distance to travel, and use this as punishment
+				//TODO QUESTION: now there is a big bonus for a bigger action radius, even if not needed
 				float punishment = distance - vehicle.getActionRadius();
 				utility -= punishment * 10;
 			}
 			
 			//The more emission of CO2, the worse the utility
 			//TODO: make this "punishment" of utility also depend on personal values of the environment
-			utility -= (distance * vehicle.getEmission());
+			utility -= (distance * vehicle.getTravelEmission());
 			
 			//The more the cost impacts the income, the worse the utility
+			//TODO make budget dependent
 			utility *= (1 - (distance * vehicle.getKilometerCost())/income);
 			
 			//Make sure utility is not lower than 1, so at least one vehicle is always chosen
@@ -411,6 +439,7 @@ public class Human {
 		}
 		
 		//TODO: also do something with happiness based on how high (or low) this utility is?
+		pastVehicle = bestVehicle.getName();
 		return bestVehicle;		
 	}
 
@@ -439,5 +468,33 @@ public class Human {
 		return this.carType;
 	}
 
+	private float getPreferenceFactor(Vehicle vehicle, float ut) {
+		if (vehicle.name == "electric_car") {
+			ut *= preference.getUtilityFactor_electric_car();
+			}
+			
+			if (vehicle.name == "electric_bicycle") {
+			ut *= preference.getUtilityFactor_electric_bicycle();
+			}
+			
+			if (vehicle.name =="hybrid_car") {
+			ut*= preference.getUtilityFactor_hybrid_car();
+			}
+			
+			if (vehicle.name == "bicycle") {
+			ut*= preference.getUtilityFactor_bicycle();
+			}
+			
+			if (vehicle.name == "public_transport") {
+			ut*= preference.getUtilityFactor_public_transport();
+			}
+			
+			if(vehicle.name == "motor") {
+			ut*=preference.getUtilityFactor_motor();
+			}
+			
+			return ut;
+	}
+	
 	//
 }

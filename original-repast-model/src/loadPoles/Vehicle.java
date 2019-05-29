@@ -42,10 +42,18 @@ public abstract class Vehicle {
 	 *Divide by number of people (since more people take a bus, a bus is better for the environment on average)
 	 *TODO: Split into travelEmission and productionEmission ?)
 	*/
-	protected float emission;
+	protected float travelEmission;
 	
     /*
-     * TODO: Model impact on environment further by splitting emission, ability to transport cargo, others?
+     *Represents the emission of CO2 in grams per kilometer (for one person)	
+	 *Divide by number of people (since more people take a bus, a bus is better for the environment on average)
+     */
+	
+	protected float purchaseEmission;
+	
+    /*
+     * represents the purchase costs in terms of CO2 or other pollution
+     * also: lifetime carbon footprint
      */
 	
 	/*
@@ -79,8 +87,12 @@ public abstract class Vehicle {
 		return speed;
 	}
 	
-	public float getEmission() {
-		return emission;
+	public float getTravelEmission() {
+		return travelEmission;
+	}
+	
+	public float getPurchaseEmission() {
+		return purchaseEmission;
 	}
 	
 }
@@ -94,7 +106,7 @@ class Motor extends Vehicle{
 		comfortPerKilometer = 0.8f;
 		actionRadius = 250;		
 		speed = 1;
-		emission = 137;
+		travelEmission = 137;
 	}
 }
 
@@ -110,7 +122,7 @@ class Bicycle extends Vehicle {
 			actionRadius = 15;		
 			//speed = 4.17f;
 			speed = 0.2f;
-			emission = 0;			
+			travelEmission = 0;			
 			break;
 			
 		case "electric":
@@ -122,7 +134,7 @@ class Bicycle extends Vehicle {
 			actionRadius = 60;	
 			//speed = 6.94f;
 			speed = 0.5f;
-			emission = 5; //Emission from the energy needed to charge
+			travelEmission = 5; //Emission from the energy needed to charge
 			break;
 		}
 	}
@@ -137,7 +149,7 @@ class PublicTransport extends Vehicle {
 		comfortPerKilometer = 0.7f;
 		actionRadius = 100;	
 		speed = 0.7f;
-		emission = 20;  //Emission from the energy needed to charge
+		travelEmission = 20;  //Emission from the energy needed to charge
 	}
 }
 
@@ -197,7 +209,7 @@ class Car extends Vehicle {
 		upkeepCost = 0.03f;
 		kilometerCost = 0.15f;
 		actionRadius = 1200;				
-		emission = 130;
+		travelEmission = 130;
 	}
 	
 	private void initHybrid() {
@@ -211,12 +223,12 @@ class Car extends Vehicle {
 		upkeepCost = 0.03f;
 		kilometerCost = 0.10f;
 		actionRadius = 1200;
-		emission = 100;
+		travelEmission = 100;
 	}
 	
 	private void initElectric() {
 		name="electric_car";
-		emission = 23;  //Emission from the energy used to charge
+		travelEmission = 23;  //Emission from the energy used to charge
 		upkeepCost = 0.01f;
 		kilometerCost = 0.04f;
 		
@@ -224,7 +236,8 @@ class Car extends Vehicle {
 		case 1:
 			//Based on Nissan LEAF (2019)
 			purchaseCost = 38940;	
-			actionRadius = 270;		
+			actionRadius = 270;
+			purchaseEmission = 300;
 			break;
 		case 2:	
 			//Based on Tesla Model 3 (Base model)
