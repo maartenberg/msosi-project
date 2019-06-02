@@ -17,6 +17,7 @@ import repast.simphony.random.RandomHelper;
 import repast.simphony.space.graph.Network;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridBuilderParameters;
+import repast.simphony.space.grid.GridPoint;
 import repast.simphony.space.grid.RandomGridAdder;
 import repast.simphony.space.grid.SimpleGridAdder;
 import repast.simphony.space.grid.StrictBorders;
@@ -25,8 +26,7 @@ import repast.simphony.util.collections.IndexedIterable;
 public class Neighbourhood {
 
 	Context<Object> context;
-	Grid<Object> dwellingsGrid;
-	Grid<Object> parkingspacesGrid;
+	Grid<Object> grid;
 	Graph g;
 	
 	/**
@@ -37,12 +37,7 @@ public class Neighbourhood {
 	 * The height of this Neighborhood's Grid.
 	 */
 	int gridY = 10;
-	
-	//Some default values
-	public Neighbourhood(Context<Object> context) {
-		this(context, 10, 10);
-	}
-	
+		
 	/**
 	 * Load a Neighborhood from a file.
 	 * @param context
@@ -54,8 +49,9 @@ public class Neighbourhood {
 		Path p = FileSystems.getDefault().getPath("neighborhoods", fileName);
 		System.out.println(p.toAbsolutePath());
 
-		//Read neighbourhood from file
+		// Read neighbourhood from file
 		try {
+			// Get the X and Y dimensions from the file
 			gridY = (int) Files.lines(p).count();
 			gridX = Files.lines(p)
 					  .map((String x) -> x.length())
@@ -72,9 +68,9 @@ public class Neighbourhood {
 					gridY
 			);
 
-			dwellingsGrid = factory.createGrid("dwellingsGrid", context, gridParameters);
-			parkingspacesGrid = factory.createGrid("parkingspacesGrid", context, gridParameters);
+			grid = factory.createGrid("grid", context, gridParameters);
 			
+			// Read each line and add the correponsing objects
 			Object[] lineContent = Files.lines(p).toArray();
 			int lineCount = lineContent.length - 1;
 
@@ -85,29 +81,34 @@ public class Neighbourhood {
 					
 					switch (c) {
 					case '#':
-						Dwelling d = new Dwelling(context, dwellingsGrid);
+						Dwelling d = new Dwelling(context);
 						d.setClosestVertex(g.findNearestVertex(x, y));
 						context.add(d);
-						dwellingsGrid.moveTo(d, x, y);
+						grid.moveTo(d, x, y);
 						break;
 						
 					case '.':
 						Road r = new Road();
 						context.add(r);
-						dwellingsGrid.moveTo(r, x, y);
+						grid.moveTo(r, x, y);
 						break;
 						
 					case 'P':
-						ParkingSpace ps = new ParkingSpace(context);
-						context.add(ps);
-						parkingspacesGrid.moveTo(ps, x, y);
-						dwellingsGrid.moveTo(ps, x, y);
+						ParkingLot pl = new ParkingLot(context);
+						context.add(pl);
+						grid.moveTo(pl, x, y);
 						break;
 						
 					case 'W':
 						Workplace w = new Workplace();
 						context.add(w);
-						dwellingsGrid.moveTo(w, x, y);
+						grid.moveTo(w, x, y);
+						break;
+						
+					case 'O':
+						PublicBuilding pb = new PublicBuilding();
+						context.add(pb);
+						grid.moveTo(pb, x, y);
 						break;
 						
 					default:
@@ -130,18 +131,18 @@ public class Neighbourhood {
 					true,
 					gridX,
 					gridY
-			);
-
-			dwellingsGrid = factory.createGrid("dwellingsGrid", context, gridParameters);
-			parkingspacesGrid = factory.createGrid("parkingspacesGrid", context, gridParameters);
-
-			//return;
+			);		
+		
+			grid = factory.createGrid("grid", context, gridParameters);
+			
+			//TODO: add randomly scattered dwellings, workplaces, roads and public buildings
+			// in case we DO need something to fall back on
 		}
 			
 		//Add people
 		for(int i = 0; i < humanCount; i++)
 		{
-			context.add(new Human(context));
+			context.add(new Human(context, grid));
 		}
 		
 		//make sure they have a home
@@ -162,187 +163,89 @@ public class Neighbourhood {
 		while (humansIterator.hasNext())
 		{
 			Human h = (Human)humansIterator.next();
-			livingin.addEdge(h, dwellings.get(RandomHelper.nextIntFromTo(0, dwellings.size()-1)));
+			Dwelling d = (Dwelling) dwellings.get(RandomHelper.nextIntFromTo(0, dwellings.size()-1));
+			livingin.addEdge(h, d);
 			
-			//TODO unemployed people should also go somewhere aside from work places
+			// Set this humans dwelling (probably not needed)
+			h.setDwelling(d);		
+			
+			// Get location of the dwelling, and move the human to there		
+			GridPoint dwellingLocation = grid.getLocation(d);		
+			grid.moveTo(h, dwellingLocation.getX(), dwellingLocation.getY());
+			
 			//If the human is employed, add a work place
 			if(h.isEmployed()) {
-				workingin.addEdge(h, workplaces.get(RandomHelper.nextIntFromTo(0, workplaces.size()-1)));
+				Workplace w = (Workplace) workplaces.get(RandomHelper.nextIntFromTo(0, workplaces.size() - 1));
+				workingin.addEdge(h, w);				
+				h.setWorkplace(w);
 			}
-		}
-		
-		//debugtesting
-		Iterator dwellingsIterator = dwellings.iterator();
-		
-		while(dwellingsIterator.hasNext()) {
-			Dwelling d = (Dwelling) dwellingsIterator.next();
-	
-			System.out.println("Dwelling " + d.getName() + "'s b types: " + d.getAmountOfParkingType("b"));			
-		}
-		
-		//Print characteristics and vehicles of humans to console
-		//plus what vehicle they would chose when traveling a random distance
-		for(Object obj : humans) {
-			Human h = (Human)obj;
-			h.Print();
 		}
 				
-		//fill the parkingspaceGrid with parkingspaces by adding to context and moving them to a location
-		int parkX = parkingspacesGrid.getDimensions().getWidth();
-		int parkY = parkingspacesGrid.getDimensions().getHeight();
-		for(int i_x = 0; i_x < parkX; i_x++) {
-			for(int i_y = 0; i_y < parkY; i_y++) {
-				ParkingSpace ps = new ParkingSpace(context);
-				context.add(ps);
-				parkingspacesGrid.moveTo(ps, i_x, i_y);
-			}
-		}		
+		this.grid = grid;
+		this.context = context;		
 	}
-	
-	public Neighbourhood(Context<Object> context, int humancount, int dwellingcount) 
-	{
-		
-		this.context = context;
-		//this.dwellingsGrid = dwellingsGrid;
-		//this.parkingspacesGrid = parkingspacesGrid;
-	
-		GridFactory factory = GridFactoryFinder.createGridFactory(null);
-		
-		//Has dwellings
-		dwellingsGrid = factory.createGrid(
-				"dwellingsGrid",
-				context,
-				new GridBuilderParameters<Object>(
-					new StrictBorders(),
-					new RandomGridAdder<Object>(),
-					true,
-					gridX,
-					gridY
-				));	
-		//context.addProjection(dwellingsGrid);
-		
-		//Has parking spaces
-		parkingspacesGrid = factory.createGrid(
-				"parkingspacesGrid",
-				context, 
-				new GridBuilderParameters<Object>(
-					new StrictBorders(),
-					new SimpleGridAdder<Object>(),
-					true,
-					gridX,
-					gridY
-				));
-		//context.addProjection(parkingspacesGrid);
-		
-		
-		//Add dwellings
-		for(int i = 0; i < dwellingcount; i++)
-		{
-			context.add(new Dwelling(context, dwellingsGrid));
-		}
-		
-		//Add people
-		for(int i = 0; i < humancount; i++)
-		{
-			context.add(new Human(context));
-		}
-		
-		//make sure they have a home
-		NetworkBuilder<Object> netBuilder = new NetworkBuilder<Object> ("livingin", context, true);
-		Network<Object> livingin = netBuilder.buildNetwork();
-		
-		IndexedIterable<Object> humans = context.getObjects(Human.class);
-		Iterator<Object> humansIterator = humans.iterator();
-		IndexedIterable<Object> dwellings = context.getObjects(Dwelling.class);
-		
-		//System.out.println(humans.size());
-		
-		//And make someone live somewhere by adding an edge in the network.
-		while (humansIterator.hasNext())
-		{
-			livingin.addEdge(humansIterator.next(), dwellings.get(RandomHelper.nextIntFromTo(0, dwellings.size()-1)));
-		}
-		
-		//debugtesting
-		Iterator<Object> dwellingsIterator = dwellings.iterator();
-		
-		while(dwellingsIterator.hasNext()) {
-			Dwelling d = (Dwelling) dwellingsIterator.next();
-	
-			System.out.println("Dwelling " + d.getName() + "'s b types: " + d.getAmountOfParkingType("b"));
-			
-		}
-		
-		
-		//fill the parkingspaceGrid with parkingspaces by adding to context and moving them to a location
-		int parkX = parkingspacesGrid.getDimensions().getWidth();
-		int parkY = parkingspacesGrid.getDimensions().getHeight();
-		for(int i_x = 0; i_x < parkX; i_x++) {
-			for(int i_y = 0; i_y < parkY; i_y++) {
-				ParkingSpace ps = new ParkingSpace(context);
-				context.add(ps);
-				parkingspacesGrid.moveTo(ps, i_x, i_y);
-			}
-		}
-	
-	
-	}
-	
+
 	//Distribute B type parking spaces at random given a ratio of B to A.
 	public void distributeParkingSpaceRandom(double ratio) {
-		Iterable<Object> parkingSpacesGrid = this.parkingspacesGrid.getObjects();
-		Iterator<Object> parkingSpacesGridIterator = parkingSpacesGrid.iterator();
-		while(parkingSpacesGridIterator.hasNext()) {
-			try{
-				ParkingSpace ps = (ParkingSpace) parkingSpacesGridIterator.next();
-				
+		IndexedIterable parkingLots = this.context.getObjects(ParkingLot.class);
+		Iterator parkingLotsIterator = parkingLots.iterator();
+		while(parkingLotsIterator.hasNext()) {
+			ParkingLot pl = (ParkingLot) parkingLotsIterator.next();
+			
+			//Get a random number for the amount of parking spaces this parking lot has
+			int nrOfSpaces = RandomHelper.nextIntFromTo(20, 50);
+			
+			//Add parking spaces to the parking lots with a given ratio
+			for(int i = 0; i < nrOfSpaces; i++) {				
 				//Do it randomly
 				//ratio% distribution of b compared to a
 				if(RandomHelper.nextDoubleFromTo(0, 1) < ratio) {
-					ps.setType("b");
+					pl.addSpace("electric");
 				} else {
-					ps.setType("a");
+					pl.addSpace("normal");
 				}
-				
-			} catch (Exception e) {
-				System.out.println("Exception: " + e);
-			} finally {
-				//do nothing
 			}
-		}
+		} 		
 	}
 	
-	public void distributeParkingSpacesToDwelling() {
-		Iterable<Object> parkingSpacesGrid = this.parkingspacesGrid.getObjects();
-		Iterator<Object> parkingSpacesGridIterator = parkingSpacesGrid.iterator();
-		while(parkingSpacesGridIterator.hasNext()) {
-			try{
-				//Get all dwellings at this location
-				ParkingSpace ps = (ParkingSpace) parkingSpacesGridIterator.next();
-				Iterable<Object> dpsdwellings = (Iterable<Object>) this.dwellingsGrid.getObjectsAt(
-					this.parkingspacesGrid.getLocation(ps).getX(),
-					this.parkingspacesGrid.getLocation(ps).getY()
-					);
-				
-				//If there are dwellings check for one with a "b-type" human.
-				checkDwellings:
-				while(dpsdwellings.iterator().hasNext()) {
-					Dwelling dpsd = (Dwelling) dpsdwellings.iterator().next();
-					if(dpsd.getAmountOfParkingType("b") > 0) {
-						//Found one, we need a b-type parkingspace here.
-						ps.setType("b");
-						break checkDwellings;
-					}
+	public void distributeParkingSpacesToDwelling(double normalSpotChance, double loadingPoleChance){
+		IndexedIterable dwellings = this.context.getObjects(Dwelling.class);
+		Iterator dwellingsIterator = dwellings.iterator();
+		while(dwellingsIterator.hasNext()) {
+			Dwelling d = (Dwelling) dwellingsIterator.next();			
+		
+			// Find the number of electric cars in this dwelling
+			int nrLoadingPoleNeeded = d.getAmountOfParkingType(true);
+			
+			// If it is bigger than 0, then add a loading pole with a given chance
+			if(nrLoadingPoleNeeded > 0) {
+				if(RandomHelper.nextDoubleFromTo(0, 1) < loadingPoleChance) {
+					d.addParkingSpace("electric");
 				}
-				
-			} catch (Exception e) {
-				System.out.println("Exception: " + e);
-			} finally {
-				//do nothing
 			}
-		}
-	
+			
+			//If the dwelling already has a parking space, lower the chance of a normal parking space
+			if(d.hasParkingSpace()) {
+				normalSpotChance *= 0.5;
+			}
+			
+			// Add a normal parking spot to this dwelling with a given chance
+			if(RandomHelper.nextDoubleFromTo(0, 1) < normalSpotChance) {
+				d.addParkingSpace("normal");
+			}
+	}		
 	}
 	
+	public void parkAllCars() {
+		//Every human has his car parked somewhere
+		IndexedIterable humans = this.context.getObjects(Human.class);
+		Iterator humansIterator = humans.iterator();
+		
+		while(humansIterator.hasNext()) {
+			Human h = (Human) humansIterator.next();
+			GridPoint currentLocation = this.grid.getLocation(h);
+			h.parkCar(currentLocation);
+		}
+	}
 	
 }

@@ -1,38 +1,60 @@
 <repast.simphony.visualization.engine.CartesianDisplayDescriptor simphonyVersion="2.6.0">
-  <name>Livinglocations</name>
+  <name>NeighbourhoodGrid</name>
   <type>2D</type>
   <styles>
+    <entry>
+      <string>loadPoles.PublicBuilding</string>
+      <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
+    </entry>
+    <entry>
+      <string>loadPoles.Workplace</string>
+      <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
+    </entry>
     <entry>
       <string>loadPoles.Human</string>
       <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
     </entry>
     <entry>
+      <string>loadPoles.ParkingLot</string>
+      <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
+    </entry>
+    <entry>
       <string>loadPoles.Dwelling</string>
+      <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
+    </entry>
+    <entry>
+      <string>loadPoles.Road</string>
       <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
     </entry>
   </styles>
   <editedStyles>
     <entry>
+      <string>loadPoles.PublicBuilding</string>
+      <string>loadPoles.PublicBuilding.style_1.xml</string>
+    </entry>
+    <entry>
+      <string>loadPoles.Workplace</string>
+      <string>loadPoles.Workplace.style_4.xml</string>
+    </entry>
+    <entry>
       <string>loadPoles.Human</string>
-      <string>loadPoles.Human.style_0.xml</string>
+      <string>loadPoles.Human.style_9.xml</string>
+    </entry>
+    <entry>
+      <string>loadPoles.ParkingLot</string>
+      <string>loadPoles.ParkingLot.style_1.xml</string>
     </entry>
     <entry>
       <string>loadPoles.Dwelling</string>
-      <string>loadPoles.Dwelling.style_3.xml</string>
+      <string>loadPoles.Dwelling.style_7.xml</string>
+    </entry>
+    <entry>
+      <string>loadPoles.Road</string>
+      <string>loadPoles.Road.style_3.xml</string>
     </entry>
   </editedStyles>
-  <netStyles>
-    <entry>
-      <string>livingin</string>
-      <string>repast.simphony.visualization.editedStyle.EditedEdgeStyle2D</string>
-    </entry>
-  </netStyles>
-  <editedNetStyles>
-    <entry>
-      <string>livingin</string>
-      <string>livingin.style_0.xml</string>
-    </entry>
-  </editedNetStyles>
+  <netStyles/>
+  <editedNetStyles/>
   <frequency>ON_MOVE</frequency>
   <schedParams>
     <start>1.0</start>
@@ -41,29 +63,40 @@
     <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
-    <hashCode>2121877333</hashCode>
+    <hashCode>1662460403</hashCode>
   </schedParams>
   <layoutClassName>foo.bar.baz</layoutClassName>
-  <layoutProjection>dwellingsGrid</layoutProjection>
+  <layoutProjection>grid</layoutProjection>
   <layoutInterval>0</layoutInterval>
   <layerOrder>
     <entry>
+      <string>loadPoles.PublicBuilding</string>
+      <int>2</int>
+    </entry>
+    <entry>
+      <string>loadPoles.Workplace</string>
+      <int>1</int>
+    </entry>
+    <entry>
       <string>loadPoles.Human</string>
-      <int>0</int>
+      <int>5</int>
+    </entry>
+    <entry>
+      <string>loadPoles.ParkingLot</string>
+      <int>3</int>
     </entry>
     <entry>
       <string>loadPoles.Dwelling</string>
-      <int>1</int>
+      <int>4</int>
+    </entry>
+    <entry>
+      <string>loadPoles.Road</string>
+      <int>0</int>
     </entry>
   </layerOrder>
   <projections>
     <repast.simphony.scenario.data.ProjectionData>
-      <id>livingin</id>
-      <attributes/>
-      <type>network</type>
-    </repast.simphony.scenario.data.ProjectionData>
-    <repast.simphony.scenario.data.ProjectionData>
-      <id>dwellingsGrid</id>
+      <id>grid</id>
       <attributes/>
       <type>grid</type>
     </repast.simphony.scenario.data.ProjectionData>
@@ -73,9 +106,9 @@
   </visualizationProperties>
   <projectionDescriptors>
     <entry>
-      <string>dwellingsGrid</string>
+      <string>grid</string>
       <repast.simphony.visualization.grid.GridProjectionDescriptor>
-        <proj reference="../../../../projections/repast.simphony.scenario.data.ProjectionData[2]"/>
+        <proj reference="../../../../projections/repast.simphony.scenario.data.ProjectionData"/>
         <props>
           <entry>
             <string>repast.simphony.visualization.grid.GridDecorator</string>
@@ -96,13 +129,6 @@
           </entry>
         </props>
       </repast.simphony.visualization.grid.GridProjectionDescriptor>
-    </entry>
-    <entry>
-      <string>livingin</string>
-      <repast.simphony.visualization.engine.DefaultProjectionDescriptor>
-        <proj reference="../../../../projections/repast.simphony.scenario.data.ProjectionData"/>
-        <props/>
-      </repast.simphony.visualization.engine.DefaultProjectionDescriptor>
     </entry>
   </projectionDescriptors>
   <props/>

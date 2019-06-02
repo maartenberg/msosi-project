@@ -64,7 +64,7 @@ public class Preferences {
 		// fluid levels go down by -0.15 by default
 		// if a vehicle was the previous action, some values have been fulfilled
 
-		if (hum.pastVehicle == "electric_car") {
+		if (hum.pastVehicle.getName() == "electric_car") {
 			// here follows a list of the values that have been fulfilled
 			if (n == 6 || n == 7 || n == 8 || n == 0 || n == 1) {
 				// if the values have been fulfilled, the fluid level rises with 0.3
@@ -83,7 +83,7 @@ public class Preferences {
 			}
 		}
 
-		if (hum.pastVehicle == "normal_car") {
+		if (hum.pastVehicle.getName() == "normal_car") {
 			// here follows a list of the values that have been fulfilled
 			if (n == 8 || n == 9 || n == 0 || n == 0 || n == 2 || n == 4 || n == 6 || n == 7 || n == 8) {
 				{
@@ -106,7 +106,7 @@ public class Preferences {
 			}
 		}
 
-		if (hum.pastVehicle == "hybrid_car") {
+		if (hum.pastVehicle.getName() == "hybrid_car") {
 			// here follows a list of the values that have been fulfilled
 			if (n == 2 || n == 0 || n == 1) {
 				{
@@ -124,7 +124,7 @@ public class Preferences {
 			}
 		}
 
-		if (hum.pastVehicle == "bicycle") {
+		if (hum.pastVehicle.getName() == "bicycle") {
 			// here follows a list of the values that have been fulfilled
 			if (n == 7 || n == 9 || n == 5 || n == 6 || n == 8) {
 				{
@@ -146,7 +146,7 @@ public class Preferences {
 			}
 		}
 
-		if (hum.pastVehicle == "electric_bicycle") {
+		if (hum.pastVehicle.getName() == "electric_bicycle") {
 			// here follows a list of the values that have been fulfilled
 			if (n == 1 || n == 2 || n == 3) {
 				{
@@ -156,7 +156,7 @@ public class Preferences {
 			}
 		}
 
-		if (hum.pastVehicle == "public_transport") {
+		if (hum.pastVehicle.getName() == "public_transport") {
 			// here follows a list of the values that have been fulfilled
 			if (n == 5) {
 				// if the values have been fulfilled, the fluid level rises with 0.3
@@ -173,7 +173,7 @@ public class Preferences {
 			}
 		}
 
-		if (hum.pastVehicle == "motor") {
+		if (hum.pastVehicle.getName() == "motor") {
 			// here follows a list of the values that have been fulfilled
 			if (n == 3 || n == 4) {
 				// if the values have been fulfilled, the fluid level rises with 0.3

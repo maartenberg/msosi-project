@@ -9,6 +9,4 @@
 <repast.simphony.action.time_series_chart context="loadPoles" file="repast.simphony.action.time_series_chart_6.xml" />
 <repast.simphony.action.time_series_chart context="loadPoles" file="repast.simphony.action.time_series_chart_7.xml" />
 <repast.simphony.action.display context="loadPoles" file="repast.simphony.action.display_8.xml" />
-<repast.simphony.action.display context="loadPoles" file="repast.simphony.action.display_9.xml" />
-<repast.simphony.action.display context="loadPoles" file="repast.simphony.action.display_10.xml" />
 </Scenario>

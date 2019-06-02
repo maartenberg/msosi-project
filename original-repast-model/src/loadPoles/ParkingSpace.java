@@ -10,7 +10,7 @@ public class ParkingSpace {
 	
 	public ParkingSpace(Context<Object> context){
 		this.context = context;
-		this.type = "a";
+		this.type = "normal";
 		this.occupied = false;
 	}
 

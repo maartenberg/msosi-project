@@ -13,6 +13,7 @@ import repast.simphony.space.graph.Network;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.SimUtilities;
+import repast.simphony.util.collections.IndexedIterable;
 
 public class Human {
 
@@ -81,17 +82,20 @@ public class Human {
 	float uncertaintyThreshold;
 
 	boolean carUser, hasParked;
-	String carType,name;
+	String name;
 	Context<Object> context;
 	float happiness;
 	Preferences preference;
-	String pastVehicle;
+	Vehicle pastVehicle;
+	ParkingSpace currentParkingSpot;
 	Dwelling dwelling;
 	Workplace workplace;	
+	Grid<Object> grid;
 
-	public Human(Context<Object> context) {
+	public Human(Context<Object> context, Grid<Object> grid) {
 
 		this.context = context;
+		this.grid = grid;
 		
 		//Initialise list of products
 		products = new ArrayList<Vehicle>();
@@ -111,16 +115,15 @@ public class Human {
 	
 		//TODO: for now leaving this unchanged, but it needs to be changed eventually
 		//Uses cars?
-		carUser = true;
-		hasParked = false;
-		//10% is type b
-		if(RandomHelper.nextDoubleFromTo(0, 1) > 0.5) {
-			// "Normal" car
-			carType = "a";
-		} else {
-			// Electric car user
-			carType = "b";
+		carUser = false;
+		for(Vehicle v : vehicles) {
+			if(v.getName() == "normal_car" || v.getName() == "hybrid_car" || v.getName() == "electric_car") {
+				carUser = true;
+			}
 		}
+		
+		
+		
 		name = String.valueOf(RandomHelper.nextDoubleFromTo(0, 2));
 		name = String.valueOf(context.getObjects(Human.class).size());
 		happiness = 1;
@@ -211,8 +214,6 @@ public class Human {
 		if(age >= 26 && age <= 26) {
 			if(RandomHelper.nextDoubleFromTo(0, 1) > 0.8) {
 				buyProduct(new Motor(), true);
-				//vehicles.add(new Motor());
-				//products.removeIf(obj -> obj.getName().equals("motor"));
 			}
 		}	
 		
@@ -221,16 +222,12 @@ public class Human {
 		if(age < 55) {
 			if(RandomHelper.nextDoubleFromTo(0, 1) > 0.9) {
 				buyProduct(new Bicycle("electric"), true);
-				//vehicles.add(new Bicycle("electric"));
-				//products.removeIf(obj -> obj.getName().equals("electric_bicycle"));
 			}
 		}
 		//If age is above 55, 20% chance of owning an electric bicycle
 		else {
 			if(RandomHelper.nextDoubleFromTo(0, 1) > 0.8) {
 				buyProduct(new Bicycle("electric"), true);
-				//vehicles.add(new Bicycle("electric"));
-				//products.removeIf(obj -> obj.getName().equals("electric_bicycle"));
 			}
 		}
 		
@@ -242,22 +239,16 @@ public class Human {
 				//70% chance of owning a normal car, or own a normal car when income is on the lower side
 				if(RandomHelper.nextDoubleFromTo(0, 1) > 0.30 || income < 2000) {
 					buyProduct(new Car("normal"), true);
-					//vehicles.add(new Car("normal"));
-					//products.removeIf(obj -> obj.getName().equals("normal_car"));
 					
 				}
 				//If income is high enough, and does not own a normal car, 70% chance of owning a hybrid car
 				else if(RandomHelper.nextDoubleFromTo(0, 1) > 0.30) {
 					buyProduct(new Car("hybrid"), true);
-					//vehicles.add(new Car("hybrid"));
-					//products.removeIf(obj -> obj.getName().equals("hybrid_car"));
 				}
 				//Else, own an electric car, with a random vehicle class
 				else {
 					int rndVehicleClass = RandomHelper.nextIntFromTo(1, 3);
 					buyProduct(new Car("electric", rndVehicleClass), true);
-					//vehicles.add(new Car("electric", rndVehicleClass));
-					//products.removeIf(obj -> (obj.getName().equals("electric_car") && obj.getVehicleClass() == rndVehicleClass));
 				}
 			}
 		}
@@ -271,7 +262,9 @@ public class Human {
 		// TODO make these values different with a normal distribution
 	}
 	
-	//Park your car
+	//TODO new method for this (without scheduler, just call at depart in the TODO when human is moving)
+	//Given a destination, make method to park car at closest parking lot, or at own dwelling if available
+	/*
 	@ScheduledMethod(start = 1, interval = 1, priority = 2, shuffle = true)
 	public void parkCar() {
 		//Do we even use a car?
@@ -355,51 +348,54 @@ public class Human {
 				happiness = (float) (happiness - 0.3);
 			}
 		}
-	}
+	} */
 
-	//Obsolete?
-	private boolean isSomeoneParked(Grid<Object> parkingSpots, GridCell<Human> cell)
-	{
-		Iterable<Object> spotUsers = parkingSpots.getObjectsAt(cell.getPoint().getX(),cell.getPoint().getY());
-		for(Object spotUserElem : spotUsers) {
-			if(spotUserElem.getClass().equals(Human.class)) {
-				Human spotUserHuman = (Human) spotUserElem;
-				if(spotUserHuman.getHasParked()) {
-					return true;
-				}
-			}
-
-		}
-		return false;
-	}
-
-	//Leave with your car
-	@ScheduledMethod(start = 1, interval = 1, priority = 3)
-	public void depart() {
-		//Do we even use a car?
-		if(!carUser || !this.hasParked) {
+	public void parkCar(GridPoint location) {
+		//TODO: see above
+		if(!carUser) {
 			return;
 		}
-
-		System.out.println("Is leaving: " + name);
-		this.hasParked = false;
-
-		//Get the ParkingSpace object/agent at this location and tell it we have moved away.
-		Grid<Object> parkingSpots = (Grid<Object>) context.getProjection("parkingspacesGrid");
-		GridPoint test = parkingSpots.getLocation(this);
-		//ParkingSpace spot = (ParkingSpace) parkingSpots.getObjectAt(cell.getPoint().getX(),cell.getPoint().getY());
-		try {
-			for( Object o : parkingSpots.getObjectsAt(parkingSpots.getLocation(this).getX(),parkingSpots.getLocation(this).getY())) {
-				if(o.getClass().equals(ParkingSpace.class)) {
-					ParkingSpace ps = (ParkingSpace) o;
-					ps.setOccupied(false);
-				}
-			}
-		} catch (Exception e) {
-			System.out.println("Human: " + parkingSpots.getLocation(this));
-			System.out.println("No object at all at " + parkingSpots.getLocation(this).getX() + "," +parkingSpots.getLocation(this).getY());
-		}
+		
+		//Else, find closest parking spot (either in a parking lot, or at its own dwelling
+		ParkingSpace bestSpot = null;
+		
+		//update currentParkingSpot
+		currentParkingSpot = bestSpot;
 	}
+	
+	@ScheduledMethod(start = 1, interval = 1, priority = 3)
+	public void depart() {
+		GridPoint destination = getDestination();		
+		GridPoint homeLocation = grid.getLocation(dwelling);
+		GridPoint currentLocation = grid.getLocation(this);
+				
+		Vehicle vehicle = null;
+		//If destination is home location, choose same vehicle as when traveling from home to destination
+		if(destination.getX() == homeLocation.getX() && destination.getY() == homeLocation.getY()) {
+			vehicle = pastVehicle;
+		}
+		else {
+			//Find distance and choose appropriate vehicle
+			double distance = grid.getDistance(currentLocation, destination);
+			vehicle = chooseVehicle(distance);
+		}
+		
+		if(vehicle.getName() == "normal_car" || vehicle.getName() == "normal_car" || vehicle.getName() == "electric_car") {
+			//TODO:
+			//Unpark current vehicle
+			//currentParkingSpot.setOccupied(false);
+			//Find new spot to park near location			
+			parkCar(destination);
+		}		
+		
+		pastVehicle = vehicle;
+		System.out.println("Travelling to: (" + destination.getX() + ", " + destination.getY() 
+							+ ")\n from: (" + currentLocation.getX() + ", " + currentLocation.getY() + ")"
+							+ "\n with distance: " + grid.getDistance(currentLocation, destination) 
+							+ "\n and vehicle: " + vehicle.getName() +"\n");
+		grid.moveTo(this, destination.getX(), destination.getY());
+	}
+	
 	
 	//Buy a product
 	private void buyProduct(Vehicle vehicle, boolean initial) {		
@@ -440,16 +436,16 @@ public class Human {
 	}
 	
 	//Decides which vehicle to use
-	public Vehicle chooseVehicle(float distance) {		
+	public Vehicle chooseVehicle(double distance) {		
 		//Keep track of the best vehicle
-		int bestUtility = 0;
+		double bestUtility = 0;
 		Vehicle bestVehicle = null;
 		
 		//Calculate utility for each vehicle available to this human
 		for(Vehicle vehicle : vehicles) {
 			//TODO: find a good starting value
 			//Start with a utility of 1000
-			int utility = 5000;
+			double utility = 5000;
 			
 			//The less comfortable, the less utility
 			utility *= vehicle.getComfort();
@@ -460,7 +456,7 @@ public class Human {
 			//If the vehicle cannot travel this distance comfortably, subtract a lot from utility			
 			if(vehicle.getActionRadius() < distance) {
 				//Get the difference between the action radius and distance to travel, and use this as punishment
-				float punishment = distance - vehicle.getActionRadius();
+				double punishment = distance - vehicle.getActionRadius();
 				utility -= punishment * 10;
 			}
 			
@@ -622,6 +618,35 @@ public class Human {
 		//TODO: replace with actual implementation
 		return 10;
 	}
+	
+	//Finds a random destination for the Human to go to
+	private GridPoint getDestination() {
+		GridPoint currentLocation = grid.getLocation(this);
+		
+		//If not home, go home
+		GridPoint homeLocation = grid.getLocation(dwelling);
+		if(currentLocation.getX() != homeLocation.getX() && currentLocation.getY() != homeLocation.getY()) {
+			return homeLocation;
+		}
+		
+		//Go to work if employed (40% chance)
+		if(isEmployed()) {
+			double goingToWork = 0.4;		
+			if(RandomHelper.nextDoubleFromTo(0,1) < goingToWork) {
+				// Return location of work place
+				return grid.getLocation(workplace);
+			}
+		}
+		
+		//Find all public building that one can go to, and pick a random one
+		IndexedIterable publicBuildings = context.getObjects(PublicBuilding.class);
+		if(publicBuildings.size() > 0) {
+			PublicBuilding pb = (PublicBuilding) publicBuildings.get(RandomHelper.nextIntFromTo(0, publicBuildings.size() - 1));
+			return grid.getLocation(pb);
+		}
+		
+		return homeLocation;
+	}
 
 	//Return the happiness
 	public float getHappiness() {
@@ -629,7 +654,7 @@ public class Human {
 	}
 
 	public Object getHappinessA() {
-		if(this.getType() == "a") {
+		if(!hasChargeableCar()) {
 			return this.getHappiness();
 		}
 		return null;
@@ -644,12 +669,25 @@ public class Human {
 		return this.name;
 	}
 
-	public String getType() {
-		return this.carType;
+	public boolean hasChargeableCar() {
+		for(Vehicle v : vehicles) {
+			if(v.getName() == "hybrid_car" || v.getName() == "electric_car") {
+				return true;
+			}
+		}
+		return false;		
 	}
 	
 	public boolean isEmployed() {
 		return isemployed;
+	}
+	
+	public void setDwelling(Dwelling dwelling) {
+		this.dwelling = dwelling;
+	}
+	
+	public void setWorkplace(Workplace workplace) {
+		this.workplace = workplace;
 	}
 	
 	public void Print() {

@@ -25,7 +25,7 @@ public class HappinessAggregateDataSourceB implements AggregateDataSource {
 	@Override
 	public Object get(Iterable<?> objs, int size) {
 		Human human = (Human) objs.iterator().next();
-		if(human.getType() == "b") {
+		if(human.hasChargeableCar()) {
 			return human.getHappiness();
 		}
 		//Crashes if it returns null. Return 0 for now
