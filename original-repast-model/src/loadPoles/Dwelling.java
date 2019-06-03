@@ -67,8 +67,13 @@ public class Dwelling {
 	}
 	
 	// Sets a spot in the parking lot for a given type to the given boolean occupied
-	public void setOccupied(String type, boolean occupied) {
-		parkingSpaces.setOccupied(type, occupied);
+	public ParkingSpace setOccupied(String type, boolean occupied) {
+		return parkingSpaces.setOccupied(type, occupied);
+	}
+	
+	// Get an available parking spot for a given type
+	public ParkingSpace getAvailable(String type) {		
+		return parkingSpaces.getAvailable(type);
 	}
 	
 	public String getName() {

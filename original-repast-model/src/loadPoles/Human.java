@@ -2,6 +2,7 @@ package loadPoles;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import repast.simphony.context.Context;
@@ -262,107 +263,87 @@ public class Human {
 		// TODO make these values different with a normal distribution
 	}
 	
-	//TODO new method for this (without scheduler, just call at depart in the TODO when human is moving)
-	//Given a destination, make method to park car at closest parking lot, or at own dwelling if available
-	/*
-	@ScheduledMethod(start = 1, interval = 1, priority = 2, shuffle = true)
-	public void parkCar() {
-		//Do we even use a car?
-		if(!carUser) {
-			return;
-		}
-
-		System.out.println("Parkingname: " + this.name);
-
-		//Find best empty spot
-		//Get location of home
-		Grid<Object> grid = (Grid<Object>) context.getProjection("dwellingsGrid");
-		Network<Object> livingin = (Network<Object>) context.getProjection("livingin");
-
-		//Should always be 1
-		//System.out.println(livingin.getDegree(this));
-
-		Iterable<Object> home = livingin.getAdjacent(this);
-		GridPoint homeLocation = grid.getLocation(home.iterator().next());
-
-		//Now look for parking spots
-		Grid<Object> parkingSpots = (Grid<Object>) context.getProjection("parkingspacesGrid");
-
-		//get all cells around the home location
-		GridCellNgh<ParkingSpace> nghCreator = new GridCellNgh<ParkingSpace>(parkingSpots, homeLocation, ParkingSpace.class, 2, 2);
-		List<GridCell<ParkingSpace>> gridCells = nghCreator.getNeighborhood(true);
-		SimUtilities.shuffle(gridCells, RandomHelper.getUniform());
-
-		//Check the neighbourhood for the closest empty spot
-		// The spot has either no agent in it or an agent that isn't parked
-		double minDistance = Double.MAX_VALUE, parkDistance = 0;
-		GridCell<ParkingSpace> closestCell = null;
-		ParkingSpace closestSpot = null;
-		for (GridCell<ParkingSpace> cell : gridCells) {
-
-			//Iterable<Object> spotUsers = parkingSpots.getObjectsAt(cell.getPoint().getX(),cell.getPoint().getY());
-			//System.out.println("spotUsers: " + spotUsers + " size: "+ spotUsers.spliterator().estimateSize() + " somone parked: " + isSomeoneParked(parkingSpots, cell));
-
-			ParkingSpace spot = (ParkingSpace) parkingSpots.getObjectAt(cell.getPoint().getX(),cell.getPoint().getY());
-
-			System.out.println("this carType: " + this.carType + " and spot type: " + spot.getType());
-
-			//if( spotUser != null) System.out.println("Spot "+ cell.getPoint().getX() + "," + cell.getPoint().getY() + " is not null but first occupant is parked?: " + spotUser.getHasParked());
-			//if( spotUser == null || isSomeoneParked(parkingSpots, cell) == false) {
-			if (!spot.getOccupied() && this.carType == spot.getType()) {
-				parkDistance = parkingSpots.getDistance(homeLocation, cell.getPoint());
-				if (parkDistance < minDistance) {
-					minDistance = parkDistance;
-					if(parkDistance == 0.0) System.out.println("is someone parked: " + spot.getOccupied());
-					System.out.println("parkDistance: " + parkDistance);
-					closestCell = cell;
-					closestSpot = spot;
-				}
-			}
-		}
-
-		//If we have found a parking spot: park!
-		if(closestCell != null) {
-			System.out.println("I am moving to: " + closestCell.getPoint().getX() + "," + closestCell.getPoint().getY());
-			parkingSpots.moveTo(this, closestCell.getPoint().getX(),closestCell.getPoint().getY());
-			closestSpot.setOccupied(true);
-			this.hasParked = true;
-			//TODO: Should we add a network to track who is parked where?
-
-
-			//happiness from parking, but unhappiness from parking far away. 0.07 is an arbitrary value.
-			//See if quadratic is reasonable...
-			if(happiness < 1) happiness = (float) (happiness + 0.1 - (parkDistance * parkDistance * 0.01));
-
-
-			//TODO:
-			// * Depending on type we can have different calculations for happiness:
-			//		Current on is for type A, but Type b is compounded: both parking and
-			//		the actual NEED to charge the car for use. So a two step process for
-			//		happiness.
-			// * Measure happiness of type a and type b separately.
-			// * Setting to make type b parkingspace exclusively for b or not.
-		} else {
-			System.out.println("wasn't able to find a spot!");
-			if (happiness > 0) {
-				happiness = (float) (happiness - 0.3);
-			}
-		}
-	} */
-
-	public void parkCar(GridPoint location) {
-		//TODO: see above
+	public void parkAllCars() {
 		if(!carUser) {
 			return;
 		}
 		
-		//Else, find closest parking spot (either in a parking lot, or at its own dwelling
-		ParkingSpace bestSpot = null;
-		
-		//update currentParkingSpot
-		currentParkingSpot = bestSpot;
+		//Park all cars
+		GridPoint currentLocation = grid.getLocation(this);
+		for(Vehicle v : vehicles) {
+			if(v.getName() == "normal_car" || v.getName() == "hybrid_car" || v.getName() == "electric_car") {
+				parkCar(currentLocation, v);
+			}			
+		}
 	}
 	
+	// Find a parking spot for your car and park there
+	public void parkCar(GridPoint location, Vehicle vehicle) {
+		//If we are no car user, no need to park, so just return
+		if(!carUser) {
+			return;
+		}
+		
+		String type = "";
+		if(vehicle.getName() == "electric_car") {
+			type = "electric";
+		} else {
+			type = "normal";
+		}
+		
+		ParkingSpace bestSpot = findClosestParkingSpace(location, type);		
+		bestSpot.setOccupied(true);
+		currentParkingSpot = bestSpot;
+	}
+
+	// Find closest parking space with available parking spaces of a given type
+	private ParkingSpace findClosestParkingSpace(GridPoint location, String type) {
+		IndexedIterable parkingLots = this.context.getObjects(ParkingLot.class);
+		Iterator parkingLotsIterator = parkingLots.iterator();
+		
+		ParkingSpace closest = null;
+		double minDistance = Integer.MAX_VALUE;			
+
+		GridPoint bestLocation = null;
+		String locType = "";
+		
+		//Find closest parking lot with an available parking space
+		while(parkingLotsIterator.hasNext()) {
+			ParkingLot pl = (ParkingLot) parkingLotsIterator.next();
+			GridPoint plLocation = grid.getLocation(pl);						
+			double distance = grid.getDistance(location, plLocation);
+			ParkingSpace available = pl.getAvailable(type);
+			
+			if(available != null && distance < minDistance) {
+				minDistance = distance;
+				closest = available;
+				bestLocation = plLocation;
+				locType = "a parking lot";
+			}	
+		}
+		
+		//If home has an available parking space for this car, keep it as an option
+		if(dwelling.hasParkingSpace()) {
+			ParkingSpace homeParking = dwelling.getAvailable(type);
+			if(homeParking != null) {
+				GridPoint homeLocation = grid.getLocation(dwelling);
+				double distance = grid.getDistance(location, homeLocation);
+				if(distance < minDistance) {
+					minDistance = distance;
+					closest = homeParking;
+					bestLocation = homeLocation;
+					locType = "home";
+				}			
+			}
+		}
+		
+		System.out.println("Parking " + type + " car at " + locType + ": (" + bestLocation.getX() + ", " + bestLocation.getY() + ")");
+		
+		//TODO: do something with minDistance affecting the human's happiness
+		return closest;
+	}
+	
+	// Find a destination and vehicle and travel there 
 	@ScheduledMethod(start = 1, interval = 1, priority = 3)
 	public void depart() {
 		GridPoint destination = getDestination();		
@@ -380,23 +361,23 @@ public class Human {
 			vehicle = chooseVehicle(distance);
 		}
 		
-		if(vehicle.getName() == "normal_car" || vehicle.getName() == "normal_car" || vehicle.getName() == "electric_car") {
-			//TODO:
+		if(vehicle.getName() == "normal_car" || vehicle.getName() == "hybrid_car" || vehicle.getName() == "electric_car") {
 			//Unpark current vehicle
-			//currentParkingSpot.setOccupied(false);
+			if(currentParkingSpot != null) {
+				currentParkingSpot.setOccupied(false);
+			}
 			//Find new spot to park near location			
-			parkCar(destination);
+			parkCar(destination, vehicle);
 		}		
 		
 		pastVehicle = vehicle;
 		System.out.println("Travelling to: (" + destination.getX() + ", " + destination.getY() 
 							+ ")\n from: (" + currentLocation.getX() + ", " + currentLocation.getY() + ")"
 							+ "\n with distance: " + grid.getDistance(currentLocation, destination) 
-							+ "\n and vehicle: " + vehicle.getName() +"\n");
+							+ "\n and vehicle: " + vehicle.getName() + "\n");
 		grid.moveTo(this, destination.getX(), destination.getY());
 	}
-	
-	
+		
 	//Buy a product
 	private void buyProduct(Vehicle vehicle, boolean initial) {		
 		//Remove product from list of products and add to available vehicles

@@ -53,15 +53,36 @@ public class ParkingLot {
 	}
 	
 	// Sets a spot in the parking lot for a given type to the given boolean occupied
-	public void setOccupied(String type, boolean occupied) {
+	public ParkingSpace setOccupied(String type, boolean occupied) {
 		for(ParkingSpace ps : parkingSpaces) {
 			// If this spot is of the same type, and has the opposite occupied value of what we want to set it, 
 			// set this one to the new value of occupied
 			if(ps.getType() == type && ps.getOccupied() != occupied) {
 				ps.setOccupied(occupied);
-				return;
+				return ps;
 			}
 		}
+		
+		return null;
+	}
+	
+	// Get an available parking spot for a given type
+	public ParkingSpace getAvailable(String type) {
+		/*
+		for(ParkingSpace ps : parkingSpaces) {
+			if(ps.getType() == type && !ps.getOccupied()) {
+				return ps;
+			}
+		}*/
+		
+		//For now, don't hold into account types
+		for(ParkingSpace ps : parkingSpaces) {
+			if(!ps.getOccupied()) {
+				return ps;
+			}
+		}
+		
+		return null;
 	}
 	
 }

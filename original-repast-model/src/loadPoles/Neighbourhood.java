@@ -243,8 +243,7 @@ public class Neighbourhood {
 		
 		while(humansIterator.hasNext()) {
 			Human h = (Human) humansIterator.next();
-			GridPoint currentLocation = this.grid.getLocation(h);
-			h.parkCar(currentLocation);
+			h.parkAllCars();
 		}
 	}
 	
