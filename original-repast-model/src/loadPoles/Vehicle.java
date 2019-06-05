@@ -55,6 +55,16 @@ public abstract class Vehicle {
 	 */
 	protected int vehicleClass;
 	
+	/*
+	 * Represents the range that is left in this electric car 
+	 */
+	protected double remainingRange;
+	
+	/*
+	 * Represents the current parking space that this car is parked at
+	 */
+	protected ParkingSpace parkingSpace;
+	
     /*
      * TODO: Model impact on environment further by splitting emission, ability to transport cargo, others?
      */
@@ -109,9 +119,34 @@ public abstract class Vehicle {
 		return purchaseEmission;
 	}
 	
+	public boolean isCar() {
+		if(getName() == "normal_car" || getName() == "hybrid_car" || getName() == "electric_car") {
+			return true;
+		}
+		
+		return false;
+	}
+	
 	//Only relevant for electric cars for now
 	public int getVehicleClass() {
 		return vehicleClass;
+	}
+	
+	//Only relevant for electric cars for now
+	public double getRemainingRange() {
+		return remainingRange;
+	}
+	
+	public void setRemainingRange(double value) {
+		remainingRange = value;
+	}
+	
+	public ParkingSpace getParkingSpace() {
+		return parkingSpace;
+	}
+	
+	public void setParkingSpace(ParkingSpace ps) {
+		parkingSpace = ps;
 	}
 	
 }
@@ -259,9 +294,11 @@ class Car extends Vehicle {
 		case 3:
 			//Based on Tesla Model S (Base model)
 			purchaseCost = 93020;	
-			actionRadius = 525;		
+			actionRadius = 525;					
 			break;
 		}		
+		
+		remainingRange = actionRadius;
 	}
 }
 

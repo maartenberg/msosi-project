@@ -6,6 +6,7 @@ import loadPoles.graph.Vertex;
 import repast.simphony.context.Context;
 import repast.simphony.space.graph.Network;
 import repast.simphony.space.grid.Grid;
+import repast.simphony.space.grid.GridPoint;
 
 public class Dwelling {
 
@@ -17,7 +18,6 @@ public class Dwelling {
 	
 	public Dwelling(Context<Object> context){
 		this.context = context;
-		this.parkingSpaces = new ParkingLot(context);
 		//number them.
 		this.name = String.valueOf(context.getObjects(Dwelling.class).size());
 	}
@@ -45,15 +45,21 @@ public class Dwelling {
 				
 		return amountFound;
 	}
-	
+		
 	// Add a parking space to this dwelling of a given type
-	public void addParkingSpace(String type) {
-		parkingSpaces.addSpace(type);
+	public void addParkingSpace(String type, Grid<Object> grid) {
+		if(this.parkingSpaces ==  null) {
+			this.parkingSpaces = new ParkingLot(grid);
+		}
+		parkingSpaces.addSpace(type, this);
 	}
 	
 	// Returns true if this dwelling has a parking space
 	public boolean hasParkingSpace() {
-		return parkingSpaces.hasNormalSpot() || parkingSpaces.hasChargingSpot();
+		if(this.parkingSpaces == null) {
+			return false;
+		}
+		return true;
 	}
 	
 	// Returns true if this dwelling has a spot for charging an electric car

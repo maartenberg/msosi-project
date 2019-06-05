@@ -3,29 +3,36 @@ package loadPoles;
 import java.util.*;
 
 import repast.simphony.context.Context;
+import repast.simphony.space.grid.Grid;
 
 public class ParkingLot {
-	Context<Object> context;
+	Grid<Object> grid;
 	List<ParkingSpace> parkingSpaces;
 	
-	public ParkingLot(Context<Object> context){		
-		this.context = context;
+	public ParkingLot(Grid<Object> grid){		
+		this.grid = grid;
 		this.parkingSpaces = new ArrayList<ParkingSpace>();
 	}	
 	
 	// Adds a new parking space to this parking lot, of a given type
-	public void addSpace(String type) {
-		ParkingSpace ps = new ParkingSpace(context);
+	public void addSpace(String type, Object parent) {
+		ParkingSpace ps = null;
+		if(parent == null) {
+			ps = new ParkingSpace(grid.getLocation(this));
+		}
+		else {
+			ps = new ParkingSpace(grid.getLocation(parent));
+		}
 		ps.setType(type);
 		parkingSpaces.add(ps);
 	}
 	
-	// Returns true if this parkinglot has a spot for charging an electric car
+	// Returns true if this parking lot has a spot for charging an electric car
 	public boolean hasChargingSpot() {
 		return numberOfSpots("electric") > 0;
 	}
 	
-	// Returns true if this parkinglot has a spot for a normal car
+	// Returns true if this parking lot has a spot for a normal car
 	public boolean hasNormalSpot() {
 		return numberOfSpots("normal") > 0;
 	}	
@@ -68,16 +75,8 @@ public class ParkingLot {
 	
 	// Get an available parking spot for a given type
 	public ParkingSpace getAvailable(String type) {
-		/*
 		for(ParkingSpace ps : parkingSpaces) {
 			if(ps.getType() == type && !ps.getOccupied()) {
-				return ps;
-			}
-		}*/
-		
-		//For now, don't hold into account types
-		for(ParkingSpace ps : parkingSpaces) {
-			if(!ps.getOccupied()) {
 				return ps;
 			}
 		}

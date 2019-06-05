@@ -1,17 +1,19 @@
 package loadPoles;
 
 import repast.simphony.context.Context;
+import repast.simphony.space.grid.Grid;
+import repast.simphony.space.grid.GridPoint;
 
 public class ParkingSpace {
 	
-	Context<Object> context;
 	String type;
 	boolean occupied;
+	GridPoint location;
 	
-	public ParkingSpace(Context<Object> context){
-		this.context = context;
+	public ParkingSpace(GridPoint location){
 		this.type = "normal";
 		this.occupied = false;
+		this.location = location;
 	}
 
 	public String getType() {
@@ -28,5 +30,9 @@ public class ParkingSpace {
 	
 	public void setOccupied(boolean occupied) {
 		this.occupied = occupied;
+	}
+	
+	public GridPoint getLocation() {
+		return this.location;
 	}
 }

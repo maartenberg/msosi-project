@@ -88,7 +88,6 @@ public class Human {
 	float happiness;
 	Preferences preference;
 	Vehicle pastVehicle;
-	ParkingSpace currentParkingSpot;
 	Dwelling dwelling;
 	Workplace workplace;	
 	Grid<Object> grid;
@@ -263,6 +262,7 @@ public class Human {
 		// TODO make these values different with a normal distribution
 	}
 	
+	// Function to park all cars of this human on initialisation
 	public void parkAllCars() {
 		if(!carUser) {
 			return;
@@ -271,18 +271,22 @@ public class Human {
 		//Park all cars
 		GridPoint currentLocation = grid.getLocation(this);
 		for(Vehicle v : vehicles) {
-			if(v.getName() == "normal_car" || v.getName() == "hybrid_car" || v.getName() == "electric_car") {
-				parkCar(currentLocation, v);
+			if(v.isCar()) {
+				ParkingSpace closest = parkCar(currentLocation, v);
+				closest.setOccupied(true);
+				v.setParkingSpace(closest);
 			}			
 		}
 	}
 	
 	// Find a parking spot for your car and park there
-	public void parkCar(GridPoint location, Vehicle vehicle) {
+	public ParkingSpace parkCar(GridPoint location, Vehicle vehicle) {
 		//If we are no car user, no need to park, so just return
 		if(!carUser) {
-			return;
+			return null;
 		}
+		
+		ParkingSpace bestSpot = null;
 		
 		String type = "";
 		if(vehicle.getName() == "electric_car") {
@@ -291,9 +295,61 @@ public class Human {
 			type = "normal";
 		}
 		
-		ParkingSpace bestSpot = findClosestParkingSpace(location, type);		
-		bestSpot.setOccupied(true);
-		currentParkingSpot = bestSpot;
+		// Check if the electric car has enough range
+		if(type == "electric") {
+			// Find closest charging space, normal space locations
+			ParkingSpace closestChargingSpace = findClosestParkingSpace(location, type);
+			ParkingSpace closestNormalSpace = findClosestParkingSpace(location, "normal");
+			GridPoint closestChargingLoc = closestChargingSpace.getLocation();
+			GridPoint closestNormalLoc = closestNormalSpace.getLocation();
+			
+			// Get remaining range of electric car
+			double remainingRange = vehicle.getRemainingRange();
+			
+			// If we are planning a trip away from home, check if we need to charge in between
+			GridPoint homeLocation = grid.getLocation(dwelling);
+			if(location.getX() != homeLocation.getX() && location.getY() != homeLocation.getY()) {							
+				// If electric car can come home when parking at a normal spot, then no need to charge	
+				ParkingSpace currentParkingSpace = vehicle.getParkingSpace();
+				GridPoint currentParkingLoc = currentParkingSpace.getLocation();						
+				
+				double normalDistance = grid.getDistance(currentParkingLoc, closestNormalLoc);
+				double chargeDistance = grid.getDistance(currentParkingLoc, closestChargingLoc);		
+				
+				//System.out.println("\nRemaining range of car: " + remainingRange);
+				//System.out.println("Distance to normal spot: " + normalDistance);
+				//System.out.println("Distance to charging spot: " + chargeDistance);
+				
+				if(remainingRange - (2*normalDistance) > 0) {
+					bestSpot = closestNormalSpace;
+					vehicle.setRemainingRange(remainingRange - (2*normalDistance));					
+					//System.out.println("Can make double trip easily!");
+				}
+				// Else, check if we can make single trip to closest charging space
+				else if(remainingRange - chargeDistance > 0) {
+					bestSpot = closestChargingSpace;
+					// Since vehicle is charged here, range is reset
+					vehicle.setRemainingRange(vehicle.getActionRadius());					
+					//System.out.println("Need to charge at destination!");
+				}
+				// Else, we cannot even make a single trip
+				else {
+					//System.out.println("Need to choose new vehicle!");
+					return null;
+				}
+			}
+			// Else, if we are going home, then always park at a charging spot
+			else {
+				bestSpot = closestChargingSpace;
+				vehicle.setRemainingRange(vehicle.getActionRadius());
+			}
+		}
+		// Else, just find closest normal parking space
+		else {	
+			bestSpot = findClosestParkingSpace(location, type);		
+		}
+		
+		return bestSpot;
 	}
 
 	// Find closest parking space with available parking spaces of a given type
@@ -304,6 +360,7 @@ public class Human {
 		ParkingSpace closest = null;
 		double minDistance = Integer.MAX_VALUE;			
 
+		// For printing to console: (can be removed)
 		GridPoint bestLocation = null;
 		String locType = "";
 		
@@ -337,7 +394,6 @@ public class Human {
 			}
 		}
 		
-		System.out.println("Parking " + type + " car at " + locType + ": (" + bestLocation.getX() + ", " + bestLocation.getY() + ")");
 		
 		//TODO: do something with minDistance affecting the human's happiness
 		return closest;
@@ -351,30 +407,59 @@ public class Human {
 		GridPoint currentLocation = grid.getLocation(this);
 				
 		Vehicle vehicle = null;
-		//If destination is home location, choose same vehicle as when traveling from home to destination
+		// If destination is home location, choose same vehicle as when traveling from home to destination
 		if(destination.getX() == homeLocation.getX() && destination.getY() == homeLocation.getY()) {
 			vehicle = pastVehicle;
 		}
 		else {
-			//Find distance and choose appropriate vehicle
+			// Find distance and choose appropriate vehicle
 			double distance = grid.getDistance(currentLocation, destination);
-			vehicle = chooseVehicle(distance);
+			vehicle = chooseVehicle(distance, null);
 		}
 		
-		if(vehicle.getName() == "normal_car" || vehicle.getName() == "hybrid_car" || vehicle.getName() == "electric_car") {
-			//Unpark current vehicle
-			if(currentParkingSpot != null) {
-				currentParkingSpot.setOccupied(false);
+		ParkingSpace closestSpace = null;
+		boolean parked = false;
+		while(vehicle.isCar() && !parked) {			
+			// Find new spot to park near location			
+			closestSpace = parkCar(destination, vehicle);
+			
+			// Park our car at new spot if we can
+			if(closestSpace != null) {			
+				vehicle.getParkingSpace().setOccupied(false);		
+				closestSpace.setOccupied(true);
+				vehicle.setParkingSpace(closestSpace);
+				parked = true;
 			}
-			//Find new spot to park near location			
-			parkCar(destination, vehicle);
+			else {
+				// Find second best vehicle by excluding current vehicle
+				double distance = grid.getDistance(currentLocation, destination);
+				String oldVehicle = vehicle.getName();
+				vehicle = chooseVehicle(distance, oldVehicle);
+				System.out.println("Changed vehicle from: " + oldVehicle + " to "  + vehicle.getName());
+				
+				// If there is no better vehicle, don't travel and subtract a lot from happiness
+				if(vehicle.getName() == oldVehicle) {
+					//TODO: subtract a lot from happiness
+					System.out.println("Can't find a suitable vehicle to travel with.\n");
+					return;
+				}					
+			}
 		}		
 		
 		pastVehicle = vehicle;
-		System.out.println("Travelling to: (" + destination.getX() + ", " + destination.getY() 
-							+ ")\n from: (" + currentLocation.getX() + ", " + currentLocation.getY() + ")"
+		System.out.println("\nTravelling from: (" + currentLocation.getX() + ", " + currentLocation.getY() + ")"
+							+ " to: (" + destination.getX() + ", " + destination.getY() + ")"
 							+ "\n with distance: " + grid.getDistance(currentLocation, destination) 
-							+ "\n and vehicle: " + vehicle.getName() + "\n");
+							+ "\n and vehicle: " + vehicle.getName());
+		
+		if(closestSpace != null) {
+			GridPoint parkLocation = closestSpace.getLocation();
+			double walkingDistance = grid.getDistance(parkLocation, destination);
+			//TODO: subtract from happiness based on this walking distance
+			System.out.println(" Parked at: (" + parkLocation.getX() + ", " + parkLocation.getY() + ") "
+							 + "\n  with walking distance from destination: " + walkingDistance);
+			
+		}
 		grid.moveTo(this, destination.getX(), destination.getY());
 	}
 		
@@ -417,7 +502,7 @@ public class Human {
 	}
 	
 	//Decides which vehicle to use
-	public Vehicle chooseVehicle(double distance) {		
+	public Vehicle chooseVehicle(double distance, String exclude) {		
 		//Keep track of the best vehicle
 		double bestUtility = 0;
 		Vehicle bestVehicle = null;
@@ -427,6 +512,12 @@ public class Human {
 			//TODO: find a good starting value
 			//Start with a utility of 1000
 			double utility = 5000;
+			
+			//If vehicle is one that we want to exclude, set utility to 1 and continue
+			if(vehicle.getName() == exclude) {
+				utility = 1;
+				continue;
+			}
 			
 			//The less comfortable, the less utility
 			utility *= vehicle.getComfort();
@@ -445,7 +536,7 @@ public class Human {
 			//TODO: make this "punishment" of utility also depend on personal values of the environment
 			utility -= environmentFactor * (distance * vehicle.getTravelEmission());
 			
-			//The more the cost impacts the income, the worse the utility
+			//The more the cost of travelling impacts the income, the worse the utility
 			utility *= (1 - (distance * vehicle.getKilometerCost())/income);
 			
 			//Make sure utility is not lower than 1, so at least one vehicle is always chosen
@@ -684,7 +775,7 @@ public class Human {
 		
 		//Print what vehicle this human would choose for a random route
 		float rndDistance = RandomHelper.nextIntFromTo(1, 100);
-		Vehicle bestVehicle = chooseVehicle(rndDistance);
+		Vehicle bestVehicle = chooseVehicle(rndDistance, null);
 		System.out.println("If I were to travel " + rndDistance + " kilometers I would choose the " + bestVehicle.getName());
 	}
 
