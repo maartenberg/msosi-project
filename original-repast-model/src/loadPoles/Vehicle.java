@@ -1,5 +1,7 @@
 package loadPoles;
 
+import loadPoles.GridObjects.ParkingSpace;
+
 public abstract class Vehicle {
 	/*
 	 * A human-readable name for this vehicle.	 

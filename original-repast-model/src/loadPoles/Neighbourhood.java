@@ -2,6 +2,12 @@ package loadPoles;
 
 import java.util.Iterator;
 
+import loadPoles.GridObjects.Dwelling;
+import loadPoles.GridObjects.ParkingLot;
+import loadPoles.GridObjects.PublicBuilding;
+import loadPoles.GridObjects.Road;
+import loadPoles.GridObjects.TransitStop;
+import loadPoles.GridObjects.Workplace;
 import loadPoles.graph.*;
 
 import java.nio.file.Files;
@@ -91,6 +97,15 @@ public class Neighbourhood {
 						Road r = new Road();
 						context.add(r);
 						grid.moveTo(r, x, y);
+						break;
+						
+					case ',':
+						Road rd = new Road();
+						TransitStop ts = new TransitStop();
+						context.add(rd);
+						context.add(ts);
+						grid.moveTo(rd, x,y);
+						grid.moveTo(ts, x,y);
 						break;
 						
 					case 'P':
