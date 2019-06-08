@@ -2,6 +2,12 @@ package loadPoles;
 
 import java.util.Iterator;
 
+import loadPoles.GridObjects.Dwelling;
+import loadPoles.GridObjects.ParkingLot;
+import loadPoles.GridObjects.PublicBuilding;
+import loadPoles.GridObjects.Road;
+import loadPoles.GridObjects.TransitStop;
+import loadPoles.GridObjects.Workplace;
 import loadPoles.graph.*;
 
 import java.nio.file.Files;
@@ -93,8 +99,17 @@ public class Neighbourhood {
 						grid.moveTo(r, x, y);
 						break;
 						
+					case ',':
+						Road rd = new Road();
+						TransitStop ts = new TransitStop();
+						context.add(rd);
+						context.add(ts);
+						grid.moveTo(rd, x,y);
+						grid.moveTo(ts, x,y);
+						break;
+						
 					case 'P':
-						ParkingLot pl = new ParkingLot(context);
+						ParkingLot pl = new ParkingLot(grid);
 						context.add(pl);
 						grid.moveTo(pl, x, y);
 						break;
@@ -200,9 +215,9 @@ public class Neighbourhood {
 				//Do it randomly
 				//ratio% distribution of b compared to a
 				if(RandomHelper.nextDoubleFromTo(0, 1) < ratio) {
-					pl.addSpace("electric");
+					pl.addSpace("electric", null);
 				} else {
-					pl.addSpace("normal");
+					pl.addSpace("normal", null);
 				}
 			}
 		} 		
@@ -213,14 +228,14 @@ public class Neighbourhood {
 		Iterator dwellingsIterator = dwellings.iterator();
 		while(dwellingsIterator.hasNext()) {
 			Dwelling d = (Dwelling) dwellingsIterator.next();			
-		
+			
 			// Find the number of electric cars in this dwelling
 			int nrLoadingPoleNeeded = d.getAmountOfParkingType(true);
 			
 			// If it is bigger than 0, then add a loading pole with a given chance
 			if(nrLoadingPoleNeeded > 0) {
 				if(RandomHelper.nextDoubleFromTo(0, 1) < loadingPoleChance) {
-					d.addParkingSpace("electric");
+					d.addParkingSpace("electric", grid);
 				}
 			}
 			
@@ -231,7 +246,7 @@ public class Neighbourhood {
 			
 			// Add a normal parking spot to this dwelling with a given chance
 			if(RandomHelper.nextDoubleFromTo(0, 1) < normalSpotChance) {
-				d.addParkingSpace("normal");
+				d.addParkingSpace("normal", grid);
 			}
 	}		
 	}
@@ -243,8 +258,7 @@ public class Neighbourhood {
 		
 		while(humansIterator.hasNext()) {
 			Human h = (Human) humansIterator.next();
-			GridPoint currentLocation = this.grid.getLocation(h);
-			h.parkCar(currentLocation);
+			h.parkAllCars();
 		}
 	}
 	
