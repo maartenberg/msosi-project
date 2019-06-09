@@ -53,7 +53,6 @@ public class Human {
 	Grid<Object> grid;
 
 	public Human(Context<Object> context, Grid<Object> grid) {
-
 		this.context = context;
 		this.grid = grid;			
 		
@@ -63,8 +62,6 @@ public class Human {
 		initVehicles();
 		initPreferences();
 	
-		//TODO: for now leaving this unchanged, but it needs to be changed eventually
-		//Uses cars?
 		carUser = false;
 		for(Vehicle v : vehicles) {
 			if(v.getName() == "normal_car" || v.getName() == "hybrid_car" || v.getName() == "electric_car") {
@@ -74,9 +71,10 @@ public class Human {
 		
 		name = String.valueOf(RandomHelper.nextDoubleFromTo(0, 2));
 		name = String.valueOf(context.getObjects(Human.class).size());
-		happiness = 1;
+		happiness = 1; // TODO: obsolete, use consumat.satisfaction instead?
 	}
 	
+	// Initialise what vehicles this human has based on their traits
 	private void initVehicles() {
 		//Add vehicles that this human already owns before the simulation
 		//For now, does not take into account social values etc. TODO ?
@@ -132,6 +130,7 @@ public class Human {
 		}
 	}	
 	
+	// Initiliase the preferences that this human has
 	private void initPreferences() {
 		this.preference = new Preferences(0.103f, 0.023f, 0.14f, 0.132f, 0.133f, 0.136f, 0.092f, 0.112f, 0.053f, 0.088f, this);
 		// TODO make values add up to 1
@@ -150,19 +149,25 @@ public class Human {
 		GridPoint currentLocation = grid.getLocation(this);
 		for(Vehicle v : vehicles) {
 			if(v.isCar()) {
-				ParkingSpace closest = travel.parkCar(currentLocation, v);
+				ParkingSpace closest = null;
+				if(v.getName() == "electric_car") {
+					closest = travel.findClosestParkingSpace(currentLocation, "electric");
+				}
+				else {
+					closest = travel.findClosestParkingSpace(currentLocation, "normal");
+				}
 				closest.setOccupied(true);
 				v.setParkingSpace(closest);
 			}			
 		}
 	}
 	
-	@ScheduledMethod(start = 1, interval = 1, priority = 3)
+	@ScheduledMethod(start = 1, interval = 1, priority = 1)
 	public void depart() {
 		travel.depart();
 	}
 
-	//Return the happiness
+	// TODO: Obsolete?
 	public float getHappiness() {
 		return this.happiness;
 	}	

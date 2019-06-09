@@ -4,11 +4,4 @@
 	<projection type="network" id="livingin"></projection>
 	<projection type="network" id="workingin"></projection>	
 	<projection type="grid" id="grid"></projection>
-	<projection type="grid" id="humansGrid"></projection>
-	<projection type="grid" id="dwellingsGrid"></projection>
-	<projection type="grid" id="workplacesGrid"></projection>
-	<projection type="grid" id="publicbuildingsGrid"></projection>
-	<projection type="grid" id="parkingspacesGrid"></projection>
-	<projection type="grid" id="roadsGrid"></projection>
-
 </context>

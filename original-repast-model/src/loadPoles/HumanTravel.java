@@ -5,6 +5,7 @@ import java.util.Iterator;
 import loadPoles.GridObjects.ParkingLot;
 import loadPoles.GridObjects.ParkingSpace;
 import loadPoles.GridObjects.PublicBuilding;
+import loadPoles.GridObjects.TransitStop;
 import repast.simphony.context.Context;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.random.RandomHelper;
@@ -17,97 +18,25 @@ public class HumanTravel {
 	Context<Object> context;
 	Grid<Object> grid;
 	Vehicle pastVehicle;
+	Route previousRoute;
 	
 	public HumanTravel(Human human, Context<Object> context, Grid<Object> grid) {
 		this.human = human;
 		this.context = context;
 		this.grid = grid;
 	}
-	
-	// Find a parking spot for your car and park there
-	public ParkingSpace parkCar(GridPoint location, Vehicle vehicle) {
-		//If we are no car user, no need to park, so just return
-		if(!human.carUser) {
-			return null;
-		}
-		
-		ParkingSpace bestSpot = null;
-		
-		String type = "";
-		if(vehicle.getName() == "electric_car") {
-			type = "electric";
-		} else {
-			type = "normal";
-		}
-		
-		// Check if the electric car has enough range
-		if(type == "electric") {
-			// Find closest charging space, normal space locations
-			ParkingSpace closestChargingSpace = findClosestParkingSpace(location, type);
-			ParkingSpace closestNormalSpace = findClosestParkingSpace(location, "normal");
-			GridPoint closestChargingLoc = closestChargingSpace.getLocation();
-			GridPoint closestNormalLoc = closestNormalSpace.getLocation();
-			
-			// Get remaining range of electric car
-			double remainingRange = vehicle.getRemainingRange();
-			
-			// If we are planning a trip away from home, check if we need to charge in between
-			GridPoint homeLocation = grid.getLocation(human.dwelling);
-			if(location.getX() != homeLocation.getX() && location.getY() != homeLocation.getY()) {							
-				// If electric car can come home when parking at a normal spot, then no need to charge	
-				ParkingSpace currentParkingSpace = vehicle.getParkingSpace();
-				GridPoint currentParkingLoc = currentParkingSpace.getLocation();						
-				
-				double normalDistance = grid.getDistance(currentParkingLoc, closestNormalLoc);
-				double chargeDistance = grid.getDistance(currentParkingLoc, closestChargingLoc);		
-				
-				//System.out.println("\nRemaining range of car: " + remainingRange);
-				//System.out.println("Distance to normal spot: " + normalDistance);
-				//System.out.println("Distance to charging spot: " + chargeDistance);
-				
-				if(remainingRange - (2*normalDistance) > 0) {
-					bestSpot = closestNormalSpace;
-					vehicle.setRemainingRange(remainingRange - (2*normalDistance));					
-					//System.out.println("Can make double trip easily!");
-				}
-				// Else, check if we can make single trip to closest charging space
-				else if(remainingRange - chargeDistance > 0) {
-					bestSpot = closestChargingSpace;
-					// Since vehicle is charged here, range is reset
-					vehicle.setRemainingRange(vehicle.getActionRadius());					
-					//System.out.println("Need to charge at destination!");
-				}
-				// Else, we cannot even make a single trip
-				else {
-					//System.out.println("Need to choose new vehicle!");
-					return null;
-				}
-			}
-			// Else, if we are going home, then always park at a charging spot
-			else {
-				bestSpot = closestChargingSpace;
-				vehicle.setRemainingRange(vehicle.getActionRadius());
-			}
-		}
-		// Else, just find closest normal parking space
-		else {	
-			bestSpot = findClosestParkingSpace(location, type);		
-		}
-		
-		return bestSpot;
-	}
 
 	// Find closest parking space with available parking spaces of a given type
-	private ParkingSpace findClosestParkingSpace(GridPoint location, String type) {
+	public ParkingSpace findClosestParkingSpace(GridPoint location, String type) {
 		IndexedIterable parkingLots = this.context.getObjects(ParkingLot.class);
 		Iterator parkingLotsIterator = parkingLots.iterator();
 		
 		ParkingSpace closest = null;
 		double minDistance = Integer.MAX_VALUE;			
 
-		// For printing to console: (can be removed)
-		GridPoint bestLocation = null;
-		String locType = "";
+		// For printing to console: (can be removed later)
+		//GridPoint bestLocation = null;
+		//String locType = "";
 		
 		//Find closest parking lot with an available parking space
 		while(parkingLotsIterator.hasNext()) {
@@ -119,8 +48,8 @@ public class HumanTravel {
 			if(available != null && distance < minDistance) {
 				minDistance = distance;
 				closest = available;
-				bestLocation = plLocation;
-				locType = "a parking lot";
+				//bestLocation = plLocation;
+				//locType = "a parking lot";
 			}	
 		}
 		
@@ -133,134 +62,183 @@ public class HumanTravel {
 				if(distance < minDistance) {
 					minDistance = distance;
 					closest = homeParking;
-					bestLocation = homeLocation;
-					locType = "home";
+					//bestLocation = homeLocation;
+					//locType = "home";
 				}			
 			}
 		}
 		
+		//System.out.println("Parking type: " + type);
+		//System.out.println("Found best location at " + locType + " with coords: (" + bestLocation.getX() +  ", " + bestLocation.getY() +")");
+		return closest;
+	}
+	
+	// Find closest transit stop to a certain location on the grid
+	private TransitStop findClosestTransitStop(GridPoint location) {
+		IndexedIterable transitStops = this.context.getObjects(TransitStop.class);
+		Iterator transitStopsIterator = transitStops.iterator();
+		
+		TransitStop closest = null;
+		double minDistance = Integer.MAX_VALUE;			
+		
+		//Find closest parking lot with an available parking space
+		while(transitStopsIterator.hasNext()) {
+			TransitStop ts = (TransitStop) transitStopsIterator.next();
+			GridPoint tsLocation = grid.getLocation(ts);						
+			double distance = grid.getDistance(location, tsLocation);
+			
+			if(distance < minDistance) {
+				minDistance = distance;
+				closest = ts;
+			}	
+		}	
 		
 		//TODO: do something with minDistance affecting the human's happiness
 		return closest;
 	}
 	
-	// Find a destination and vehicle and travel there 
-	//@ScheduledMethod(start = 1, interval = 1, priority = 3)
-	public void depart() {
-		GridPoint destination = getDestination();		
-		GridPoint homeLocation = grid.getLocation(human.dwelling);
-		GridPoint currentLocation = grid.getLocation(human);
-				
-		Vehicle vehicle = null;
-		// If destination is home location, choose same vehicle as when traveling from home to destination
-		if(destination.getX() == homeLocation.getX() && destination.getY() == homeLocation.getY()) {
-			vehicle = pastVehicle;
-		}
-		else {
-			// Find distance and choose appropriate vehicle
-			double distance = grid.getDistance(currentLocation, destination);
-			vehicle = chooseVehicle(distance, null);
-		}
+	// Find a route given a destination and a vehicle
+	private Route findRoute(GridPoint destination, Vehicle vehicle) {
+		Route route = null;
 		
-		ParkingSpace closestSpace = null;
-		boolean parked = false;
-		while(vehicle.isCar() && !parked) {			
-			// Find new spot to park near location			
-			closestSpace = parkCar(destination, vehicle);
-			
-			// Park our car at new spot if we can
-			if(closestSpace != null) {			
-				vehicle.getParkingSpace().setOccupied(false);		
-				closestSpace.setOccupied(true);
-				vehicle.setParkingSpace(closestSpace);
-				parked = true;
-			}
-			else {
-				// Find second best vehicle by excluding current vehicle
-				double distance = grid.getDistance(currentLocation, destination);
-				String oldVehicle = vehicle.getName();
-				vehicle = chooseVehicle(distance, oldVehicle);
-				System.out.println("Changed vehicle from: " + oldVehicle + " to "  + vehicle.getName());
-				
-				// If there is no better vehicle, don't travel and subtract a lot from happiness
-				if(vehicle.getName() == oldVehicle) {
-					//TODO: subtract a lot from happiness
-					System.out.println("Can't find a suitable vehicle to travel with.\n");
-					return;
-				}					
+		if(vehicle.isCar()) {
+			route = findCarRoute(destination, vehicle);
+		}
+		else if(vehicle.getName() == "public_transport") {
+			route = findTransitRoute(destination, vehicle);			
+		}
+		else {		
+			GridPoint currentLocation = grid.getLocation(human);
+			route = new Route(grid, currentLocation, destination, vehicle);		
+		}
+
+		// If vehicle is bicycle or public transport, then distance is 0.8 times shorter with a 40% chance
+		// (Because of possible bicycle paths and transit only roads)
+		double distance = route.getTravelDistance();
+		if(vehicle.getName() == "bicycle" || vehicle.getName() == "electric_bicycle" || vehicle.getName() == "public_transport") {
+			if(RandomHelper.nextDoubleFromTo(0, 1) < 0.4) {
+				distance *= 0.8;
+				route.setTravelDistance(distance);
 			}
 		}		
 		
-		pastVehicle = vehicle;
-		System.out.println("\nTravelling from: (" + currentLocation.getX() + ", " + currentLocation.getY() + ")"
-							+ " to: (" + destination.getX() + ", " + destination.getY() + ")"
-							+ "\n with distance: " + grid.getDistance(currentLocation, destination) 
-							+ "\n and vehicle: " + vehicle.getName());
-		
-		if(closestSpace != null) {
-			GridPoint parkLocation = closestSpace.getLocation();
-			double walkingDistance = grid.getDistance(parkLocation, destination);
-			//TODO: subtract from happiness based on this walking distance
-			System.out.println(" Parked at: (" + parkLocation.getX() + ", " + parkLocation.getY() + ") "
-							 + "\n  with walking distance from destination: " + walkingDistance);
-			
-		}
-		grid.moveTo(human, destination.getX(), destination.getY());
+		return route;
 	}
+	
+	// Finds a corresponding route when the vehicle is public transport that includes transit stops
+	private Route findTransitRoute(GridPoint destination, Vehicle vehicle) {
+		GridPoint currentLocation = grid.getLocation(human);
 		
-	//Decides which vehicle to use
-	public Vehicle chooseVehicle(double distance, String exclude) {		
-		//Keep track of the best vehicle
+		// Find closest transits stops at beginning and end of route
+		TransitStop from = findClosestTransitStop(currentLocation);
+		TransitStop to = findClosestTransitStop(destination);
+		
+		Route route = new Route(grid, currentLocation, destination, vehicle);
+		route.setTransitStops(from, to);
+		return route;
+	}	
+	
+	// Finds a corresponding route when the vehicle is a car that includes finding parking spaces
+	public Route findCarRoute(GridPoint destination, Vehicle vehicle) {		
+		GridPoint currentLocation = grid.getLocation(human);
+		GridPoint homeLocation = grid.getLocation(human.dwelling);
+		
+		ParkingSpace from = vehicle.getParkingSpace();
+		ParkingSpace to = null;
+		// Check if the electric car has enough range
+		if(vehicle.getName() == "electric_car") {						
+			// Find closest charging space, normal space locations
+			ParkingSpace closestChargingSpace = findClosestParkingSpace(destination, "electric");
+			ParkingSpace closestNormalSpace = findClosestParkingSpace(destination, "normal");
+			
+			// Always charge if going home
+			if(destination.getX() == homeLocation.getX() && destination.getY() == homeLocation.getY()) {
+				to = closestChargingSpace;
+			}
+			else {
+				// Get remaining range of electric car, and distance between each type of parking lot
+				double remainingRange = vehicle.getRemainingRange();				
+				double normalDistance = grid.getDistance(from.getLocation(), closestNormalSpace.getLocation());
+				double chargeDistance = grid.getDistance(from.getLocation(), closestChargingSpace.getLocation());		
+				
+				// If we can make the double trip easily, just park at normal parking space
+				if(remainingRange - (2*normalDistance) > 0) {
+					to = closestNormalSpace;		
+				}
+				// Else, check if we can make single trip to closest charging space
+				else if(remainingRange - chargeDistance > 0) {
+					to = closestChargingSpace;		
+				}
+				// Else, we cannot even make a single trip
+				else {
+					return null;
+				}
+			}
+		}
+		// Else, just find closest normal parking space
+		else {	
+			to = findClosestParkingSpace(destination, "normal");		
+		}
+		
+		Route route = new Route(grid, currentLocation, destination, vehicle);
+		route.setParkingSpaces(from, to);
+		return route;		
+	}
+	
+	// Calculate the utility for each vehicle and corresponding route, and return the best one 
+	public Route findBestRoute(GridPoint destination) {		
+		//Keep track of the best route (which includes the best vehicle)
 		double bestUtility = 0;
-		Vehicle bestVehicle = null;
+		Route bestRoute = null;
 		
 		//Calculate utility for each vehicle available to this human
 		for(Vehicle vehicle : human.vehicles) {
-			//TODO: find a good starting value
-			//Start with a utility of 1000
+			//TODO: find a good starting value for utility
 			double utility = 5000;
 			
-			//If vehicle is one that we want to exclude, set utility to 1 and continue
-			if(vehicle.getName() == exclude) {
-				utility = 1;
-				continue;
+			// Find the corresponding route for this vehicle
+			Route route = findRoute(destination, vehicle);
+			if(route == null) {
+				utility = 1;				
+			}
+			else {							
+				// The less comfortable, the less utility
+				utility *= vehicle.getComfort();
+				
+				// The slower it is, the less utility
+				utility *= vehicle.getSpeed();	
+				
+				//If the vehicle cannot travel this distance comfortably, subtract a lot from utility			
+				if(vehicle.getActionRadius() < route.getTravelDistance()) {
+					//Get the difference between the action radius and distance to travel, and use this as punishment
+					double punishment = route.getTravelDistance() - vehicle.getActionRadius();
+					utility -= punishment * 10;
+				}
+				
+				//The more emission of CO2, the worse the utility
+				utility -= human.traits.environmentFactor * (route.getTravelDistance() * vehicle.getTravelEmission());
+				
+				//The more the cost of travelling impacts the income, the worse the utility
+				utility *= (1 - (route.getTravelDistance() * vehicle.getKilometerCost())/human.traits.income);
+				
+				//The more we have to walk between stops during the route, the worse the utility
+				utility -= route.getWalkingDistance() * 5;
+				
+				//Make sure utility is not lower than 1, so at least one vehicle is always chosen
+				utility = Math.max(1, utility);					
 			}
 			
-			//The less comfortable, the less utility
-			utility *= vehicle.getComfort();
+			route.setUtility(utility);
 			
-			//The slower it is, the less utility
-			utility *= vehicle.getSpeed();	
-			
-			//If the vehicle cannot travel this distance comfortably, subtract a lot from utility			
-			if(vehicle.getActionRadius() < distance) {
-				//Get the difference between the action radius and distance to travel, and use this as punishment
-				double punishment = distance - vehicle.getActionRadius();
-				utility -= punishment * 10;
-			}
-			
-			//The more emission of CO2, the worse the utility
-			//TODO: make this "punishment" of utility also depend on personal values of the environment
-			utility -= human.traits.environmentFactor * (distance * vehicle.getTravelEmission());
-			
-			//The more the cost of travelling impacts the income, the worse the utility
-			utility *= (1 - (distance * vehicle.getKilometerCost())/human.traits.income);
-			
-			//Make sure utility is not lower than 1, so at least one vehicle is always chosen
-			utility = Math.max(1, utility);		
-			
-			//Update best values
 			if(utility > bestUtility) {
 				bestUtility = utility;
-				bestVehicle = vehicle;
+				bestRoute = route;
 			}			
-		}
-		
-		//TODO: also do something with happiness based on how high (or low) this utility is?
-		return bestVehicle;		
+		}		
+		return bestRoute;		
 	}	
 	
-	//Finds a random destination for the Human to go to
+	// Finds a random destination for the Human to go to
 	private GridPoint getDestination() {
 		GridPoint currentLocation = grid.getLocation(human);
 		
@@ -288,4 +266,90 @@ public class HumanTravel {
 		
 		return homeLocation;
 	}
+	
+	// Find a destination and vehicle and travel there 
+	public void depart() {
+		GridPoint destination = getDestination();		
+		GridPoint homeLocation = grid.getLocation(human.dwelling);
+		GridPoint currentLocation = grid.getLocation(human);
+				
+		Route route = null;
+		boolean goingHome = false;
+		// If destination is home location, choose same route as when traveling from home to destination
+		// BUT always find a new route for cars, because of parking space occupancy, we cannot use old parking spaces on the previous route
+		if(previousRoute != null && !previousRoute.getVehicle().isCar() && destination.getX() == homeLocation.getX() && destination.getY() == homeLocation.getY()) {
+			route = previousRoute;
+			goingHome = true;			
+		} else {
+			route = findBestRoute(destination);
+		}		
+		
+		Vehicle vehicle = route.getVehicle();
+		GridPoint currentFrom = null; //Only for console printing
+		GridPoint currentTo = null; //Only for console printing
+		
+		// Handle parking and un-parking cars
+		if(vehicle.isCar()) {		
+			ParkingSpace from = null;
+			ParkingSpace to = null;
+			if(goingHome) {
+				from = (ParkingSpace) route.getSecondSpace();
+				to = (ParkingSpace) route.getFirstSpace();
+			} else {
+				from = (ParkingSpace) route.getFirstSpace();
+				to = (ParkingSpace) route.getSecondSpace();
+			}
+			
+			from.setOccupied(false);
+			to.setOccupied(true);
+			vehicle.setParkingSpace(to);
+			
+			//Only for console printing:
+			currentFrom = from.getLocation();
+			currentTo = to.getLocation();
+			
+			// Update remaining range if we are using an electric car
+			if(vehicle.getName() == "electric_car") {
+				double remainingRange = vehicle.getRemainingRange();
+			
+				// If we are charging, reset range
+				if(to.getType() == "electric") {
+					vehicle.setRemainingRange(vehicle.getActionRadius());
+				}
+				else {
+					vehicle.setRemainingRange(remainingRange - route.getTravelDistance());
+				}
+			}			
+		}		
+		
+		// The following is just printing information to console. Can be deleted if obsolete
+		System.out.println( "\nHUMAN " + human.getName() + ":" +
+							"\n travelling from: (" + currentLocation.getX() + ", " + currentLocation.getY() + ")"
+							+ " to: (" + destination.getX() + ", " + destination.getY() + ")"
+							+ "\n with distance: " + grid.getDistance(currentLocation, destination) 
+							+ "\n and vehicle: " + vehicle.getName());
+		
+		if(vehicle.isCar()) {
+			System.out.println(" went from parking space at: (" + currentFrom.getX() + ", " + currentFrom.getY() + ")"
+							 + "\n  to parking space at: (" + currentTo.getX() + ", " + currentTo.getY() + ")"
+							 + "\n  with total walking distance: " + route.getWalkingDistance());			
+		}
+		if(vehicle.getName() == "public_transport") {
+			if(goingHome) {
+				currentFrom = grid.getLocation(route.getSecondStop());
+				currentTo = grid.getLocation(route.getFirstStop());				
+			} else {
+				currentFrom = grid.getLocation(route.getFirstStop());
+				currentTo = grid.getLocation(route.getSecondStop());
+			}
+			System.out.println(" went from transit stop at: (" + currentFrom.getX() + ", " + currentFrom.getY() + ")"
+							 + "\n  to transit stop at: (" + currentTo.getX() + ", " + currentTo.getY() + ")"
+							 + "\n  with total walking distance: " + route.getWalkingDistance());		
+		}
+		
+		previousRoute = route;
+		grid.moveTo(human, destination.getX(), destination.getY());
+	}
+		
+	
 }

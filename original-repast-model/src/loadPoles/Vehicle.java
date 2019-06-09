@@ -143,14 +143,13 @@ public abstract class Vehicle {
 		remainingRange = value;
 	}
 	
-	public ParkingSpace getParkingSpace() {
-		return parkingSpace;
-	}
-	
 	public void setParkingSpace(ParkingSpace ps) {
 		parkingSpace = ps;
 	}
 	
+	public ParkingSpace getParkingSpace() {
+		return parkingSpace;
+	}
 }
 
 class Motor extends Vehicle{
