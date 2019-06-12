@@ -3,5 +3,6 @@
 	xsi:noNamespaceSchemaLocation="http://repast.org/scenario/context">
 	<projection type="network" id="livingin"></projection>
 	<projection type="network" id="workingin"></projection>	
+	<projection type="network" id="journeys"></projection>
 	<projection type="grid" id="grid"></projection>
 </context>

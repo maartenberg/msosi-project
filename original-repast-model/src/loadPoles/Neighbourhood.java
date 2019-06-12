@@ -168,6 +168,10 @@ public class Neighbourhood {
 		NetworkBuilder<Object> workNetBuilder = new NetworkBuilder<Object>("workingin", context, true);
 		Network<Object> workingin = workNetBuilder.buildNetwork();
 		
+		//Init travel network
+		NetworkBuilder<Object> journeysBuilder = new NetworkBuilder<Object>("journeys", context, true);
+		Network<Object> journeys = journeysBuilder.buildNetwork();
+		
 		IndexedIterable humans = context.getObjects(Human.class);
 		Iterator humansIterator = humans.iterator();
 		IndexedIterable dwellings = context.getObjects(Dwelling.class);

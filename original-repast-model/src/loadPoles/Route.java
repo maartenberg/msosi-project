@@ -1,5 +1,8 @@
 package loadPoles;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import loadPoles.GridObjects.ParkingSpace;
 import loadPoles.GridObjects.TransitStop;
 import repast.simphony.space.grid.Grid;
@@ -101,6 +104,29 @@ public class Route {
 	
 	public ParkingSpace getSecondSpace() {
 		return secondSpace;
+	}
+	
+	public List<double[]> getRouteCoordinates() {
+		List<double[]> allCoords = new ArrayList<double[]>();		
+		
+		allCoords.add(new double[] { from.getX(), from.getY() });
+		
+		if(firstSpace != null && secondSpace != null) {
+			GridPoint firstLoc = firstSpace.getLocation();
+			GridPoint secondLoc = secondSpace.getLocation();
+			allCoords.add(new double[] { firstLoc.getX(), firstLoc.getY() });
+			allCoords.add(new double[] { secondLoc.getX(), secondLoc.getY() });
+		}
+		else if(firstStop != null && secondStop != null) {
+			GridPoint firstLoc = grid.getLocation(firstStop);
+			GridPoint secondLoc = grid.getLocation(secondStop);
+			allCoords.add(new double[] { firstLoc.getX(), firstLoc.getY() });
+			allCoords.add(new double[] { secondLoc.getX(), secondLoc.getY() });
+		}		
+
+		allCoords.add(new double[] { to.getX(), to.getY() });
+		
+		return allCoords;
 	}
 
 }

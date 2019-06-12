@@ -9,6 +9,7 @@ import loadPoles.GridObjects.TransitStop;
 import repast.simphony.context.Context;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.random.RandomHelper;
+import repast.simphony.space.graph.Network;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.util.collections.IndexedIterable;
@@ -346,6 +347,14 @@ public class HumanTravel {
 							 + "\n  to transit stop at: (" + currentTo.getX() + ", " + currentTo.getY() + ")"
 							 + "\n  with total walking distance: " + route.getWalkingDistance());		
 		}
+		
+		if(previousRoute != null) {
+			this.context.remove(previousRoute);
+		}
+		this.context.add(route);
+		this.grid.moveTo(route, currentLocation.getX(), currentLocation.getY());
+		Network<Object> journeysNetwork = (Network<Object>) this.context.getProjection("journeys");
+		journeysNetwork.addEdge(route, human);		
 		
 		previousRoute = route;
 		grid.moveTo(human, destination.getX(), destination.getY());
