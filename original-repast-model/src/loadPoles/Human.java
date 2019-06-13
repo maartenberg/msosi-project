@@ -255,7 +255,23 @@ public class Human {
 	}	
 	
 	private void initPreferences() {
-		this.preference = new Preferences(0.103f, 0.023f, 0.14f, 0.132f, 0.133f, 0.136f, 0.092f, 0.112f, 0.053f, 0.088f, this);
+		float[] valueInit = new float[9];
+		for (int i = 0; i < valueInit.length/2; i ++)
+		{
+			float valueWeight = RandomHelper.getSeed();
+			float contrastWeight = RandomHelper.getSeed();
+			float c = 100f; 
+			
+			//if (100-(c/2))
+			
+			int j = i+5;
+			valueInit[i] = valueWeight;
+			valueInit[j] = contrastWeight;
+					
+		}
+		
+		this.preference = new Preferences (valueInit, this);
+		//this.preference = new Preferences(0.103f, 0.023f, 0.14f, 0.132f, 0.133f, 0.136f, 0.092f, 0.112f, 0.053f, 0.088f, this);
 		// TODO make values add up to 1
 		// TODO incorporate cultural dimension Hofstede
 		// TODO make the 5 latter values dependent on the 5 first values

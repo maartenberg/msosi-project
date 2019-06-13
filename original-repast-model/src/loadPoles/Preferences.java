@@ -16,15 +16,14 @@ public class Preferences {
 	float dl = -0.15f;
 	float valuetemps[], fluidlevels[];
 
-	public Preferences(float va, float vb, float vc, float vd, float ve, float vf, float vg, float vh, float vi,
-			float vj, Human hum)
+	public Preferences(float[] valueTemps, Human hum)
 	// float b,float c, float d, float e, float f,float g, float h, float i, float j
 	// let op bij aanmaken: initieer er 5 random, laat de andere 5 daarvan afhangen
 	// (het zijn schalen)
 
 	{
 		this.hum = hum;
-		valuetemps = new float[] { va, vb, vc, vd, ve, vf, vg, vh, vi, vj };
+		//valuetemps = new float[] { va, vb, vc, vd, ve, vf, vg, vh, vi, vj };
 		fluidlevels = new float[] { 0.4f, 0.4f, 0.4f, 0.4f, 0.4f, 0.4f, 0.4f, 0.4f, 0.4f, 0.4f };
 	}
 
