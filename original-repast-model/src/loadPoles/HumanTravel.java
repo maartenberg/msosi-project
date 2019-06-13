@@ -113,15 +113,17 @@ public class HumanTravel {
 			route = new Route(grid, currentLocation, destination, vehicle);		
 		}
 
-		// If vehicle is bicycle or public transport, then distance is 0.8 times shorter with a 40% chance
-		// (Because of possible bicycle paths and transit only roads)
-		double distance = route.getTravelDistance();
-		if(vehicle.getName() == "bicycle" || vehicle.getName() == "electric_bicycle" || vehicle.getName() == "public_transport") {
-			if(RandomHelper.nextDoubleFromTo(0, 1) < 0.4) {
-				distance *= 0.8;
-				route.setTravelDistance(distance);
-			}
-		}		
+		if(route != null) {
+			// If vehicle is bicycle or public transport, then distance is 0.8 times shorter with a 40% chance
+			// (Because of possible bicycle paths and transit only roads)
+			double distance = route.getTravelDistance();
+			if(vehicle.getName() == "bicycle" || vehicle.getName() == "electric_bicycle" || vehicle.getName() == "public_transport") {
+				if(RandomHelper.nextDoubleFromTo(0, 1) < 0.4) {
+					distance *= 0.8;
+					route.setTravelDistance(distance);
+				}
+			}		
+		}
 		
 		return route;
 	}
@@ -145,6 +147,13 @@ public class HumanTravel {
 		GridPoint homeLocation = grid.getLocation(human.dwelling);
 		
 		ParkingSpace from = vehicle.getParkingSpace();
+		if(from == null) {
+			if(vehicle.getName() == "electric_car") {
+				from = findClosestParkingSpace(currentLocation, "electric");
+			} else {
+				from = findClosestParkingSpace(currentLocation, "normal");
+			}
+		}
 		ParkingSpace to = null;
 		// Check if the electric car has enough range
 		if(vehicle.getName() == "electric_car") {						
@@ -179,6 +188,11 @@ public class HumanTravel {
 		// Else, just find closest normal parking space
 		else {	
 			to = findClosestParkingSpace(destination, "normal");		
+		}
+		
+		// If we cannot find a parking space (all are occupied)
+		if(to == null) {
+			return null;
 		}
 		
 		Route route = new Route(grid, currentLocation, destination, vehicle);

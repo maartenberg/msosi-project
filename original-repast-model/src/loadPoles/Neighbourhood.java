@@ -176,6 +176,9 @@ public class Neighbourhood {
 		
 		NetworkBuilder<Object> socialNetworkBuilder = new NetworkBuilder<Object>("socialnetwork", context, true);
 		Network<Object> socialnetwork = socialNetworkBuilder.buildNetwork();
+		
+		NetworkBuilder<Object> consumerMarketBuilder = new NetworkBuilder<Object>("consumermarket", context, true);
+		Network<Object> consumerMarket = consumerMarketBuilder.buildNetwork();
 
 		IndexedIterable humans = context.getObjects(Human.class);
 		Iterator humansIterator = humans.iterator();

@@ -14,13 +14,13 @@ public class HumanTraits {
 	 * Represents how much influence the neighbors have on this Human's decision to buy an EV.
 	 * Ranges from 0 to 1, inclusive.
 	 */
-	float socialFactor;
+	double socialFactor;
 
 	/**
 	 * Represents how much influence the environmental effects have on this Human's decision to buy an EV.
 	 * Ranges from 0 to 1, inclusive.
 	 */
-	float environmentFactor;
+	double environmentFactor;
 
 	/**
 	 * Represents whether or not this Human has a license to drive a car.
@@ -59,6 +59,9 @@ public class HumanTraits {
 
 	public HumanTraits() {		
 		//Initialise variables, vehicles, and preferences belonging to this human		
+		socialFactor = RandomHelper.nextDoubleFromTo(0, 1);
+		environmentFactor = RandomHelper.nextDoubleFromTo(0, 1);
+		
 		initFeatures();		
 	}
 	

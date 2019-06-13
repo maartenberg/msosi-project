@@ -56,7 +56,7 @@ public class Human {
 		this.context = context;
 		this.grid = grid;			
 		
-		consumat = new ConsumatModel(this);
+		consumat = new ConsumatModel(this, context);
 		traits = new HumanTraits();			
 		travel = new HumanTravel(this, context, grid);
 		initVehicles();
@@ -130,7 +130,7 @@ public class Human {
 		}
 	}	
 	
-	// Initiliase the preferences that this human has
+	// Initialise the preferences that this human has
 	private void initPreferences() {
 		this.preference = new Preferences(0.103f, 0.023f, 0.14f, 0.132f, 0.133f, 0.136f, 0.092f, 0.112f, 0.053f, 0.088f, this);
 		// TODO make values add up to 1
@@ -165,6 +165,11 @@ public class Human {
 	@ScheduledMethod(start = 1, interval = 1, priority = 1)
 	public void depart() {
 		travel.depart();
+	}
+	
+	@ScheduledMethod(start = 2, interval = 2, priority = 2)
+	public void buy() {
+		consumat.buy();
 	}
 
 	// TODO: Obsolete?
