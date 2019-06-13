@@ -1,6 +1,7 @@
 package loadPoles;
 
 import java.util.Iterator;
+import java.util.List;
 
 import loadPoles.GridObjects.Dwelling;
 import loadPoles.GridObjects.ParkingLot;
@@ -19,14 +20,18 @@ import repast.simphony.context.Context;
 import repast.simphony.context.space.graph.NetworkBuilder;
 import repast.simphony.context.space.grid.GridFactory;
 import repast.simphony.context.space.grid.GridFactoryFinder;
+import repast.simphony.query.space.grid.GridCell;
+import repast.simphony.query.space.grid.GridCellNgh;
 import repast.simphony.random.RandomHelper;
 import repast.simphony.space.graph.Network;
+import repast.simphony.space.graph.RepastEdge;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridBuilderParameters;
 import repast.simphony.space.grid.GridPoint;
 import repast.simphony.space.grid.RandomGridAdder;
 import repast.simphony.space.grid.SimpleGridAdder;
 import repast.simphony.space.grid.StrictBorders;
+import repast.simphony.util.SimUtilities;
 import repast.simphony.util.collections.IndexedIterable;
 
 public class Neighbourhood {
@@ -127,7 +132,7 @@ public class Neighbourhood {
 						break;
 						
 					default:
-						// We don't recognize this, too bad.
+						// We don't recognize this, empty cell
 						break;
 					}
 				}
@@ -155,23 +160,23 @@ public class Neighbourhood {
 		}
 			
 		//Add people
-		for(int i = 0; i < humanCount; i++)
-		{
+		for(int i = 0; i < humanCount; i++) {
 			context.add(new Human(context, grid));
 		}
 		
-		//make sure they have a home
+		// Initialise networks
 		NetworkBuilder<Object> dwellingNetBuilder = new NetworkBuilder<Object>("livingin", context, true);
 		Network<Object> livingin = dwellingNetBuilder.buildNetwork();
 		
-		//Make sure they have a workplace
 		NetworkBuilder<Object> workNetBuilder = new NetworkBuilder<Object>("workingin", context, true);
 		Network<Object> workingin = workNetBuilder.buildNetwork();
 		
-		//Init travel network
 		NetworkBuilder<Object> journeysBuilder = new NetworkBuilder<Object>("journeys", context, true);
 		Network<Object> journeys = journeysBuilder.buildNetwork();
 		
+		NetworkBuilder<Object> socialNetworkBuilder = new NetworkBuilder<Object>("socialnetwork", context, true);
+		Network<Object> socialnetwork = socialNetworkBuilder.buildNetwork();
+
 		IndexedIterable humans = context.getObjects(Human.class);
 		Iterator humansIterator = humans.iterator();
 		IndexedIterable dwellings = context.getObjects(Dwelling.class);
@@ -180,19 +185,19 @@ public class Neighbourhood {
 		//And make someone live somewhere by adding an edge in the network.
 		//Also make someone work somewhere
 		while (humansIterator.hasNext())
-		{
+		{		
 			Human h = (Human)humansIterator.next();
+			
+			// Assign human to a random dwelling
 			Dwelling d = (Dwelling) dwellings.get(RandomHelper.nextIntFromTo(0, dwellings.size()-1));
 			livingin.addEdge(h, d);
-			
-			// Set this humans dwelling (probably not needed)
 			h.setDwelling(d);		
 			
 			// Get location of the dwelling, and move the human to there		
 			GridPoint dwellingLocation = grid.getLocation(d);		
 			grid.moveTo(h, dwellingLocation.getX(), dwellingLocation.getY());
 			
-			//If the human is employed, add a work place
+			// If the human is employed, add a random workplace
 			if(h.isEmployed()) {
 				Workplace w = (Workplace) workplaces.get(RandomHelper.nextIntFromTo(0, workplaces.size() - 1));
 				workingin.addEdge(h, w);				
@@ -200,7 +205,6 @@ public class Neighbourhood {
 			}
 		}
 				
-		this.grid = grid;
 		this.context = context;		
 	}
 
@@ -217,7 +221,7 @@ public class Neighbourhood {
 			//Add parking spaces to the parking lots with a given ratio
 			for(int i = 0; i < nrOfSpaces; i++) {				
 				//Do it randomly
-				//ratio% distribution of b compared to a
+				//ratio% distribution of electric (loading poles) compared to normal parking spaces
 				if(RandomHelper.nextDoubleFromTo(0, 1) < ratio) {
 					pl.addSpace("electric", null);
 				} else {
@@ -252,7 +256,83 @@ public class Neighbourhood {
 			if(RandomHelper.nextDoubleFromTo(0, 1) < normalSpotChance) {
 				d.addParkingSpace("normal", grid);
 			}
-	}		
+		}		
+	}
+	
+	public void initSocialNetwork() {
+		// Get all humans, and networks that we need
+		IndexedIterable<Object> humans = this.context.getObjects(Human.class);
+		Iterator<Object> humansIterator = humans.iterator();
+		
+		Network<Object> livingin =  (Network<Object>) this.context.getProjection("livingin");
+		Network<Object> workingin = (Network<Object>) this.context.getProjection("workingin");
+		Network<Object> socialnetwork = (Network<Object>) this.context.getProjection("socialnetwork");
+		
+		// Establish social network for each human
+		while(humansIterator.hasNext()) {
+			Human human = (Human) humansIterator.next();
+			
+			// Add random colleagues to their social network
+			if(human.isEmployed()) {
+				Workplace workplace = human.workplace;			
+				Iterable<RepastEdge<Object>> colleagues = workingin.getInEdges(workplace);
+				Iterator<RepastEdge<Object>> colleguesIterator = colleagues.iterator();
+				
+				// Human and collegue are added to social network with 20% chance
+				while(colleguesIterator.hasNext()) {
+					Human colleague = (Human) colleguesIterator.next().getSource();				
+					if(RandomHelper.nextDoubleFromTo(0, 1) < 0.20) {
+						RepastEdge<Object> edge = new RepastEdge(human, colleague, false);
+						if(socialnetwork.containsEdge(edge)) {
+							socialnetwork.addEdge(edge);
+						}
+					}
+				}
+			}
+			
+			// Add people living in dwelling to social network ("family")
+			Dwelling dwelling = human.dwelling;
+			Iterable<RepastEdge<Object>> family = livingin.getInEdges(dwelling);
+			Iterator<RepastEdge<Object>> familyIterator = family.iterator();			
+			while(familyIterator.hasNext()) {
+				Human familyMember = (Human) familyIterator.next().getSource();
+				if(human != familyMember) {
+					RepastEdge<Object> edge = new RepastEdge(human, familyMember, false);
+					if(!socialnetwork.containsEdge(edge)) {
+						socialnetwork.addEdge(edge);
+					}
+				}
+			}
+			
+			
+			// Add random people from their neighbourhood to their social network
+			GridPoint pt = grid.getLocation(dwelling);
+			
+			// Use the GridCellNgh class to create GridCells for the surrounding neighbourhood, in a 10 cell radius
+			GridCellNgh<Dwelling> nghCreator = new GridCellNgh<Dwelling>(this.grid, pt, Dwelling.class, 10, 10);
+			List<GridCell<Dwelling>> gridCells = nghCreator.getNeighborhood(false);
+			
+			// For each cell, find the corresponding dwelling, and humans living in it
+			for(GridCell<Dwelling> cell : gridCells) {
+				Iterator neighbourHousesIterator = cell.items().iterator();
+				if(neighbourHousesIterator.hasNext()) {
+					Dwelling neighbourHouse = (Dwelling) neighbourHousesIterator.next();
+					Iterable<RepastEdge<Object>> neighbours = livingin.getInEdges(neighbourHouse);
+					Iterator<RepastEdge<Object>> neighboursIterator = neighbours.iterator();
+					
+					// Human and neighbour are added to social network with 30% chance
+					while(neighboursIterator.hasNext()) {
+						Human neighbour = (Human) neighboursIterator.next().getSource();
+						if(RandomHelper.nextDoubleFromTo(0, 1) < 0.3) {
+							RepastEdge<Object> edge = new RepastEdge(human, neighbour, false);
+							if(!socialnetwork.containsEdge(edge)) {
+								socialnetwork.addEdge(edge);
+							}
+						}
+					}
+				}
+			}			
+		}
 	}
 	
 	public void parkAllCars() {

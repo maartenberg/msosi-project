@@ -29,8 +29,8 @@ public class HumanTravel {
 
 	// Find closest parking space with available parking spaces of a given type
 	public ParkingSpace findClosestParkingSpace(GridPoint location, String type) {
-		IndexedIterable parkingLots = this.context.getObjects(ParkingLot.class);
-		Iterator parkingLotsIterator = parkingLots.iterator();
+		IndexedIterable<Object> parkingLots = this.context.getObjects(ParkingLot.class);
+		Iterator<Object> parkingLotsIterator = parkingLots.iterator();
 		
 		ParkingSpace closest = null;
 		double minDistance = Integer.MAX_VALUE;			
@@ -76,8 +76,8 @@ public class HumanTravel {
 	
 	// Find closest transit stop to a certain location on the grid
 	private TransitStop findClosestTransitStop(GridPoint location) {
-		IndexedIterable transitStops = this.context.getObjects(TransitStop.class);
-		Iterator transitStopsIterator = transitStops.iterator();
+		IndexedIterable<Object> transitStops = this.context.getObjects(TransitStop.class);
+		Iterator<Object> transitStopsIterator = transitStops.iterator();
 		
 		TransitStop closest = null;
 		double minDistance = Integer.MAX_VALUE;			
@@ -259,7 +259,7 @@ public class HumanTravel {
 		}
 		
 		//Find all public building that one can go to, and pick a random one
-		IndexedIterable publicBuildings = context.getObjects(PublicBuilding.class);
+		IndexedIterable<Object> publicBuildings = context.getObjects(PublicBuilding.class);
 		if(publicBuildings.size() > 0) {
 			PublicBuilding pb = (PublicBuilding) publicBuildings.get(RandomHelper.nextIntFromTo(0, publicBuildings.size() - 1));
 			return grid.getLocation(pb);

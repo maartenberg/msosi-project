@@ -4,5 +4,6 @@
 	<projection type="network" id="livingin"></projection>
 	<projection type="network" id="workingin"></projection>	
 	<projection type="network" id="journeys"></projection>
+	<projection type="network" id="socialnetwork"></projection>
 	<projection type="grid" id="grid"></projection>
 </context>
