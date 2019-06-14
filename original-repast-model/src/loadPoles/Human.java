@@ -45,7 +45,7 @@ public class Human {
 	boolean carUser, hasParked;
 	String name;
 	Context<Object> context;
-	float happiness;
+	float happiness, funds;
 	Preferences preference;
 	Vehicle pastVehicle;
 	Dwelling dwelling;
@@ -170,6 +170,13 @@ public class Human {
 	@ScheduledMethod(start = 2, interval = 2, priority = 2)
 	public void buy() {
 		consumat.buy();
+	}
+	
+	@ScheduledMethod(start = 1, interval = 60, priority = 1)
+	public void updateFunds() {
+		funds += traits.income*0.15;
+		
+		System.out.println("Human " + getName() + " has funds: " + funds);
 	}
 
 	// TODO: Obsolete?

@@ -49,12 +49,15 @@ public class ConsumatModel {
 		//Initialise list of products
 		this.products = new ArrayList<Vehicle>();
 		this.products.add(new Bicycle("electric"));
-		this.products.add(new Motor());
-		this.products.add(new Car("normal"));
-		this.products.add(new Car("hybrid"));
-		this.products.add(new Car("electric", 1));
-		this.products.add(new Car("electric", 2));
-		this.products.add(new Car("electric", 3));	
+		
+		if(human.traits.hasCarLicense) {
+			this.products.add(new Motor());
+			this.products.add(new Car("normal"));
+			this.products.add(new Car("hybrid"));
+			this.products.add(new Car("electric", 1));
+			this.products.add(new Car("electric", 2));
+			this.products.add(new Car("electric", 3));
+		}
 	}
 			
 	// Decides which vehicle to buy, if any
@@ -184,20 +187,15 @@ public class ConsumatModel {
 			}
 		}
 		
-		//If it is not the "initial" adding of the product, affect income
+		//If it is not the "initial" adding of the product, affect human funds
 		if(!initial) {
-			float cost = vehicle.getPurchaseCost();
-			
-			//TODO: infect income based on this cost. 
-			//Perhaps divide cost by 12 and subtract from income for some limited amount of time
-			satisfaction += calcVehicleSatisfaction(vehicle);
+			human.funds -= vehicle.getPurchaseCost();	
 		}		
 	}
 	
 	// Returns true if the human can afford the vehicle
 	public boolean canAfford(Vehicle product) {
-		//TODO: check if we can afford a vehicle
-		return false;
+		return product.getPurchaseCost() < human.funds;
 	}
 	
 	// Find the most popular product in the social network
