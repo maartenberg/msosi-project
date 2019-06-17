@@ -42,12 +42,16 @@ public class Human {
 	 */
 	List<Vehicle> vehicles;
 	
-	boolean carUser, hasParked;
+	/*
+	 * Represents an array in which this humans values can be stored 
+	 */
+	float[] valueInit = new float[9];
+	
+	boolean carUser;
 	String name;
 	Context<Object> context;
-	float happiness;
-	Preferences preference;
-	Vehicle pastVehicle;
+	float happiness, funds;
+	AgentPreferences agentPreference;
 	Dwelling dwelling;
 	Workplace workplace;	
 	Grid<Object> grid;
@@ -56,11 +60,11 @@ public class Human {
 		this.context = context;
 		this.grid = grid;			
 		
-		consumat = new ConsumatModel(this);
 		traits = new HumanTraits();			
+		consumat = new ConsumatModel(this, context);
 		travel = new HumanTravel(this, context, grid);
 		initVehicles();
-		initPreferences();
+		initAgentPreferences();
 	
 		carUser = false;
 		for(Vehicle v : vehicles) {
@@ -87,7 +91,7 @@ public class Human {
 		
 		// MOTORBIKE:
 		//If age is over 26, 20% chance of owning a motor
-		if(traits.age >= 26 && traits.age <= 26) {
+		if(traits.age >= 26) {
 			if(RandomHelper.nextDoubleFromTo(0, 1) > 0.8) {
 				consumat.buyProduct(new Motor(), true);
 			}
@@ -100,7 +104,7 @@ public class Human {
 				consumat.buyProduct(new Bicycle("electric"), true);
 			}
 		}
-		//If age is above 55, 20% chance of owning an electric bicycle
+		//If age is 55 and over, 20% chance of owning an electric bicycle
 		else {
 			if(RandomHelper.nextDoubleFromTo(0, 1) > 0.8) {
 				consumat.buyProduct(new Bicycle("electric"), true);
@@ -111,7 +115,7 @@ public class Human {
 		//Person is age 18 or over
 		if(traits.age >= 18) {			
 			//If the person has a car license, and a decent income
-			if(traits.hasCarLicense && traits.income > 1500) {		
+			if(traits.hasCarLicense && traits.income >= 1500) {		
 				//70% chance of owning a normal car, or own a normal car when income is on the lower side
 				if(RandomHelper.nextDoubleFromTo(0, 1) > 0.30 || traits.income < 2000) {
 					consumat.buyProduct(new Car("normal"), true);
@@ -130,15 +134,31 @@ public class Human {
 		}
 	}	
 	
-	// Initiliase the preferences that this human has
-	private void initPreferences() {
-		this.preference = new Preferences(0.103f, 0.023f, 0.14f, 0.132f, 0.133f, 0.136f, 0.092f, 0.112f, 0.053f, 0.088f, this);
+	// Initialise the preferences that this human has
+	private void initAgentPreferences() {
+
+		for (int i = 0; i < valueInit.length/2; i ++)
+		{
+			float valueWeight = RandomHelper.nextIntFromTo(0, 100);
+			//float valueWeight = 0.4f;
+			float contrastWeight = 100 - valueWeight;
+			float c = 100f; 
+			
+			//if (100-(c/2))
+			
+			int j = i+5;
+			valueInit[i] = valueWeight;
+			valueInit[j] = contrastWeight;	
+		}
+		//System.out.println("This hums values are" + valueInit);
+		
+		this.agentPreference = new AgentPreferences(valueInit, this);
+		//this.preference = new Preferences(0.103f, 0.023f, 0.14f, 0.132f, 0.133f, 0.136f, 0.092f, 0.112f, 0.053f, 0.088f, this);
 		// TODO make values add up to 1
 		// TODO incorporate cultural dimension Hofstede
 		// TODO make the 5 latter values dependent on the 5 first values
 		// TODO make these values different with a normal distribution
 	}
-	
 	// Function to park all cars of this human on initialisation
 	public void parkAllCars() {
 		if(!carUser) {
@@ -165,6 +185,22 @@ public class Human {
 	@ScheduledMethod(start = 1, interval = 1, priority = 1)
 	public void depart() {
 		travel.depart();
+	}
+	
+	@ScheduledMethod(start = 2, interval = 2, priority = 2)
+	public void buy() {
+		// Update this human's preferences
+		agentPreference.Update(valueInit, this, agentPreference.fluidlevels);
+		
+		// See if we want to buy a product
+		consumat.buy();
+	}
+	
+	@ScheduledMethod(start = 1, interval = 60, priority = 1)
+	public void updateFunds() {
+		funds += traits.income*0.15;
+		
+		System.out.println("Human " + getName() + " has funds: " + funds);
 	}
 
 	// TODO: Obsolete?

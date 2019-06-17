@@ -14,28 +14,18 @@ public class HumanTraits {
 	 * Represents how much influence the neighbors have on this Human's decision to buy an EV.
 	 * Ranges from 0 to 1, inclusive.
 	 */
-	float socialFactor;
+	double socialFactor;
 
 	/**
 	 * Represents how much influence the environmental effects have on this Human's decision to buy an EV.
 	 * Ranges from 0 to 1, inclusive.
 	 */
-	float environmentFactor;
+	double environmentFactor;
 
 	/**
 	 * Represents whether or not this Human has a license to drive a car.
 	 */
 	boolean hasCarLicense;	
-
-	/**
-	 * Represents the different vehicles available to this Human.
-	 */
-	List<Vehicle> vehicles;
-	
-	/*
-	 * Represents the list of all vehicles that can be bought
-	 */
-	List<Vehicle> products;
 	
 	/*
 	 * Represents the gender of this person
@@ -59,6 +49,9 @@ public class HumanTraits {
 
 	public HumanTraits() {		
 		//Initialise variables, vehicles, and preferences belonging to this human		
+		socialFactor = RandomHelper.nextDoubleFromTo(0, 1);
+		environmentFactor = RandomHelper.nextDoubleFromTo(0, 1);
+		
 		initFeatures();		
 	}
 	
@@ -80,15 +73,15 @@ public class HumanTraits {
 			setIncome(0.689, 600, 1200);
 		}
 		else if(25 <= age && age < 55) {
-			//Between the ages of 15 to 25, the employment rate is 86.0%, the income is between 1600 and 3500
+			//Between the ages of 25 to 55, the employment rate is 86.0%, the income is between 1600 and 4500
 			setIncome(0.860, 1600, 4500);
 		}
 		else if(55 <= age && age < 65) {
-			//Between the ages of 15 to 25, the employment rate is 70.9%, the income is between 1600 and 3500
+			//Between the ages of 55 to 65, the employment rate is 70.9%, the income is between 1600 and 4500
 			setIncome(0.709, 1600, 4500);
 		}	
 		else {
-			//Between the ages 65 and up, the employment rate is 12.9%, the income is between 1600 and 300
+			//Between the ages 65 and up, the employment rate is 12.9%, the income is between 1600 and 3500
 			setIncome(0.129, 1600, 3500);
 		}
 		

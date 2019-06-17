@@ -40,6 +40,9 @@ public class LoadPolesBuilder implements ContextBuilder<Object> {
 		//Every human has their car parked somewhere
 		nbh.parkAllCars();
 		
+		//Initialise social network
+		nbh.initSocialNetwork();
+		
 		return context;
 	}
 

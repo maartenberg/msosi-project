@@ -29,8 +29,8 @@ public class HumanTravel {
 
 	// Find closest parking space with available parking spaces of a given type
 	public ParkingSpace findClosestParkingSpace(GridPoint location, String type) {
-		IndexedIterable parkingLots = this.context.getObjects(ParkingLot.class);
-		Iterator parkingLotsIterator = parkingLots.iterator();
+		IndexedIterable<Object> parkingLots = this.context.getObjects(ParkingLot.class);
+		Iterator<Object> parkingLotsIterator = parkingLots.iterator();
 		
 		ParkingSpace closest = null;
 		double minDistance = Integer.MAX_VALUE;			
@@ -76,8 +76,8 @@ public class HumanTravel {
 	
 	// Find closest transit stop to a certain location on the grid
 	private TransitStop findClosestTransitStop(GridPoint location) {
-		IndexedIterable transitStops = this.context.getObjects(TransitStop.class);
-		Iterator transitStopsIterator = transitStops.iterator();
+		IndexedIterable<Object> transitStops = this.context.getObjects(TransitStop.class);
+		Iterator<Object> transitStopsIterator = transitStops.iterator();
 		
 		TransitStop closest = null;
 		double minDistance = Integer.MAX_VALUE;			
@@ -113,15 +113,17 @@ public class HumanTravel {
 			route = new Route(grid, currentLocation, destination, vehicle);		
 		}
 
-		// If vehicle is bicycle or public transport, then distance is 0.8 times shorter with a 40% chance
-		// (Because of possible bicycle paths and transit only roads)
-		double distance = route.getTravelDistance();
-		if(vehicle.getName() == "bicycle" || vehicle.getName() == "electric_bicycle" || vehicle.getName() == "public_transport") {
-			if(RandomHelper.nextDoubleFromTo(0, 1) < 0.4) {
-				distance *= 0.8;
-				route.setTravelDistance(distance);
-			}
-		}		
+		if(route != null) {
+			// If vehicle is bicycle or public transport, then distance is 0.8 times shorter with a 40% chance
+			// (Because of possible bicycle paths and transit only roads)
+			double distance = route.getTravelDistance();
+			if(vehicle.getName() == "bicycle" || vehicle.getName() == "electric_bicycle" || vehicle.getName() == "public_transport") {
+				if(RandomHelper.nextDoubleFromTo(0, 1) < 0.4) {
+					distance *= 0.8;
+					route.setTravelDistance(distance);
+				}
+			}		
+		}
 		
 		return route;
 	}
@@ -145,6 +147,13 @@ public class HumanTravel {
 		GridPoint homeLocation = grid.getLocation(human.dwelling);
 		
 		ParkingSpace from = vehicle.getParkingSpace();
+		if(from == null) {
+			if(vehicle.getName() == "electric_car") {
+				from = findClosestParkingSpace(currentLocation, "electric");
+			} else {
+				from = findClosestParkingSpace(currentLocation, "normal");
+			}
+		}
 		ParkingSpace to = null;
 		// Check if the electric car has enough range
 		if(vehicle.getName() == "electric_car") {						
@@ -181,13 +190,18 @@ public class HumanTravel {
 			to = findClosestParkingSpace(destination, "normal");		
 		}
 		
+		// If we cannot find a parking space (all are occupied)
+		if(to == null) {
+			return null;
+		}		
+		
 		Route route = new Route(grid, currentLocation, destination, vehicle);
 		route.setParkingSpaces(from, to);
 		return route;		
 	}
 	
 	// Calculate the utility for each vehicle and corresponding route, and return the best one 
-	public Route findBestRoute(GridPoint destination) {		
+	private Route findBestRoute(GridPoint destination) {		
 		//Keep track of the best route (which includes the best vehicle)
 		double bestUtility = 0;
 		Route bestRoute = null;
@@ -259,7 +273,7 @@ public class HumanTravel {
 		}
 		
 		//Find all public building that one can go to, and pick a random one
-		IndexedIterable publicBuildings = context.getObjects(PublicBuilding.class);
+		IndexedIterable<Object> publicBuildings = context.getObjects(PublicBuilding.class);
 		if(publicBuildings.size() > 0) {
 			PublicBuilding pb = (PublicBuilding) publicBuildings.get(RandomHelper.nextIntFromTo(0, publicBuildings.size() - 1));
 			return grid.getLocation(pb);

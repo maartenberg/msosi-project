@@ -24,10 +24,10 @@ public abstract class Vehicle {
 	protected float kilometerCost;
 
 	/*
-	 * Represents how comfortable this vehicle is to use, per kilometer.
+	 * Represents how comfortable this vehicle is to use.
 	 * Should be greater than or equal to zero, where 1 represents using a normal car.	 
 	 */
-	protected float comfortPerKilometer;
+	protected float comfort;
 
 	/*
 	 * Represents the maximum range in kilometers that can be traveled with this vehicle.
@@ -36,18 +36,17 @@ public abstract class Vehicle {
 	
 	/*
 	 * Represents the maximum speed of this vehicle, where 1 is the fastest, 0 is the slowest.
-	 * TODO: not implemented yet, since I don't know if this is necessary
 	 */
 	protected float speed;
 
 	/*Represents the emission of CO2 in grams per kilometer (for one person)	
-	 *Divide by number of people (since more people take a bus, a bus is better for the environment on average)
+	 *TODO: Divide by number of people (since more people take a bus, a bus is better for the environment on average)
 	*/
 	protected float travelEmission;
 	
     /*
-     *Represents the emission of CO2 in grams per kilometer (for one person)	
-	 *Divide by number of people (since more people take a bus, a bus is better for the environment on average)
+     *Represents the emission of CO2 when purchasing this vehicle
+     *TODO: Use this
      */	
 	protected float purchaseEmission;
 	
@@ -66,10 +65,6 @@ public abstract class Vehicle {
 	 * Represents the current parking space that this car is parked at
 	 */
 	protected ParkingSpace parkingSpace;
-	
-    /*
-     * TODO: Model impact on environment further by splitting emission, ability to transport cargo, others?
-     */
 	
 	/*
 	 * Override equals 
@@ -102,7 +97,7 @@ public abstract class Vehicle {
 	}
 	
 	public float getComfort() {
-		return comfortPerKilometer;
+		return comfort;
 	}
 	
 	public float getActionRadius() {
@@ -158,7 +153,7 @@ class Motor extends Vehicle{
 		purchaseCost = 7500;
 		upkeepCost = 0.05f;
 		kilometerCost = 0.08f;
-		comfortPerKilometer = 0.8f;
+		comfort = 0.8f;
 		actionRadius = 250;		
 		speed = 1;
 		travelEmission = 137;
@@ -173,9 +168,8 @@ class Bicycle extends Vehicle {
 			purchaseCost = 300;
 			upkeepCost = 0.001f;
 			kilometerCost = 0;
-			comfortPerKilometer = 0.3f;
-			actionRadius = 15;		
-			//speed = 4.17f;
+			comfort = 0.3f;
+			actionRadius = 15;	
 			speed = 0.2f;
 			travelEmission = 0;			
 			break;
@@ -185,9 +179,8 @@ class Bicycle extends Vehicle {
 			purchaseCost = 1000;
 			upkeepCost = 0.05f;
 			kilometerCost = 0.01f;
-			comfortPerKilometer = 0.5f;
+			comfort = 0.5f;
 			actionRadius = 60;	
-			//speed = 6.94f;
 			speed = 0.5f;
 			travelEmission = 5; //Emission from the energy needed to charge
 			break;
@@ -201,7 +194,7 @@ class PublicTransport extends Vehicle {
 		purchaseCost = 0;
 		upkeepCost = 0;
 		kilometerCost = 0.17f;
-		comfortPerKilometer = 0.7f;
+		comfort = 0.7f;
 		actionRadius = 100;	
 		speed = 0.7f;
 		travelEmission = 20;  //Emission from the energy needed to charge
@@ -232,7 +225,7 @@ class Car extends Vehicle {
 	 * Initialisers
 	 */
 	private void initialise() {
-		comfortPerKilometer = 1;
+		comfort = 1;
 		speed = 1;
 		
 		//Choose what initialise method to use, based on the type
