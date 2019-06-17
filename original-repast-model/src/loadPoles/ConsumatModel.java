@@ -222,7 +222,7 @@ public class ConsumatModel {
 		int x = findVehicleUsage(vehicle); 
 		
 		// Difference between vehicle characteristics and personal preferences
-		double productSatisfaction =  human.agentPreference.getUtilityFactor(vehicle);
+		double productSatisfaction = human.agentPreference.getUtilityFactor(vehicle);
 		
 		//TODO: make this possibly also depend on other factors
 		// i.e. Happiness of humans when traveling
