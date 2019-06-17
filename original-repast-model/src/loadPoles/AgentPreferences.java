@@ -1,6 +1,6 @@
 package loadPoles;
 
-public class Preferences {
+public class AgentPreferences {
 	protected float utilityFactor_electric_car;
 	protected float utilityFactor_electric_bicycle;
 	protected float utilityFactor_normal_car;
@@ -14,34 +14,37 @@ public class Preferences {
 
 	float r, t, l;
 	float dl = -0.15f;
-	float valuetemps[], fluidlevels[];
+	float fluidlevels[];
 
-	public Preferences(float[] valueTemps, Human hum)
-	// float b,float c, float d, float e, float f,float g, float h, float i, float j
-	// let op bij aanmaken: initieer er 5 random, laat de andere 5 daarvan afhangen
-	// (het zijn schalen)
+	public AgentPreferences(float[] valueTemps, Human hum)
+
 
 	{
 		this.hum = hum;
-		//valuetemps = new float[] { va, vb, vc, vd, ve, vf, vg, vh, vi, vj };
 		fluidlevels = new float[] { 0.4f, 0.4f, 0.4f, 0.4f, 0.4f, 0.4f, 0.4f, 0.4f, 0.4f, 0.4f };
+
 	}
 
-	public void Update() {
-		for (int n = 0; n < valuetemps.length; n++) {
-
+	public void Update(float[] valueTemps, Human hum, float[] prevFluids) {
+		System.out.println("Human = " +hum);
+		
+		for (int n = 0; n <valueTemps.length ; n++) {
+			
+			//System.out.println("Current value = " +n);
 			updateFluids(n);
 
-			fluidlevels[n] = fluidlevels[n] + dl;
-
+			fluidlevels[n] = prevFluids[n] + dl;
+			System.out.println(n+ "'s fluid level = " + fluidlevels[n]);
+			
 			float rlowest = 100;
-			r = ((fluidlevels[n] - valuetemps[n]) / valuetemps[n]) * 100;
+			r = ((fluidlevels[n] - valueTemps[n]) / valueTemps[n]) * 100;
 
 			if (r < rlowest) {
 				rlowest = r;
 				t = n;
 			}
 		}
+		System.out.println(t + "is the value that needs most attention");
 
 		// In case power is the most needed
 		if (t == 1) {
@@ -52,6 +55,7 @@ public class Preferences {
 			utilityFactor_bicycle = 1f;
 			utilityFactor_public_transport = 0.6f;
 			utilityFactor_motor = 1f;
+			System.out.println("updated power levels");
 
 		} else {
 			System.out.println("power is not the most needed");
@@ -59,14 +63,21 @@ public class Preferences {
 	}
 
 	private float updateFluids(int n) {
-		// TODO update fluid levels based on previous actions
 		// fluid levels go down by -0.15 by default
 		// if a vehicle was the previous action, some values have been fulfilled
 
+		dl = -0.15f;
+
+		if (hum.pastVehicle.getName()== null)
+		{
+			dl = 0;
+		}
+		
 		if (hum.pastVehicle.getName() == "electric_car") {
-			// here follows a list of the values that have been fulfilled
+			//System.out.println("EC updatedd");
+			// here follows a list of the values that are linked to this action
 			if (n == 6 || n == 7 || n == 8 || n == 0 || n == 1) {
-				// if the values have been fulfilled, the fluid level rises with 0.3
+				// if the values have been fulfilled, the fluid level OF THIS VALUE rises with 0.3
 				dl = 0.3f;
 				// some values have a double score for this vehicle
 				if (n == 3) {
@@ -83,6 +94,7 @@ public class Preferences {
 		}
 
 		if (hum.pastVehicle.getName() == "normal_car") {
+			//.out.println("ICEV updatedd");
 			// here follows a list of the values that have been fulfilled
 			if (n == 8 || n == 9 || n == 0 || n == 0 || n == 2 || n == 4 || n == 6 || n == 7 || n == 8) {
 				{
@@ -106,6 +118,7 @@ public class Preferences {
 		}
 
 		if (hum.pastVehicle.getName() == "hybrid_car") {
+			//System.out.println("hybrid updatedd");
 			// here follows a list of the values that have been fulfilled
 			if (n == 2 || n == 0 || n == 1) {
 				{
@@ -124,6 +137,7 @@ public class Preferences {
 		}
 
 		if (hum.pastVehicle.getName() == "bicycle") {
+			//System.out.println("bicycle updated");
 			// here follows a list of the values that have been fulfilled
 			if (n == 7 || n == 9 || n == 5 || n == 6 || n == 8) {
 				{
@@ -146,6 +160,7 @@ public class Preferences {
 		}
 
 		if (hum.pastVehicle.getName() == "electric_bicycle") {
+			//System.out.println("e-bike updated");
 			// here follows a list of the values that have been fulfilled
 			if (n == 1 || n == 2 || n == 3) {
 				{
@@ -156,6 +171,7 @@ public class Preferences {
 		}
 
 		if (hum.pastVehicle.getName() == "public_transport") {
+			//System.out.println("OV updatedd");
 			// here follows a list of the values that have been fulfilled
 			if (n == 5) {
 				// if the values have been fulfilled, the fluid level rises with 0.3
@@ -173,6 +189,7 @@ public class Preferences {
 		}
 
 		if (hum.pastVehicle.getName() == "motor") {
+			//System.out.println("motor updatedd");
 			// here follows a list of the values that have been fulfilled
 			if (n == 3 || n == 4) {
 				// if the values have been fulfilled, the fluid level rises with 0.3
@@ -190,15 +207,18 @@ public class Preferences {
 			}
 		}
 
-		// TODO add walk
-
+		// TODO add walk?
+		if(dl == 0)
+		{System.out.println("Be careful: preferences are not updated");}
+		System.out.println("value "+  n + "is updated with " + dl);
 		return dl;
+		
 	}
 	
 	public float getUtilityFactor(Vehicle vehicle) {
 		switch (vehicle.getName()) {
 		case "bicycle":
-			return utilityFactor_electric_car;
+			return utilityFactor_bicycle;
 		case "electric_bycicle":
 			return utilityFactor_electric_bicycle;
 		case "normal_car":

@@ -3,6 +3,7 @@ package loadPoles;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 import repast.simphony.context.Context;
 import repast.simphony.engine.schedule.ScheduledMethod;
@@ -80,24 +81,31 @@ public class Human {
 	 */
 	float satisfactionThreshold;
 	float uncertaintyThreshold;
+	
+	
+	/*
+	 * Represents an array in which this humans values can be stored 
+	 */
+	 float[] valueInit = new float[9];
 
 	boolean carUser, hasParked;
 	String name;
 	Context<Object> context;
 	float happiness;
-	Preferences preference;
+	AgentPreferences agentPreference;
 	Vehicle pastVehicle;
 	ParkingSpace currentParkingSpot;
 	Dwelling dwelling;
 	Workplace workplace;	
 	Grid<Object> grid;
+	
 
 	public Human(Context<Object> context, Grid<Object> grid) {
 
 		this.context = context;
 		this.grid = grid;
 		
-		//Initialise list of products
+		//Initialize list of products
 		products = new ArrayList<Vehicle>();
 		products.add(new Bicycle("electric"));
 		products.add(new Motor());
@@ -111,7 +119,7 @@ public class Human {
 		//Initialise variables, vehicles, and preferences belonging to this human		
 		initFeatures();
 		initVehicles();
-		initPreferences();
+		initAgentPreferences();
 	
 		//TODO: for now leaving this unchanged, but it needs to be changed eventually
 		//Uses cars?
@@ -141,6 +149,7 @@ public class Human {
 		//Choose a random age between 15 and 75
 		age = RandomHelper.nextIntFromTo(15, 75);
 		
+		//ASS: what if you don't have a job?
 		//Different incomes for different age groups, based on data from CBS
 		if(15 <= age && age < 25) {
 			//Between the ages of 15 to 25, the employment rate is 68.9%, the income is between 600 and 1200
@@ -232,6 +241,7 @@ public class Human {
 		}
 		
 		// CARS
+		//ASS: everyone with a car licence has a car
 		//Person is age 18 or over
 		if(age >= 18) {			
 			//If the person has a car license, and a decent income
@@ -254,23 +264,24 @@ public class Human {
 		}
 	}	
 	
-	private void initPreferences() {
-		float[] valueInit = new float[9];
+	private void initAgentPreferences() {
+
 		for (int i = 0; i < valueInit.length/2; i ++)
 		{
-			float valueWeight = RandomHelper.getSeed();
-			float contrastWeight = RandomHelper.getSeed();
+			float valueWeight = RandomHelper.nextIntFromTo(0, 100);
+			//float valueWeight = 0.4f;
+			float contrastWeight = 1 - valueWeight;
 			float c = 100f; 
 			
 			//if (100-(c/2))
 			
 			int j = i+5;
 			valueInit[i] = valueWeight;
-			valueInit[j] = contrastWeight;
-					
+			valueInit[j] = contrastWeight;	
 		}
+		//System.out.println("This hums values are" + valueInit);
 		
-		this.preference = new Preferences (valueInit, this);
+		this.agentPreference = new AgentPreferences (valueInit, this);
 		//this.preference = new Preferences(0.103f, 0.023f, 0.14f, 0.132f, 0.133f, 0.136f, 0.092f, 0.112f, 0.053f, 0.088f, this);
 		// TODO make values add up to 1
 		// TODO incorporate cultural dimension Hofstede
@@ -396,6 +407,7 @@ public class Human {
 			vehicle = chooseVehicle(distance);
 		}
 		
+		//QUESTION: should this be normal + hybrid?
 		if(vehicle.getName() == "normal_car" || vehicle.getName() == "normal_car" || vehicle.getName() == "electric_car") {
 			//TODO:
 			//Unpark current vehicle
@@ -451,11 +463,15 @@ public class Human {
 		return mostUsed;
 	}
 	
+	
+	//
+	//
 	//Decides which vehicle to use
 	public Vehicle chooseVehicle(double distance) {		
 		//Keep track of the best vehicle
 		double bestUtility = 0;
 		Vehicle bestVehicle = null;
+		//this.agentPreference.Update();
 		
 		//Calculate utility for each vehicle available to this human
 		for(Vehicle vehicle : vehicles) {
@@ -486,6 +502,11 @@ public class Human {
 			//Make sure utility is not lower than 1, so at least one vehicle is always chosen
 			utility = Math.max(1, utility);		
 			
+			//Punish/reward for the extent to which the vehicle suits an agents personal preferences
+		//	if(vehicle.getName() == "normal_car")
+		//	{ utility *= }
+			
+			
 			//Update best values
 			if(utility > bestUtility) {
 				bestUtility = utility;
@@ -496,6 +517,15 @@ public class Human {
 		//TODO: also do something with happiness based on how high (or low) this utility is?
 		return bestVehicle;		
 	}
+	
+	//testloop for the agentPreferences update functie
+	@ScheduledMethod(start = 1, interval = 1, priority = 1)
+	public void update() {
+	   //doe je update functie hier
+		agentPreference.Update(valueInit, this, agentPreference.fluidlevels);
+	}
+	
+	
 	
 	//Decides which vehicle to buy, if any
 	public void buyVehicle() {				
