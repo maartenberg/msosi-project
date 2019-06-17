@@ -270,7 +270,7 @@ public class Human {
 		{
 			float valueWeight = RandomHelper.nextIntFromTo(0, 100);
 			//float valueWeight = 0.4f;
-			float contrastWeight = 1 - valueWeight;
+			float contrastWeight = 100 - valueWeight;
 			float c = 100f; 
 			
 			//if (100-(c/2))
