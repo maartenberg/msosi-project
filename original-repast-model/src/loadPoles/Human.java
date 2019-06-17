@@ -523,6 +523,13 @@ public class Human {
 	public void update() {
 	   //doe je update functie hier
 		agentPreference.Update(valueInit, this, agentPreference.fluidlevels);
+		//TODO multiply the utility with the value that is returned
+		//HOW TO?: place within utility function?
+		for(Vehicle vehicle: vehicles) {
+			if(vehicle.getName() == "normal_car") {
+				//pas de utility van de normal car aan etc. 
+			}
+		}
 	}
 	
 	
@@ -587,6 +594,7 @@ public class Human {
 		for(Vehicle vehicle : vehicles) {
 			if(vehicle == mostUsed) {
 				//TODO: Do something?
+				//SUGGESTION: Count how often this happens? (and after x times increase cost?)
 			}
 		}
 		
