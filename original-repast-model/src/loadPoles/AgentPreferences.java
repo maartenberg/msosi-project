@@ -181,7 +181,6 @@ public class AgentPreferences {
 			}
 		}
 
-		// TODO add walk?
 		if(dl == 0)	{
 			System.out.println("Be careful: preferences are not updated");
 		}

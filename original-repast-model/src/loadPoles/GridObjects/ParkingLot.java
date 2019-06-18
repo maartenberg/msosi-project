@@ -8,9 +8,16 @@ import repast.simphony.space.grid.Grid;
 public class ParkingLot {
 	Grid<Object> grid;
 	List<ParkingSpace> parkingSpaces;
+	public int presetNumSpaces = 0;
 	
 	public ParkingLot(Grid<Object> grid){		
 		this.grid = grid;
+		this.parkingSpaces = new ArrayList<ParkingSpace>();
+	}	
+
+	public ParkingLot(Grid<Object> grid, int presetSpaces){		
+		this.grid = grid;
+		this.presetNumSpaces = presetSpaces;
 		this.parkingSpaces = new ArrayList<ParkingSpace>();
 	}	
 	

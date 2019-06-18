@@ -119,8 +119,7 @@ public class ConsumatModel {
 		//If we already have this product
 		for(Vehicle vehicle : human.vehicles) {
 			if(vehicle == mostUsed) {
-				//TODO: Do something?
-				// i.e. make human happier
+				// No action needed.
 				return;
 			}
 		}
@@ -163,7 +162,7 @@ public class ConsumatModel {
 		// If we already have this product
 		for(Vehicle vehicle : human.vehicles) {
 			if(vehicle == mostUsed) {
-				//TODO: Do something?
+				// No action needed.
 				return;
 			}
 		}
@@ -180,6 +179,7 @@ public class ConsumatModel {
 		//Remove product from list of products and add to available vehicles
 		for(Vehicle product : products) {
 			if(product.equals(vehicle)) {				
+				human.totalEmissions += vehicle.getPurchaseEmission();
 				human.vehicles.add(product);
 				products.removeIf(obj -> obj.equals(product));
 				//consumerMarket.addEdge(human, product);
@@ -224,7 +224,7 @@ public class ConsumatModel {
 		// Difference between vehicle characteristics and personal preferences
 		double productSatisfaction = human.agentPreference.getUtilityFactor(vehicle);
 		
-		//TODO: make this possibly also depend on other factors
+		// TODO Anouk: make this possibly also depend on other factors
 		// i.e. Happiness of humans when traveling
 		
 		// Calculate expected satisfaction for this vehicle

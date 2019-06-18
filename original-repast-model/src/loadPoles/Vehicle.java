@@ -40,13 +40,14 @@ public abstract class Vehicle {
 	protected float speed;
 
 	/*Represents the emission of CO2 in grams per kilometer (for one person)	
-	 *TODO: Divide by number of people (since more people take a bus, a bus is better for the environment on average)
-	*/
+	 * Possible expansion / TODO: Divide by number of people (since more people
+	 * take a bus, a bus is better for the environment on average)
+	 */
 	protected float travelEmission;
 	
     /*
-     *Represents the emission of CO2 when purchasing this vehicle
-     *TODO: Use this
+     * Represents the emission of CO2 when purchasing this vehicle
+     * TODO: Use this
      */	
 	protected float purchaseEmission;
 	
@@ -157,6 +158,7 @@ class Motor extends Vehicle{
 		actionRadius = 250;		
 		speed = 1;
 		travelEmission = 137;
+		purchaseEmission = 
 	}
 }
 
@@ -172,6 +174,7 @@ class Bicycle extends Vehicle {
 			actionRadius = 15;	
 			speed = 0.2f;
 			travelEmission = 0;			
+			purchaseEmission = 
 			break;
 			
 		case "electric":
@@ -242,37 +245,35 @@ class Car extends Vehicle {
 	}
 	
 	private void initNormal() {
-		/*
-		 * TODO Optionally: 
-		 *   -Add different vehicleClass implementations for a normal car
-		 */
-		name="normal_car";
+		name="normal_car"; // DieselSlurper 3000™
 		purchaseCost = 20000;
 		upkeepCost = 0.03f;
 		kilometerCost = 0.15f;
 		actionRadius = 1200;				
-		travelEmission = 130;
+		travelEmission = 218; // Average of diesel and gasoline.
+		purchaseEmission = 6_450_000;
 	}
 	
 	private void initHybrid() {
-		/*
-		 * TODO: Optionally:
-		 *   -There are two hybrid types: Plug-in Hybrid and normal Hybrid. Implement this?		
-		 *   -Add different vehicleClass implementations for a hybrid car
-		*/
 		name="hybrid_car";	
-		purchaseCost = 20000;
+		purchaseCost = 33000;
 		upkeepCost = 0.03f;
 		kilometerCost = 0.10f;
 		actionRadius = 1200;
-		travelEmission = 100;
+		travelEmission = 127;
+		// TODO Anouk: Find better value for Hybrid's purchaseEmissions.
+		// (Currently average of EV and normal car, random assumption.)
+		purchaseEmission = (6_450_000 + 13_650_000) / 2;
 	}
 	
 	private void initElectric() {
 		name="electric_car";
-		travelEmission = 23;  //Emission from the energy used to charge
+		travelEmission = 23;  // Emission from the energy used to charge
+		// TODO Anouk: Make travelEmission configurable to represent how 'green'
+		// the electricity is.
 		upkeepCost = 0.01f;
 		kilometerCost = 0.04f;
+		purchaseEmission = 13_650_000;
 		
 		switch(vehicleClass) {		
 		case 1:

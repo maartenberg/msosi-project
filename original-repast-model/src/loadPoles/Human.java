@@ -47,6 +47,9 @@ public class Human {
 	 */
 	float[] valueInit = new float[9];
 	
+	/* Represents this human's CO2 footprint. */
+	public float totalEmissions = 0;
+	
 	boolean carUser;
 	String name;
 	Context<Object> context;
@@ -75,13 +78,13 @@ public class Human {
 		
 		name = String.valueOf(RandomHelper.nextDoubleFromTo(0, 2));
 		name = String.valueOf(context.getObjects(Human.class).size());
-		happiness = 1; // TODO: obsolete, use consumat.satisfaction instead?
+		happiness = 0.5f;
 	}
 	
 	// Initialise what vehicles this human has based on their traits
 	private void initVehicles() {
 		//Add vehicles that this human already owns before the simulation
-		//For now, does not take into account social values etc. TODO ?
+		//For now, does not take into account social values etc.
 		vehicles = new ArrayList<Vehicle>();
 		
 		// BICYCLE AND PUBLIC TRANSPORT
@@ -154,10 +157,6 @@ public class Human {
 		
 		this.agentPreference = new AgentPreferences(valueInit, this);
 		//this.preference = new Preferences(0.103f, 0.023f, 0.14f, 0.132f, 0.133f, 0.136f, 0.092f, 0.112f, 0.053f, 0.088f, this);
-		// TODO make values add up to 1
-		// TODO incorporate cultural dimension Hofstede
-		// TODO make the 5 latter values dependent on the 5 first values
-		// TODO make these values different with a normal distribution
 	}
 	// Function to park all cars of this human on initialisation
 	public void parkAllCars() {
@@ -203,7 +202,6 @@ public class Human {
 		System.out.println("Human " + getName() + " has funds: " + funds);
 	}
 
-	// TODO: Obsolete?
 	public float getHappiness() {
 		return this.happiness;
 	}	

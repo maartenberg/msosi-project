@@ -9,7 +9,6 @@ import loadPoles.GridObjects.PublicBuilding;
 import loadPoles.GridObjects.Road;
 import loadPoles.GridObjects.TransitStop;
 import loadPoles.GridObjects.Workplace;
-import loadPoles.graph.*;
 
 import java.nio.file.Files;
 import java.io.IOException;
@@ -38,7 +37,6 @@ public class Neighbourhood {
 
 	Context<Object> context;
 	Grid<Object> grid;
-	Graph g;
 	
 	/**
 	 * The width of this Neighborhood's Grid.
@@ -55,8 +53,6 @@ public class Neighbourhood {
 	 * @param fileName
 	 */
 	public Neighbourhood(Context<Object> context, String fileName, int humanCount) {
-		Reader reader = new Reader(null);
-		this.g = reader.getGraph();
 		Path p = FileSystems.getDefault().getPath("neighborhoods", fileName);
 		System.out.println(p.toAbsolutePath());
 
@@ -93,7 +89,6 @@ public class Neighbourhood {
 					switch (c) {
 					case '#':
 						Dwelling d = new Dwelling(context);
-						d.setClosestVertex(g.findNearestVertex(x, y));
 						context.add(d);
 						grid.moveTo(d, x, y);
 						break;
@@ -117,6 +112,13 @@ public class Neighbourhood {
 						ParkingLot pl = new ParkingLot(grid);
 						context.add(pl);
 						grid.moveTo(pl, x, y);
+						break;
+						
+					case 'p':
+						ParkingLot pl1 = new ParkingLot(grid);
+						context.add(pl1);
+						pl1.presetNumSpaces = 2;
+						grid.moveTo(pl1, x, y);
 						break;
 						
 					case 'W':
@@ -154,9 +156,7 @@ public class Neighbourhood {
 			);		
 		
 			grid = factory.createGrid("grid", context, gridParameters);
-			
-			//TODO: add randomly scattered dwellings, workplaces, roads and public buildings
-			// in case we DO need something to fall back on
+			System.out.println("You're missing the neighbourhood file! Please try again.");
 		}
 			
 		//Add people
@@ -219,7 +219,12 @@ public class Neighbourhood {
 			ParkingLot pl = (ParkingLot) parkingLotsIterator.next();
 			
 			//Get a random number for the amount of parking spaces this parking lot has
-			int nrOfSpaces = RandomHelper.nextIntFromTo(20, 50);
+			int nrOfSpaces;
+			if (pl.presetNumSpaces == 0) {
+				nrOfSpaces = RandomHelper.nextIntFromTo(20, 50);
+			} else {
+				nrOfSpaces = pl.presetNumSpaces;
+			}
 			
 			//Add parking spaces to the parking lots with a given ratio
 			for(int i = 0; i < nrOfSpaces; i++) {				

@@ -94,7 +94,6 @@ public class HumanTravel {
 			}	
 		}	
 		
-		//TODO: do something with minDistance affecting the human's happiness
 		return closest;
 	}
 	
@@ -208,7 +207,7 @@ public class HumanTravel {
 		
 		//Calculate utility for each vehicle available to this human
 		for(Vehicle vehicle : human.vehicles) {
-			//TODO: find a good starting value for utility
+			// TODO all: find a good starting value for utility
 			double utility = 5000;
 			
 			// Find the corresponding route for this vehicle
@@ -367,6 +366,7 @@ public class HumanTravel {
 		}
 		this.context.add(route);
 		this.grid.moveTo(route, currentLocation.getX(), currentLocation.getY());
+		human.totalEmissions += vehicle.getTravelEmission() * route.getTravelDistance();
 		Network<Object> journeysNetwork = (Network<Object>) this.context.getProjection("journeys");
 		journeysNetwork.addEdge(route, human);		
 		
