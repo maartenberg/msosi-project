@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import repast.simphony.context.Context;
+import repast.simphony.engine.environment.RunEnvironment;
+import repast.simphony.parameter.Parameters;
 import repast.simphony.space.graph.Network;
 import repast.simphony.space.graph.RepastEdge;
 
@@ -43,6 +45,10 @@ public class ConsumatModel {
 		this.human = human;		
 		this.context = context;
 		//this.consumerMarket = (Network<Object>) this.context.getProjection("consumermarket");		
+		
+		Parameters params = RunEnvironment.getInstance().getParameters();
+		uncertaintyThreshold = params.getFloat("consumatUncertaintyThreshold");
+		satisfactionThreshold = params.getFloat("consumatSatisfactionThreshold");
 		
 		consumatAction = "deliberate";
 		

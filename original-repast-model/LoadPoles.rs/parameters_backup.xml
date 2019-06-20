@@ -6,14 +6,32 @@
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
-				<parameter name="dwellingcount" displayName="Dwelling count" type="int" 
+				<parameter name="consumatUncertaintyThreshold" displayName="Consumat Uncertainty Threshold" type="float" 
 						defaultValue="10" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
+				<parameter name="fuelTax" displayName="Fuel tax (added cost per kilometer for IC, halved for hybrids)" type="float" 
+						defaultValue="0.0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$FloatConverter"
+									
+		/>
+				<parameter name="parkSpacesPerLot" displayName="Parking spaces per lot" type="int" 
+						defaultValue="50" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+									
+		/>
+				<parameter name="dwellingcount" displayName="Dwelling count" type="int" 
+						defaultValue="75" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+									
+		/>
 				<parameter name="humancount" displayName="Human count" type="int" 
-						defaultValue="10" 
+						defaultValue="20" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
@@ -25,10 +43,34 @@
 									values="ratio dwelling "
 						
 		/>
+				<parameter name="electricityEmissionsFactor" displayName="Emissions factor of electricity (multiplies EV, electric bike emissions)" type="float" 
+						defaultValue="1.0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$FloatConverter"
+									
+		/>
+				<parameter name="evSubsidy" displayName="Subsidy on EV's (absolute discount)" type="int" 
+						defaultValue="0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
+									
+		/>
+				<parameter name="consumatSatisfactionThreshold" displayName="Consumat Satisfaction Threshold" type="float" 
+						defaultValue="10.0" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$FloatConverter"
+									
+		/>
 				<parameter name="ratio_b" displayName="Ratio of B" type="double" 
-						defaultValue="0.0" 
+						defaultValue="0.1" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$DoubleConverter"
+									
+		/>
+				<parameter name="roadTax" displayName="Road Tax setting (per tick, halved for hybrids, zero for EVs)" type="float" 
+						defaultValue="1" 
+						isReadOnly="false" 
+						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
 		/>
 		</parameters>

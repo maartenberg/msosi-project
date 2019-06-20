@@ -19,6 +19,8 @@ import repast.simphony.context.Context;
 import repast.simphony.context.space.graph.NetworkBuilder;
 import repast.simphony.context.space.grid.GridFactory;
 import repast.simphony.context.space.grid.GridFactoryFinder;
+import repast.simphony.engine.environment.RunEnvironment;
+import repast.simphony.parameter.Parameters;
 import repast.simphony.query.space.grid.GridCell;
 import repast.simphony.query.space.grid.GridCellNgh;
 import repast.simphony.random.RandomHelper;
@@ -81,6 +83,9 @@ public class Neighbourhood {
 			Object[] lineContent = Files.lines(p).toArray();
 			int lineCount = lineContent.length - 1;
 
+			Parameters params = RunEnvironment.getInstance().getParameters();
+			int spacesPerParkingLot = params.getInteger("parkSpacesPerLot");
+
 			for (int y = 0; y < gridY; y++) {
 				String line = (String) lineContent[lineCount - y];
 				for (int x = 0; x < Math.min(gridX, line.length()); x++) {
@@ -109,13 +114,13 @@ public class Neighbourhood {
 						break;
 						
 					case 'P':
-						ParkingLot pl = new ParkingLot(grid);
+						ParkingLot pl = new ParkingLot(grid, spacesPerParkingLot);
 						context.add(pl);
 						grid.moveTo(pl, x, y);
 						break;
 						
 					case 'p':
-						ParkingLot pl1 = new ParkingLot(grid);
+						ParkingLot pl1 = new ParkingLot(grid, 2);
 						context.add(pl1);
 						pl1.presetNumSpaces = 2;
 						grid.moveTo(pl1, x, y);

@@ -201,6 +201,13 @@ public class Human {
 		
 		System.out.println("Human " + getName() + " has funds: " + funds);
 	}
+	
+	@ScheduledMethod(start=1, interval=30, priority=2)
+	public void payRoadTax() {
+		for (Vehicle v : vehicles) {
+			funds -= v.roadTaxCost;
+		}
+	}
 
 	public float getHappiness() {
 		return this.happiness;

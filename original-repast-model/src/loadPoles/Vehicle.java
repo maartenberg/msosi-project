@@ -1,8 +1,11 @@
 package loadPoles;
 
 import loadPoles.GridObjects.ParkingSpace;
+import repast.simphony.engine.environment.RunEnvironment;
+import repast.simphony.parameter.Parameters;
 
 public abstract class Vehicle {
+	protected Parameters params = RunEnvironment.getInstance().getParameters();
 	/*
 	 * A human-readable name for this vehicle.	 
 	 */
@@ -14,9 +17,13 @@ public abstract class Vehicle {
 	protected float purchaseCost;
 
 	/*
-	 * Represents the costs for owning this vehicle, per kilometer.
+	 * Represents the costs for owning this vehicle, per tick.
 	 */
 	protected float upkeepCost;
+	/*
+	 * Represents an additional cost to own this vehicle, per tick.
+	 */
+	protected float roadTaxCost;
 	
 	/*
 	 * Represents the cost of using this vehicle, per kilometer.
@@ -159,6 +166,7 @@ class Motor extends Vehicle{
 		speed = 1;
 		travelEmission = 137;
 		purchaseEmission = 13; // TODO Anouk
+		roadTaxCost = 0.3f * params.getFloat("roadTax");
 	}
 }
 
@@ -185,7 +193,7 @@ class Bicycle extends Vehicle {
 			comfort = 0.5f;
 			actionRadius = 60;	
 			speed = 0.5f;
-			travelEmission = 5; //Emission from the energy needed to charge
+			travelEmission = 5 * params.getFloat("electricityEmissionsFactor"); //Emission from the energy needed to charge
 			break;
 		}
 	}
@@ -248,47 +256,50 @@ class Car extends Vehicle {
 		name="normal_car"; // DieselSlurper 3000™
 		purchaseCost = 20000;
 		upkeepCost = 0.03f;
-		kilometerCost = 0.15f;
+		kilometerCost = 0.15f + params.getFloat("fuelTax");
 		actionRadius = 1200;				
 		travelEmission = 218; // Average of diesel and gasoline.
 		purchaseEmission = 6_450_000;
+		roadTaxCost = params.getFloat("roadTax");
 	}
 	
 	private void initHybrid() {
 		name="hybrid_car";	
 		purchaseCost = 33000;
 		upkeepCost = 0.03f;
-		kilometerCost = 0.10f;
+		kilometerCost = 0.10f + 0.5f * params.getFloat("fuelTax");
 		actionRadius = 1200;
 		travelEmission = 127;
 		// TODO Anouk: Find better value for Hybrid's purchaseEmissions.
 		// (Currently average of EV and normal car, random assumption.)
 		purchaseEmission = (6_450_000 + 13_650_000) / 2;
+		roadTaxCost = 0.5f * params.getFloat("roadTax");
 	}
 	
 	private void initElectric() {
 		name="electric_car";
-		travelEmission = 23;  // Emission from the energy used to charge
+		travelEmission = 23 * params.getFloat("electricityEmissionsFactor");  // Emission from the energy used to charge
 		// TODO Anouk: Make travelEmission configurable to represent how 'green'
 		// the electricity is.
 		upkeepCost = 0.01f;
 		kilometerCost = 0.04f;
 		purchaseEmission = 13_650_000;
+		roadTaxCost = 0; // https://www.belastingdienst.nl/wps/wcm/connect/nl/auto-en-vervoer/content/hulpmiddel-motorrijtuigenbelasting-berekenen
 		
 		switch(vehicleClass) {		
 		case 1:
 			//Based on Nissan LEAF (2019)
-			purchaseCost = 38940;	
+			purchaseCost = 38940 - params.getInteger("evSubsidy");	
 			actionRadius = 270;		
 			break;
 		case 2:	
 			//Based on Tesla Model 3 (Base model)
-			purchaseCost = 43500;	
+			purchaseCost = 43500 - params.getInteger("evSubsidy");	
 			actionRadius = 335;		
 			break;
 		case 3:
 			//Based on Tesla Model S (Base model)
-			purchaseCost = 93020;	
+			purchaseCost = 93020 - params.getInteger("evSubsidy");	
 			actionRadius = 525;					
 			break;
 		}		
