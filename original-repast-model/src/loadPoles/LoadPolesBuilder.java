@@ -18,7 +18,7 @@ public class LoadPolesBuilder implements ContextBuilder<Object> {
 		int dwellingcount = params.getInteger("dwellingcount");
 		
 		//build neighbourhood
-		Neighbourhood nbh = new Neighbourhood(context, "bunnik.wijk", humancount);
+		Neighbourhood nbh = new Neighbourhood(context, "metropolis.wijk", humancount);
 		
 		// Randomly assign parking spaces to dwellings
 		nbh.distributeParkingSpacesToDwelling(0.6, 0.2);		
