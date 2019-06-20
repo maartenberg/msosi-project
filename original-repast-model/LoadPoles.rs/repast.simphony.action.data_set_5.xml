@@ -1,5 +1,5 @@
 <repast.simphony.data2.engine.DataSetDescriptor simphonyVersion="2.6.0">
-  <name>Total Happiness Data</name>
+  <name>Average Emission Data</name>
   <type>AGGREGATE</type>
   <inclTick>true</inclTick>
   <inclBatchRun>false</inclBatchRun>
@@ -11,34 +11,16 @@
     <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
-    <hashCode>430889952</hashCode>
+    <hashCode>-2039842557</hashCode>
   </scheduleParams>
   <atEnd>false</atEnd>
   <methodDataSources class="linked-hash-map">
     <entry>
-      <string>Total</string>
-      <repast.simphony.data2.engine.MethodDataSourceDefinition>
-        <id>Total</id>
-        <className>loadPoles.ScenarioTree.HappinessData</className>
-        <methodName>getTotalHappiness</methodName>
-        <aggType>SUM</aggType>
-      </repast.simphony.data2.engine.MethodDataSourceDefinition>
-    </entry>
-    <entry>
-      <string>Bicycle</string>
-      <repast.simphony.data2.engine.MethodDataSourceDefinition>
-        <id>Bicycle</id>
-        <className>loadPoles.ScenarioTree.HappinessData</className>
-        <methodName>getBicycleHappiness</methodName>
-        <aggType>SUM</aggType>
-      </repast.simphony.data2.engine.MethodDataSourceDefinition>
-    </entry>
-    <entry>
       <string>Electric Bicycle</string>
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
         <id>Electric Bicycle</id>
-        <className>loadPoles.ScenarioTree.HappinessData</className>
-        <methodName>getElectricBicycleHappiness</methodName>
+        <className>loadPoles.ScenarioTree.EmissionData</className>
+        <methodName>getAvgElectricBicycleEmission</methodName>
         <aggType>SUM</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>
@@ -46,8 +28,8 @@
       <string>Motor</string>
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
         <id>Motor</id>
-        <className>loadPoles.ScenarioTree.HappinessData</className>
-        <methodName>getMotorHappiness</methodName>
+        <className>loadPoles.ScenarioTree.EmissionData</className>
+        <methodName>getAvgMotorEmission</methodName>
         <aggType>SUM</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>
@@ -55,8 +37,8 @@
       <string>Public Transport</string>
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
         <id>Public Transport</id>
-        <className>loadPoles.ScenarioTree.HappinessData</className>
-        <methodName>getPublicTransportHappiness</methodName>
+        <className>loadPoles.ScenarioTree.EmissionData</className>
+        <methodName>getAvgPublicTransportEmission</methodName>
         <aggType>SUM</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>
@@ -64,8 +46,8 @@
       <string>Normal Car</string>
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
         <id>Normal Car</id>
-        <className>loadPoles.ScenarioTree.HappinessData</className>
-        <methodName>getNormalCarHappiness</methodName>
+        <className>loadPoles.ScenarioTree.EmissionData</className>
+        <methodName>getAvgNormalCarEmission</methodName>
         <aggType>SUM</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>
@@ -73,8 +55,8 @@
       <string>Hybrid Car</string>
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
         <id>Hybrid Car</id>
-        <className>loadPoles.ScenarioTree.HappinessData</className>
-        <methodName>getHybridCarHappiness</methodName>
+        <className>loadPoles.ScenarioTree.EmissionData</className>
+        <methodName>getAvgHybridCarEmission</methodName>
         <aggType>SUM</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>
@@ -82,8 +64,8 @@
       <string>Electric Car</string>
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
         <id>Electric Car</id>
-        <className>loadPoles.ScenarioTree.HappinessData</className>
-        <methodName>getElectricCarHappiness</methodName>
+        <className>loadPoles.ScenarioTree.EmissionData</className>
+        <methodName>getAvgElectricCarEmission</methodName>
         <aggType>SUM</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>

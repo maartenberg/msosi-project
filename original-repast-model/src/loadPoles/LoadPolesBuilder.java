@@ -1,5 +1,6 @@
 package loadPoles;
 
+import loadPoles.ScenarioTree.DataUpdater;
 import repast.simphony.context.Context;
 import repast.simphony.dataLoader.ContextBuilder;
 import repast.simphony.engine.environment.RunEnvironment;
@@ -15,7 +16,10 @@ public class LoadPolesBuilder implements ContextBuilder<Object> {
 		//Get initializing params
 		Parameters params = RunEnvironment.getInstance().getParameters();
 		int humancount = params.getInteger("humancount");
-		int dwellingcount = params.getInteger("dwellingcount");
+		int dwellingcount = params.getInteger("dwellingcount");		
+
+		DataUpdater dataUpdater = new DataUpdater(context);
+		context.add(dataUpdater);
 		
 		//build neighbourhood
 		Neighbourhood nbh = new Neighbourhood(context, "bunnik.wijk", humancount);
@@ -42,6 +46,7 @@ public class LoadPolesBuilder implements ContextBuilder<Object> {
 		
 		//Initialise social network
 		nbh.initSocialNetwork();
+		
 		
 		return context;
 	}

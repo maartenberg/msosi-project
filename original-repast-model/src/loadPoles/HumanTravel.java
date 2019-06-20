@@ -6,6 +6,7 @@ import loadPoles.GridObjects.ParkingLot;
 import loadPoles.GridObjects.ParkingSpace;
 import loadPoles.GridObjects.PublicBuilding;
 import loadPoles.GridObjects.TransitStop;
+import loadPoles.ScenarioTree.EmissionData;
 import repast.simphony.context.Context;
 import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.random.RandomHelper;
@@ -33,11 +34,7 @@ public class HumanTravel {
 		Iterator<Object> parkingLotsIterator = parkingLots.iterator();
 		
 		ParkingSpace closest = null;
-		double minDistance = Integer.MAX_VALUE;			
-
-		// For printing to console: (can be removed later)
-		//GridPoint bestLocation = null;
-		//String locType = "";
+		double minDistance = Integer.MAX_VALUE;		
 		
 		//Find closest parking lot with an available parking space
 		while(parkingLotsIterator.hasNext()) {
@@ -49,8 +46,6 @@ public class HumanTravel {
 			if(available != null && distance < minDistance) {
 				minDistance = distance;
 				closest = available;
-				//bestLocation = plLocation;
-				//locType = "a parking lot";
 			}	
 		}
 		
@@ -63,14 +58,9 @@ public class HumanTravel {
 				if(distance < minDistance) {
 					minDistance = distance;
 					closest = homeParking;
-					//bestLocation = homeLocation;
-					//locType = "home";
 				}			
 			}
 		}
-		
-		//System.out.println("Parking type: " + type);
-		//System.out.println("Found best location at " + locType + " with coords: (" + bestLocation.getX() +  ", " + bestLocation.getY() +")");
 		return closest;
 	}
 	
@@ -135,6 +125,11 @@ public class HumanTravel {
 		TransitStop from = findClosestTransitStop(currentLocation);
 		TransitStop to = findClosestTransitStop(destination);
 		
+		// If the two transit stops are at the same location, we basically do not travel with public transport
+		if(grid.getLocation(to).getX() == grid.getLocation(from).getX() && grid.getLocation(to).getY() == grid.getLocation(from).getY()) {
+			return null;
+		}
+		
 		Route route = new Route(grid, currentLocation, destination, vehicle);
 		route.setTransitStops(from, to);
 		return route;
@@ -194,6 +189,11 @@ public class HumanTravel {
 			return null;
 		}		
 		
+		// If park at the same parking spaces, we are not driving at all
+		if(to.getLocation().getX() == from.getLocation().getX() && to.getLocation().getY() == from.getLocation().getY()) {
+			return null;
+		}
+		
 		Route route = new Route(grid, currentLocation, destination, vehicle);
 		route.setParkingSpaces(from, to);
 		return route;		
@@ -212,8 +212,10 @@ public class HumanTravel {
 			
 			// Find the corresponding route for this vehicle
 			Route route = findRoute(destination, vehicle);
+			
+			// If route is null, it is an invalid route, ignore it
 			if(route == null) {
-				utility = 1;				
+				continue;			
 			}
 			else {							
 				// The less comfortable, the less utility
@@ -361,18 +363,21 @@ public class HumanTravel {
 							 + "\n  with total walking distance: " + route.getWalkingDistance());		
 		}
 		
+		// Remove the previousroute and add new route to the context
 		if(previousRoute != null) {
 			this.context.remove(previousRoute);
 		}
 		this.context.add(route);
+		
+		// Put Route on Human's current location, so arrows are directed in the correct way
 		this.grid.moveTo(route, currentLocation.getX(), currentLocation.getY());
-		human.totalEmissions += vehicle.getTravelEmission() * route.getTravelDistance();
 		Network<Object> journeysNetwork = (Network<Object>) this.context.getProjection("journeys");
-		journeysNetwork.addEdge(route, human);		
-		
-		previousRoute = route;
+		journeysNetwork.addEdge(route, human);				
+
+		// Move human and update variables
 		grid.moveTo(human, destination.getX(), destination.getY());
+		human.totalEmissions += vehicle.getTravelEmission() * route.getTravelDistance();
+		human.happiness += route.getUtility();		
+		previousRoute = route;
 	}
-		
-	
 }

@@ -1,9 +1,9 @@
 <repast.simphony.chart2.engine.TimeSeriesChartDescriptor simphonyVersion="2.6.0">
-  <name>Vehicle Usage</name>
-  <dataSet>Vehicle Usage Data</dataSet>
+  <name>Average Happiness</name>
+  <dataSet>Average Happiness Data</dataSet>
   <xAxisLabel>Tick Count</xAxisLabel>
-  <yAxisLabel>Times used</yAxisLabel>
-  <chartTitle>Vehicle usage over time</chartTitle>
+  <yAxisLabel>happiness/vehicle usage</yAxisLabel>
+  <chartTitle>Average happiness over time</chartTitle>
   <type>TIME_SERIES</type>
   <background>
     <red>192</red>

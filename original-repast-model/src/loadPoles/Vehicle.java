@@ -158,7 +158,7 @@ class Motor extends Vehicle{
 		actionRadius = 250;		
 		speed = 1;
 		travelEmission = 137;
-		purchaseEmission = 
+		purchaseEmission = 0;
 	}
 }
 
@@ -174,7 +174,7 @@ class Bicycle extends Vehicle {
 			actionRadius = 15;	
 			speed = 0.2f;
 			travelEmission = 0;			
-			purchaseEmission = 
+			purchaseEmission = 0;
 			break;
 			
 		case "electric":

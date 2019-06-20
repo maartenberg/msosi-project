@@ -1,9 +1,9 @@
 <repast.simphony.chart2.engine.TimeSeriesChartDescriptor simphonyVersion="2.6.0">
-  <name>Vehicle Usage</name>
-  <dataSet>Vehicle Usage Data</dataSet>
+  <name>Vehicle Possession</name>
+  <dataSet>Vehicle Possession Data</dataSet>
   <xAxisLabel>Tick Count</xAxisLabel>
-  <yAxisLabel>Times used</yAxisLabel>
-  <chartTitle>Vehicle usage over time</chartTitle>
+  <yAxisLabel>Amount in possession</yAxisLabel>
+  <chartTitle>Vehicle possession over time</chartTitle>
   <type>TIME_SERIES</type>
   <background>
     <red>192</red>
@@ -25,8 +25,8 @@
       <SeriesData>
         <label>Motor</label>
         <color>
-          <red>0</red>
-          <green>255</green>
+          <red>255</red>
+          <green>0</green>
           <blue>0</blue>
           <alpha>255</alpha>
         </color>
@@ -37,8 +37,8 @@
       <SeriesData>
         <label>Hybrid Car</label>
         <color>
-          <red>0</red>
-          <green>255</green>
+          <red>255</red>
+          <green>0</green>
           <blue>255</blue>
           <alpha>255</alpha>
         </color>
@@ -50,7 +50,7 @@
         <label>Electric Car</label>
         <color>
           <red>255</red>
-          <green>255</green>
+          <green>200</green>
           <blue>0</blue>
           <alpha>255</alpha>
         </color>
@@ -61,33 +61,9 @@
       <SeriesData>
         <label>Normal Car</label>
         <color>
-          <red>255</red>
-          <green>200</green>
-          <blue>0</blue>
-          <alpha>255</alpha>
-        </color>
-      </SeriesData>
-    </entry>
-    <entry>
-      <string>Bicycle</string>
-      <SeriesData>
-        <label>Bicycle</label>
-        <color>
           <red>0</red>
-          <green>0</green>
-          <blue>255</blue>
-          <alpha>255</alpha>
-        </color>
-      </SeriesData>
-    </entry>
-    <entry>
-      <string>Public Transport</string>
-      <SeriesData>
-        <label>Public Transport</label>
-        <color>
-          <red>255</red>
-          <green>0</green>
-          <blue>255</blue>
+          <green>255</green>
+          <blue>0</blue>
           <alpha>255</alpha>
         </color>
       </SeriesData>
@@ -97,9 +73,9 @@
       <SeriesData>
         <label>Electric Bicycle</label>
         <color>
-          <red>255</red>
+          <red>0</red>
           <green>0</green>
-          <blue>0</blue>
+          <blue>255</blue>
           <alpha>255</alpha>
         </color>
       </SeriesData>

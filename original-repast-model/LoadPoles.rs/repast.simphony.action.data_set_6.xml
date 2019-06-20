@@ -1,5 +1,5 @@
 <repast.simphony.data2.engine.DataSetDescriptor simphonyVersion="2.6.0">
-  <name>Total Happiness Data</name>
+  <name>Average Happiness Data</name>
   <type>AGGREGATE</type>
   <inclTick>true</inclTick>
   <inclBatchRun>false</inclBatchRun>
@@ -11,25 +11,16 @@
     <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
-    <hashCode>430889952</hashCode>
+    <hashCode>650343707</hashCode>
   </scheduleParams>
   <atEnd>false</atEnd>
   <methodDataSources class="linked-hash-map">
-    <entry>
-      <string>Total</string>
-      <repast.simphony.data2.engine.MethodDataSourceDefinition>
-        <id>Total</id>
-        <className>loadPoles.ScenarioTree.HappinessData</className>
-        <methodName>getTotalHappiness</methodName>
-        <aggType>SUM</aggType>
-      </repast.simphony.data2.engine.MethodDataSourceDefinition>
-    </entry>
     <entry>
       <string>Bicycle</string>
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
         <id>Bicycle</id>
         <className>loadPoles.ScenarioTree.HappinessData</className>
-        <methodName>getBicycleHappiness</methodName>
+        <methodName>getAvgBicycleHappiness</methodName>
         <aggType>SUM</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>
@@ -38,7 +29,7 @@
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
         <id>Electric Bicycle</id>
         <className>loadPoles.ScenarioTree.HappinessData</className>
-        <methodName>getElectricBicycleHappiness</methodName>
+        <methodName>getAvgElectricBicycleHappiness</methodName>
         <aggType>SUM</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>
@@ -47,7 +38,7 @@
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
         <id>Motor</id>
         <className>loadPoles.ScenarioTree.HappinessData</className>
-        <methodName>getMotorHappiness</methodName>
+        <methodName>getAvgMotorHappiness</methodName>
         <aggType>SUM</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>
@@ -56,7 +47,7 @@
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
         <id>Public Transport</id>
         <className>loadPoles.ScenarioTree.HappinessData</className>
-        <methodName>getPublicTransportHappiness</methodName>
+        <methodName>getAvgPublicTransportHappiness</methodName>
         <aggType>SUM</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>
@@ -65,7 +56,7 @@
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
         <id>Normal Car</id>
         <className>loadPoles.ScenarioTree.HappinessData</className>
-        <methodName>getNormalCarHappiness</methodName>
+        <methodName>getAvgNormalCarHappiness</methodName>
         <aggType>SUM</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>
@@ -74,7 +65,7 @@
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
         <id>Hybrid Car</id>
         <className>loadPoles.ScenarioTree.HappinessData</className>
-        <methodName>getHybridCarHappiness</methodName>
+        <methodName>getAvgHybridCarHappiness</methodName>
         <aggType>SUM</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>
@@ -83,7 +74,7 @@
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
         <id>Electric Car</id>
         <className>loadPoles.ScenarioTree.HappinessData</className>
-        <methodName>getElectricCarHappiness</methodName>
+        <methodName>getAvgElectricCarHappiness</methodName>
         <aggType>SUM</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>

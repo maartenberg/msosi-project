@@ -71,12 +71,12 @@ public class Human {
 	
 		carUser = false;
 		for(Vehicle v : vehicles) {
-			if(v.getName() == "normal_car" || v.getName() == "hybrid_car" || v.getName() == "electric_car") {
+			if(v.isCar()) {
 				carUser = true;
+				break;
 			}
 		}		
 		
-		name = String.valueOf(RandomHelper.nextDoubleFromTo(0, 2));
 		name = String.valueOf(context.getObjects(Human.class).size());
 		happiness = 0.5f;
 	}
@@ -139,9 +139,7 @@ public class Human {
 	
 	// Initialise the preferences that this human has
 	private void initAgentPreferences() {
-
-		for (int i = 0; i < valueInit.length/2; i ++)
-		{
+		for (int i = 0; i < valueInit.length/2; i ++) {
 			float valueWeight = RandomHelper.nextIntFromTo(0, 100);
 			//float valueWeight = 0.4f;
 			float contrastWeight = 100 - valueWeight;
