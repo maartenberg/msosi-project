@@ -1,5 +1,5 @@
 <repast.simphony.data2.engine.DataSetDescriptor simphonyVersion="2.6.0">
-  <name>hasParked</name>
+  <name>Vehicle Usage Data</name>
   <type>AGGREGATE</type>
   <inclTick>true</inclTick>
   <inclBatchRun>false</inclBatchRun>
@@ -11,16 +11,70 @@
     <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
-    <hashCode>773821971</hashCode>
+    <hashCode>-725047800</hashCode>
   </scheduleParams>
   <atEnd>false</atEnd>
   <methodDataSources class="linked-hash-map">
     <entry>
-      <string>hasParked</string>
+      <string>Bicycle</string>
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
-        <id>hasParked</id>
-        <className>loadPoles.Human</className>
-        <methodName>getHasParked</methodName>
+        <id>Bicycle</id>
+        <className>loadPoles.ScenarioTree.VehicleUsageData</className>
+        <methodName>getBicycleUsage</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>Electric Bicycle</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>Electric Bicycle</id>
+        <className>loadPoles.ScenarioTree.VehicleUsageData</className>
+        <methodName>getElectricBicycleUsage</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>Motor</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>Motor</id>
+        <className>loadPoles.ScenarioTree.VehicleUsageData</className>
+        <methodName>getMotorUsage</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>Public Transport</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>Public Transport</id>
+        <className>loadPoles.ScenarioTree.VehicleUsageData</className>
+        <methodName>getPublicTransportUsage</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>Normal Car</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>Normal Car</id>
+        <className>loadPoles.ScenarioTree.VehicleUsageData</className>
+        <methodName>getNormalCarUsage</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>Hybrid Car</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>Hybrid Car</id>
+        <className>loadPoles.ScenarioTree.VehicleUsageData</className>
+        <methodName>getHybridCarUsage</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>Electric Car</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>Electric Car</id>
+        <className>loadPoles.ScenarioTree.VehicleUsageData</className>
+        <methodName>getElectricCarUsage</methodName>
         <aggType>SUM</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>

@@ -20,23 +20,6 @@ public class HumanTravel {
 	Grid<Object> grid;
 	Vehicle pastVehicle;
 	Route previousRoute;
-	
-	protected float usage_electric_car;
-	protected float usage_electric_bicycle;
-	protected float usage_normal_car;
-	protected float usage_hybrid_car;
-	protected float usage_bicycle;
-	protected float usage_public_transport;
-	protected float usage_motor;
-	
-	protected float avgUtil_electric_car;
-	protected float avgUtil_electric_bicycle;
-	protected float avgUtil_normal_car;
-	protected float avgUtil_hybrid_car;
-	protected float avgUtil_bicycle;
-	protected float avgUtil_public_transport;
-	protected float avgUtil_motor;
-	
 	double walkingPunishment;
 	
 	public HumanTravel(Human human, Context<Object> context, Grid<Object> grid) {
@@ -48,14 +31,9 @@ public class HumanTravel {
 	// Find closest parking space with available parking spaces of a given type
 	public ParkingSpace findClosestParkingSpace(GridPoint location, String type) {
 		IndexedIterable<Object> parkingLots = this.context.getObjects(ParkingLot.class);
-		Iterator<Object> parkingLotsIterator = parkingLots.iterator();
-		
+		Iterator<Object> parkingLotsIterator = parkingLots.iterator();		
 		ParkingSpace closest = null;
-		double minDistance = Integer.MAX_VALUE;			
-
-		// For printing to console: (can be removed later)
-		//GridPoint bestLocation = null;
-		//String locType = "";
+		double minDistance = Integer.MAX_VALUE;
 		
 		//Find closest parking lot with an available parking space
 		while(parkingLotsIterator.hasNext()) {
@@ -67,8 +45,6 @@ public class HumanTravel {
 			if(available != null && distance < minDistance) {
 				minDistance = distance;
 				closest = available;
-				//bestLocation = plLocation;
-				//locType = "a parking lot";
 			}	
 		}
 		
@@ -81,14 +57,9 @@ public class HumanTravel {
 				if(distance < minDistance) {
 					minDistance = distance;
 					closest = homeParking;
-					//bestLocation = homeLocation;
-					//locType = "home";
 				}			
 			}
 		}
-		
-		//System.out.println("Parking type: " + type);
-		//System.out.println("Found best location at " + locType + " with coords: (" + bestLocation.getX() +  ", " + bestLocation.getY() +")");
 		return closest;
 	}
 	
@@ -149,9 +120,14 @@ public class HumanTravel {
 	private Route findTransitRoute(GridPoint destination, Vehicle vehicle) {
 		GridPoint currentLocation = grid.getLocation(human);
 		
-		// Find closest transits stops at beginning and end of route
+		// Find closest transit stops at beginning and end of route
 		TransitStop from = findClosestTransitStop(currentLocation);
 		TransitStop to = findClosestTransitStop(destination);
+
+		// If the two transit stops are at the same location, we basically do not travel with public transport
+		if(grid.getLocation(to).getX() == grid.getLocation(from).getX() && grid.getLocation(to).getY() == grid.getLocation(from).getY()) {
+			return null;
+		}
 		
 		Route route = new Route(grid, currentLocation, destination, vehicle);
 		route.setTransitStops(from, to);
@@ -211,7 +187,12 @@ public class HumanTravel {
 		if(to == null) {
 			return null;
 		}		
-		
+
+		// If park at the same parking spaces, we are not driving at all
+		if(to.getLocation().getX() == from.getLocation().getX() && to.getLocation().getY() == from.getLocation().getY()) {
+			return null;
+		}
+			
 		Route route = new Route(grid, currentLocation, destination, vehicle);
 		route.setParkingSpaces(from, to);
 		return route;		
@@ -230,8 +211,11 @@ public class HumanTravel {
 			
 			// Find the corresponding route for this vehicle
 			Route route = findRoute(destination, vehicle);
+
+			// If route is null, it is an invalid route, so ignore it
 			if(route == null) {
-				utility = 1;				
+				utility = 1;	
+				continue;			
 			}
 			else {		
 				utility *= human.agentPreference.getUtilityFactor(vehicle);
@@ -256,46 +240,40 @@ public class HumanTravel {
 				
 				// The slower it is, the less utility
 				//extra in case value 1 or 2 are most important
-				if(human.agentPreference.agentActionType == 1 || human.agentPreference.agentActionType == 2)
-				{
-				utility *= vehicle.getSpeed()*2;
-				}
-				else {
+				if(human.agentPreference.agentActionType == 1 || human.agentPreference.agentActionType == 2) {
+					utility *= vehicle.getSpeed()*2;
+				} else {
 				utility *= vehicle.getSpeed();
 				}
 				
 				//The more emision of CO2, the worse the utility, 
 				//only in case value 0 is most important
 				if(human.agentPreference.agentActionType == 0) {
-				utility -= vehicle.getTravelEmission();
+					utility -= vehicle.getTravelEmission();
 				}
 				
 				//The more the cost of traveling impacts the income, the worse the utility
 				utility *= (1 - (route.getTravelDistance() * vehicle.getKilometerCost())/human.traits.income);
 				
-				if(route.getWalkingDistance() > 15)
-				{
+				if(route.getWalkingDistance() > 15)	{
 					walkingPunishment = route.getWalkingDistance() * 10;
-				}
-				else {
+				} else {
 					walkingPunishment = route.getWalkingDistance();
 				}
 				
 				//The more we have to walk between stops during the route, the worse the utility
 				//extra in case value 2 is most important
 				if(human.agentPreference.agentActionType ==2) {
-				walkingPunishment *= 10;
+					walkingPunishment *= 10;
 				}
 				//less in case value 0 is most important
-				else if(human.agentPreference.agentActionType == 0)
-				{
+				else if(human.agentPreference.agentActionType == 0)	{
 					walkingPunishment *= 2;
-				}
-				else {
+				} else {
 					walkingPunishment *= 5;
-				}
-				
+				}				
 				utility -= walkingPunishment;
+
 				//Make sure utility is not lower than 1, so at least one vehicle is always chosen
 				utility = Math.max(1, utility);		
 				}
@@ -308,10 +286,10 @@ public class HumanTravel {
 			}			
 		}
 		
-		float usage = (float) (this.getUsage(bestRoute.getVehicle())+1);
-		this.setUsage(bestRoute.getVehicle(), usage);
-		float avgUtility = (float) ((this.getAvgUtil(bestRoute.getVehicle()) + bestRoute.getUtility()/5000)/this.getUsage(bestRoute.getVehicle()));
-		this.setAvgUtil(bestRoute.getVehicle(), avgUtility);
+		//float usage = (float) (this.getUsage(bestRoute.getVehicle())+1);
+		//this.setUsage(bestRoute.getVehicle(), usage);
+		//float avgUtility = (float) ((this.getAvgUtil(bestRoute.getVehicle()) + bestRoute.getUtility()/5000)/this.getUsage(bestRoute.getVehicle()));
+		//this.setAvgUtil(bestRoute.getVehicle(), avgUtility);
 		return bestRoute;		
 	}	
 
@@ -400,10 +378,10 @@ public class HumanTravel {
 		}		
 		
 		// The following is just printing information to console. Can be deleted if obsolete
-		System.out.println( "\nHUMAN " + human.getName() + ":" +
-							//"\n travelling from: (" + currentLocation.getX() + ", " + currentLocation.getY() + ")"
-							//+ " to: (" + destination.getX() + ", " + destination.getY() + ")"
-							 "\n with distance: " + grid.getDistance(currentLocation, destination) 
+		System.out.println( "\nHUMAN " + human.getName() + ":" 
+							+ "\n travelling from: (" + currentLocation.getX() + ", " + currentLocation.getY() + ")"
+							+ " to: (" + destination.getX() + ", " + destination.getY() + ")"
+							+ "\n with distance: " + grid.getDistance(currentLocation, destination) 
 							+ "\n and vehicle: " + vehicle.getName()
 							+"\n and utility " + route.getUtility()
 							+ "\n and value-profile: " + human.agentPreference.agentActionType);
@@ -426,97 +404,21 @@ public class HumanTravel {
 							 + "\n  with total walking distance: " + route.getWalkingDistance());		
 		}
 		
+		// Remove the previousroute and add new route to the context
 		if(previousRoute != null) {
 			this.context.remove(previousRoute);
 		}
 		this.context.add(route);
+		
+		// Put Route on Human's current location, so arrows are directed in the correct way
 		this.grid.moveTo(route, currentLocation.getX(), currentLocation.getY());
-		human.totalEmissions += vehicle.getTravelEmission() * route.getTravelDistance();
 		Network<Object> journeysNetwork = (Network<Object>) this.context.getProjection("journeys");
-		journeysNetwork.addEdge(route, human);		
-		
-		previousRoute = route;
-		pastVehicle = vehicle;
+		journeysNetwork.addEdge(route, human);				
+
+		// Move human and update variables
 		grid.moveTo(human, destination.getX(), destination.getY());
-	}
-
-	public float getUsage(Vehicle vehicle) {
-		switch (vehicle.getName()) {
-		case "bicycle":
-			return usage_bicycle;
-		case "electric_bycicle":
-			return usage_electric_bicycle;
-		case "normal_car":
-			return usage_normal_car;
-		case "hybrid_car":
-			return usage_hybrid_car;
-		case "electric_car":
-			return usage_electric_car;
-		case "public_transport":
-			return usage_public_transport;
-		case "motor":
-			return usage_motor;
-		}
-		return 0;
-	}
-	
-	public float getAvgUtil(Vehicle vehicle) {
-		switch (vehicle.getName()) {
-		case "bicycle":
-			return avgUtil_bicycle;
-		case "electric_bycicle":
-			return avgUtil_electric_bicycle;
-		case "normal_car":
-			return avgUtil_normal_car;
-		case "hybrid_car":
-			return avgUtil_hybrid_car;
-		case "electric_car":
-			return avgUtil_electric_car;
-		case "public_transport":
-			return avgUtil_public_transport;
-		case "motor":
-			return avgUtil_motor;
-		}
-		return 0;
-	}
-
-	public void setUsage(Vehicle vehicle, float num) {
-		switch (vehicle.getName()) {
-		case "bicycle":
-			usage_bicycle = num;
-		case "electric_bycicle":
-			usage_electric_bicycle = num;
-		case "normal_car":
-			usage_normal_car = num;
-		case "hybrid_car":
-			usage_hybrid_car = num;
-		case "electric_car":
-			usage_electric_car = num;
-		case "public_transport":
-			usage_public_transport =num;
-		case "motor":
-			usage_motor = num;
-		}
-	}
-	
-	public void setAvgUtil(Vehicle vehicle, float num) {
-		switch (vehicle.getName()) {
-		case "bicycle":
-			avgUtil_bicycle = num;
-		case "electric_bycicle":
-			avgUtil_electric_bicycle = num;
-		case "normal_car":
-			avgUtil_normal_car = num;
-		case "hybrid_car":
-			avgUtil_hybrid_car = num;
-		case "electric_car":
-			avgUtil_electric_car = num;
-		case "public_transport":
-			avgUtil_public_transport =num;
-		case "motor":
-			avgUtil_motor = num;
-		}
-	}
-		
-	
+		human.totalEmissions += vehicle.getTravelEmission() * route.getTravelDistance();
+		human.happiness += route.getUtility();		
+		previousRoute = route;
+	}	
 }

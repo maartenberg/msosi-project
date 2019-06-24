@@ -1,5 +1,6 @@
 package loadPoles;
 
+import loadPoles.ScenarioTree.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -10,11 +11,13 @@ import repast.simphony.parameter.Parameters;
 import repast.simphony.random.RandomHelper;
 import repast.simphony.space.graph.Network;
 import repast.simphony.space.graph.RepastEdge;
+import repast.simphony.util.collections.IndexedIterable;
 
 public class ConsumatModel {
 	Context<Object> context;
 	Network<Object> consumerMarket;
-	
+	DataUpdater dataUpdater;
+
 	/**
 	 * Human "parent" of this class
 	 */
@@ -46,7 +49,12 @@ public class ConsumatModel {
 	public ConsumatModel(Human human, Context<Object> context) {
 		this.human = human;		
 		this.context = context;
-		//this.consumerMarket = (Network<Object>) this.context.getProjection("consumermarket");		
+
+		IndexedIterable<Object> dataUpdaters = context.getObjects(DataUpdater.class);
+		Iterator<Object> dataUpdaterIterator = dataUpdaters.iterator();
+		while(dataUpdaterIterator.hasNext()) {
+			this.dataUpdater = (DataUpdater) dataUpdaterIterator.next();
+		}		
 		
 		Parameters params = RunEnvironment.getInstance().getParameters();
 		uncertaintyThreshold = params.getFloat("consumatUncertaintyThreshold");
@@ -207,23 +215,37 @@ public class ConsumatModel {
 	}
 	
 	// Buy a product
-	public void buyProduct(Vehicle vehicle, boolean initial) {			
-		//Network<Object> consumerMarket = (Network<Object>) this.context.getProjection("consumermarket");	
-		//Remove product from list of products and add to available vehicles
+	public void buyProduct(Vehicle vehicle, boolean initial) {		
+		// Human can only have one car	
+		Vehicle oldCar = null;
+		if(vehicle.isCar()) {
+			for(Vehicle v : human.vehicles) {
+				if(v.isCar()) {
+					oldCar = v;
+					human.vehicles.removeIf(obj -> obj.equals(v));
+					break;
+				}
+			}
+		}
+		
+		// Remove product from list of products and add to available vehicles
 		for(Vehicle product : products) {
-			if(product.equals(vehicle)) {				
-				human.totalEmissions += vehicle.getPurchaseEmission();
+			if(product.equals(vehicle)) {			
+				if(!initial) {
+					human.totalEmissions += vehicle.getPurchaseEmission();
+					human.funds -= vehicle.getPurchaseCost();	
+				}
 				human.vehicles.add(product);
 				products.removeIf(obj -> obj.equals(product));
-				//consumerMarket.addEdge(human, product);
 				break;
 			}
 		}
 		
-		//If it is not the "initial" adding of the product, affect human funds
-		if(!initial) {
-			human.funds -= vehicle.getPurchaseCost();	
-		}		
+		if(oldCar != null) {
+			products.add(oldCar);
+		}				
+
+		dataUpdater.purchaseUpdate(vehicle, initial);	
 	}
 	
 	// Returns true if the human can afford the vehicle
@@ -258,7 +280,8 @@ public class ConsumatModel {
 		
 		//Average utility of the used vehicles
 		//TODO: test if this function works as expected
-		float avgUsageUtil = human.travel.getAvgUtil(vehicle);
+		//float avgUsageUtil = human.travel.getAvgUtil(vehicle);
+		float avgUsageUtil = dataUpdater.hd.getAverageHappiness(vehicle);
 		double productSatisfaction = avgUsageUtil * human.agentPreference.getUtilityFactor(vehicle);
 		
 		// Calculate expected satisfaction for this vehicle

@@ -291,7 +291,7 @@ public class Neighbourhood {
 				Iterable<RepastEdge<Object>> colleagues = workingin.getInEdges(workplace);
 				Iterator<RepastEdge<Object>> colleguesIterator = colleagues.iterator();
 				
-				// Human and collegue are added to social network with 20% chance
+				// Human and colleague are added to social network with 20% chance
 				while(colleguesIterator.hasNext()) {
 					Human colleague = (Human) colleguesIterator.next().getSource();				
 					if(RandomHelper.nextDoubleFromTo(0, 1) < 0.20) {

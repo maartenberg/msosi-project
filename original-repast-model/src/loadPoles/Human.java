@@ -74,14 +74,15 @@ public class Human {
 	
 		carUser = false;
 		for(Vehicle v : vehicles) {
-			if(v.getName() == "normal_car" || v.getName() == "hybrid_car" || v.getName() == "electric_car") {
+			if(v.isCar()) {
 				carUser = true;
+				break;
 			}
 		}		
 		
 		name = String.valueOf(RandomHelper.nextDoubleFromTo(0, 2));
 		name = String.valueOf(context.getObjects(Human.class).size());
-		happiness = 0.5f;
+		happiness = 0;
 	}
 	
 	// Initialise what vehicles this human has based on their traits
@@ -144,8 +145,7 @@ public class Human {
 	private void initAgentPreferences() {
 
 		int maxv = 0;
-		for (int i = 0; i < valueInit.length/2; i ++)
-		{
+		for (int i = 0; i < valueInit.length/2; i ++) {
 			//assign a value to the valueWeight (i) and the contrastWeight (j) so that:
 			//i is between 0 and 150
 			//if i == 0, j >= 50 and the other way around

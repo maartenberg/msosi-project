@@ -216,8 +216,7 @@ class Car extends Vehicle {
 	/*
 	 * Represents the type of the car (i.e. normal, hybrid, electric)
 	 */
-	private String type;
-	
+	private String type;	
 	
 	public Car(String type, int vehicleClass) {
 		this.type = type;

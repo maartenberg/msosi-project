@@ -31,7 +31,7 @@
 									
 		/>
 				<parameter name="humancount" displayName="Human count" type="int" 
-						defaultValue="20" 
+						defaultValue="100" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									

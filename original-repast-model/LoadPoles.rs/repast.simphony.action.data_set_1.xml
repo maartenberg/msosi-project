@@ -1,5 +1,5 @@
 <repast.simphony.data2.engine.DataSetDescriptor simphonyVersion="2.6.0">
-  <name>Happiness</name>
+  <name>Total Emission Data</name>
   <type>AGGREGATE</type>
   <inclTick>true</inclTick>
   <inclBatchRun>false</inclBatchRun>
@@ -11,17 +11,71 @@
     <pType>LAST</pType>
     <duration>-1.0</duration>
     <frequency>REPEAT</frequency>
-    <hashCode>-1983941307</hashCode>
+    <hashCode>-1697991265</hashCode>
   </scheduleParams>
   <atEnd>false</atEnd>
   <methodDataSources class="linked-hash-map">
     <entry>
-      <string>Happiness</string>
+      <string>Total</string>
       <repast.simphony.data2.engine.MethodDataSourceDefinition>
-        <id>Happiness</id>
-        <className>loadPoles.Human</className>
-        <methodName>getHappiness</methodName>
-        <aggType>MEAN</aggType>
+        <id>Total</id>
+        <className>loadPoles.ScenarioTree.EmissionData</className>
+        <methodName>getTotalEmission</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>Electric Bicycle</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>Electric Bicycle</id>
+        <className>loadPoles.ScenarioTree.EmissionData</className>
+        <methodName>getElectricBicycleEmission</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>Motor</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>Motor</id>
+        <className>loadPoles.ScenarioTree.EmissionData</className>
+        <methodName>getMotorEmission</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>Public Transport</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>Public Transport</id>
+        <className>loadPoles.ScenarioTree.EmissionData</className>
+        <methodName>getPublicTransportEmission</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>Normal Car</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>Normal Car</id>
+        <className>loadPoles.ScenarioTree.EmissionData</className>
+        <methodName>getNormalCarEmission</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>Hybrid Car</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>Hybrid Car</id>
+        <className>loadPoles.ScenarioTree.EmissionData</className>
+        <methodName>getHybridCarEmission</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
+    <entry>
+      <string>Electric Car</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>Electric Car</id>
+        <className>loadPoles.ScenarioTree.EmissionData</className>
+        <methodName>getElectricCarEmission</methodName>
+        <aggType>SUM</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>
   </methodDataSources>
