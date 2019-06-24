@@ -200,7 +200,7 @@ class PublicTransport extends Vehicle {
 		comfort = 0.7f;
 		actionRadius = 100;	
 		speed = 0.7f;
-		travelEmission = 20;  //Emission from the energy needed to charge
+		travelEmission = 65;  //Emission from the energy needed to charge
 	}
 }
 
@@ -268,7 +268,7 @@ class Car extends Vehicle {
 	
 	private void initElectric() {
 		name="electric_car";
-		travelEmission = 23;  // Emission from the energy used to charge
+		travelEmission = 70;  // Emission from the energy used to charge
 		// TODO Anouk: Make travelEmission configurable to represent how 'green'
 		// the electricity is.
 		upkeepCost = 0.01f;

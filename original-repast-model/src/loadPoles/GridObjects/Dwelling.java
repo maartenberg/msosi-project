@@ -8,8 +8,6 @@ import repast.simphony.space.graph.Network;
 import repast.simphony.space.grid.Grid;
 
 public class Dwelling {
-
-	private List<Human> inhabitants;
 	Context<Object> context;
 	private String name;
 	private ParkingLot parkingSpaces;
@@ -18,12 +16,7 @@ public class Dwelling {
 		this.context = context;
 		//number them.
 		this.name = String.valueOf(context.getObjects(Dwelling.class).size());
-	}
-	
-	//A new human starts living here
-	public void moveIn(Human inhabitant) {
-		inhabitants.add(inhabitant);
-	}
+	}	
 	
 	//Returns the amount of humans that have a certain type of car (chargeable or not) to park that live in this dwelling
 	public int getAmountOfParkingType(boolean chargable) {		

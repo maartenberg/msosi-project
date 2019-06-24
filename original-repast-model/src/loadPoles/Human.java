@@ -78,7 +78,7 @@ public class Human {
 		}		
 		
 		name = String.valueOf(context.getObjects(Human.class).size());
-		happiness = 0.5f;
+		happiness = 0;
 	}
 	
 	// Initialise what vehicles this human has based on their traits

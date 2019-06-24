@@ -121,7 +121,7 @@ public class HumanTravel {
 	private Route findTransitRoute(GridPoint destination, Vehicle vehicle) {
 		GridPoint currentLocation = grid.getLocation(human);
 		
-		// Find closest transits stops at beginning and end of route
+		// Find closest transit stops at beginning and end of route
 		TransitStop from = findClosestTransitStop(currentLocation);
 		TransitStop to = findClosestTransitStop(destination);
 		
