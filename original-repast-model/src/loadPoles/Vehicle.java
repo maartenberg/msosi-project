@@ -161,7 +161,7 @@ class Motor extends Vehicle{
 		purchaseCost = 7500;
 		upkeepCost = 0.05f;
 		kilometerCost = 0.08f;
-		comfort = 0.8f;
+		//comfort = 0.8f;
 		actionRadius = 250;		
 		speed = 1;
 		travelEmission = 137;
@@ -178,7 +178,7 @@ class Bicycle extends Vehicle {
 			purchaseCost = 300;
 			upkeepCost = 0.001f;
 			kilometerCost = 0;
-			comfort = 0.3f;
+			//comfort = 0.3f;
 			actionRadius = 15;	
 			speed = 0.2f;
 			travelEmission = 0;			
@@ -190,7 +190,7 @@ class Bicycle extends Vehicle {
 			purchaseCost = 1000;
 			upkeepCost = 0.05f;
 			kilometerCost = 0.01f;
-			comfort = 0.5f;
+			//comfort = 0.5f;
 			actionRadius = 60;	
 			speed = 0.5f;
 			travelEmission = 5 * params.getFloat("electricityEmissionsFactor"); //Emission from the energy needed to charge
@@ -205,10 +205,10 @@ class PublicTransport extends Vehicle {
 		purchaseCost = 0;
 		upkeepCost = 0;
 		kilometerCost = 0.17f;
-		comfort = 0.7f;
+		//comfort = 0.7f;
 		actionRadius = 100;	
 		speed = 0.7f;
-		travelEmission = 20;  //Emission from the energy needed to charge
+		travelEmission = 20; 
 	}
 }
 

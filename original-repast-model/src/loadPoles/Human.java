@@ -45,10 +45,13 @@ public class Human {
 	/*
 	 * Represents an array in which this humans values can be stored 
 	 */
-	float[] valueInit = new float[9];
+	float[] valueInit = new float[4];
 	
 	/* Represents this human's CO2 footprint. */
 	public float totalEmissions = 0;
+	
+	/* Represents this human's main valuesection */
+	protected int agentType;
 	
 	boolean carUser;
 	String name;
@@ -140,24 +143,40 @@ public class Human {
 	// Initialise the preferences that this human has
 	private void initAgentPreferences() {
 
+		int maxv = 0;
 		for (int i = 0; i < valueInit.length/2; i ++)
 		{
-			float valueWeight = RandomHelper.nextIntFromTo(0, 100);
-			//float valueWeight = 0.4f;
-			float contrastWeight = 100 - valueWeight;
-			float c = 100f; 
-			
-			//if (100-(c/2))
-			
-			int j = i+5;
+			//assign a value to the valueWeight (i) and the contrastWeight (j) so that:
+			//i is between 0 and 150
+			//if i == 0, j >= 50 and the other way around
+			//i + j together are between 50 and 150
+			//j cannot be smaller than 0
+			int valueWeight = RandomHelper.nextIntFromTo(0, 150);
+			int contrastWeight= RandomHelper.nextIntFromTo(Math.max(0, 50-valueWeight), 150 - valueWeight);
+
+			int j = i+valueInit.length/2;
 			valueInit[i] = valueWeight;
 			valueInit[j] = contrastWeight;	
+			
+			
+			//determine the type of agent by logging what value has the highest temperature
+			if(valueWeight > maxv)
+			{
+				maxv = valueWeight;
+				this.agentType = i;
+			}
+			
+			if (contrastWeight > maxv)
+			{
+				maxv = contrastWeight;
+				this.agentType = j;
+			}
 		}
 		//System.out.println("This hums values are" + valueInit);
 		
 		this.agentPreference = new AgentPreferences(valueInit, this);
-		//this.preference = new Preferences(0.103f, 0.023f, 0.14f, 0.132f, 0.133f, 0.136f, 0.092f, 0.112f, 0.053f, 0.088f, this);
 	}
+	
 	// Function to park all cars of this human on initialisation
 	public void parkAllCars() {
 		if(!carUser) {

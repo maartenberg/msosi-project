@@ -1,5 +1,7 @@
 package loadPoles;
 
+import repast.simphony.random.RandomHelper;
+
 public class AgentPreferences {
 	protected float utilityFactor_electric_car;
 	protected float utilityFactor_electric_bicycle;
@@ -8,184 +10,197 @@ public class AgentPreferences {
 	protected float utilityFactor_bicycle;
 	protected float utilityFactor_public_transport;
 	protected float utilityFactor_motor;
+	protected int agentActionType;
 	private Human hum;	
 
 	float r, t, l;
 	float dl = -0.15f;
 	float fluidlevels[];
+	float positiveFactor = 1.4f;//TODO Maarten: deze factoren kunnen we evt. actief aanpasbaar maken
+	float negativeFactor = 0.6f;
+	float dlUp;
+	float dlDown;
+	float rhighest;
 
 	public AgentPreferences(float[] valueTemps, Human hum)
 	{
 		this.hum = hum;
-		fluidlevels = new float[] { 0.4f, 0.4f, 0.4f, 0.4f, 0.4f, 0.4f, 0.4f, 0.4f, 0.4f, 0.4f };
+		fluidlevels = new float[] { 100f, 100f, 100f, 100f};
+		agentActionType =  RandomHelper.nextIntFromTo(0, 3);
 	}
 
 	public void Update(float[] valueTemps, Human hum, float[] prevFluids) {
-		System.out.println("Human = " + hum);
-		
-		for (int n = 0; n <valueTemps.length ; n++) {
+			//set the comparison value to the max distance 
+			rhighest = -1000;
+			System.out.println("\nHuman: " + hum.getName() + "\nagentActionType:" + agentActionType);
+			for (int n = 0; n <valueTemps.length ; n++) {
+						
+			float temps = valueTemps[n];	
+			fluidlevels[n] = prevFluids[n] + updateFluids(n, temps);
 			
-			//System.out.println("Current value = " +n);
-			updateFluids(n);
-
-			fluidlevels[n] = prevFluids[n] + dl;
-			System.out.println(n+ "'s fluid level = " + fluidlevels[n]);
+			//determine the upper and lower levels of the fluid tanks
+			if(fluidlevels[n]> 200)
+			{
+				fluidlevels[n] =200;
+			}
+			if(fluidlevels[n] < 0)
+			{
+				fluidlevels[n] = 0;
+			}
 			
-			float rlowest = 100;
-			r = ((fluidlevels[n] - valueTemps[n]) / valueTemps[n]) * 100;
-
-			if (r < rlowest) {
-				rlowest = r;
+			r = (-((fluidlevels[n] - valueTemps[n])) / valueTemps[n]) * 100;
+			System.out.print("\nvalue " + n + "\nvalueTemp: " + valueTemps [n] + "\nfluidlevels" + fluidlevels[n] + "\nr " + r +"\nfluid levels update:" + dl +"\n");
+			
+			if (r > rhighest) {
+				rhighest = r;
 				t = n;
 			}
 		}
-		System.out.println(t + " is the value that needs most attention");
 
-		// In case power is the most needed
-		if (t == 1) {
-			utilityFactor_electric_car = 1.4f;
+
+		// In case self-trancendence is the most needed value
+		if (t == 0) {
+			agentActionType = 0;
+			utilityFactor_electric_car = 1f * this.positiveFactor;
 			utilityFactor_electric_bicycle = 1f;
-			utilityFactor_normal_car = 1.4f;
+			utilityFactor_normal_car = 1f * this.negativeFactor;
 			utilityFactor_hybrid_car = 1f;
 			utilityFactor_bicycle = 1f;
-			utilityFactor_public_transport = 0.6f;
-			utilityFactor_motor = 1f;
-			System.out.println("updated power levels");
-
-		} else {
-			System.out.println("power is not the most needed");
+			utilityFactor_public_transport = 1f * this.positiveFactor;
+			utilityFactor_motor = 1f * this.negativeFactor;
 		}
+	
+		// In case conservation is the most needed value
+	if (t == 1) {
+		agentActionType =1;
+		utilityFactor_electric_car = 1f;
+		utilityFactor_electric_bicycle = 1f;
+		utilityFactor_normal_car = 1f * 2* this.positiveFactor; 
+		utilityFactor_hybrid_car = 1f;
+		utilityFactor_bicycle = 1f;
+		utilityFactor_public_transport = 1f * this.negativeFactor;
+		utilityFactor_motor = 1f * this.negativeFactor;
+	}
+	
+	// In case self-enhancement is the most needed value
+if (t == 2) {
+	agentActionType = 2;
+	utilityFactor_electric_car = 1f;
+	utilityFactor_electric_bicycle = 1f * this.negativeFactor;
+	utilityFactor_normal_car = 1.f * this.positiveFactor;
+	utilityFactor_hybrid_car = 1f * this.positiveFactor;
+	utilityFactor_bicycle = 1f;
+	utilityFactor_public_transport = 1f * this.negativeFactor;
+	utilityFactor_motor = 1f;
+
+}
+
+// In case openness to change is the most needed value
+if (t == 3) {
+agentActionType =3;
+utilityFactor_electric_car = 1f;
+utilityFactor_electric_bicycle = 1f;
+utilityFactor_normal_car = 1f * this.negativeFactor;
+utilityFactor_hybrid_car = 1f * this.positiveFactor;
+utilityFactor_bicycle = 1f;
+utilityFactor_public_transport = 1f * this.negativeFactor;
+utilityFactor_motor = 1f * this.positiveFactor;
+
+}
+
+System.out.println("\new action profile: " + agentActionType);
 	}
 
-	private float updateFluids(int n) {
+	private float updateFluids(int n, float temps) {
 		// fluid levels go down by -0.15 by default
 		// if a vehicle was the previous action, some values have been fulfilled
 
-		dl = -0.15f;
+		dl = -10f;
+		dlUp = (100f - temps) * 0.2f;
+		dlDown = -1 * dlUp;
 
 		if(hum.travel.pastVehicle == null) {
 			dl = 0;
+			System.out.println("no past vehicle is listed");
 		}
 		
 		else if(hum.travel.pastVehicle.getName() == "electric_car") {
-			//System.out.println("EC updatedd");
-			// here follows a list of the values that are linked to this action
-			if (n == 6 || n == 7 || n == 8 || n == 0 || n == 1) {
+			// here follows a list of the values that are positively linked to this action
+			if (n == 0) {
 				// if the values have been fulfilled, the fluid level OF THIS VALUE rises with 0.3
-				dl = 0.3f;
-				// some values have a double score for this vehicle
-				if (n == 3) {
-					dl *= 1.5;
-				}
+				dl = dlUp;
 			}
-			// here follows a list of the values that have received extra punishment
-			if (n == 9 || n == 2 || n == 4) {
-				// if the values have been punished, the fluid level goes down with 0.2
-				dl = -0.2f;				
-			}
+			// There are no punishments for electric cars
 		}
 
 		else if(hum.travel.pastVehicle.getName() == "normal_car") {
-			//.out.println("ICEV updatedd");
 			// here follows a list of the values that have been fulfilled
-			if (n == 8 || n == 9 || n == 0 || n == 0 || n == 2 || n == 4 || n == 6 || n == 7 || n == 8) {
+			if (n == 1|| n == 2) {
 				// if the values have been fulfilled, the fluid level rises with 0.3
-				dl = 0.3f;
+				dl = dlUp;
 				// some values have a double score for this vehicle
-				if (n == 8 || n == 9 || n == 0 || n == 0 || n == 2 || n == 4) {
+				if (n == 1) {
 					dl *= 1.5;
 				}				
 			}
 			// here follows a list of the values that have received extra punishment
-			if (n == 5 || n == 3) {
-				// if the values have been punished, the fluid level goes down with 0.2
-				// all values have a double score for this vehicle
-				dl = -0.3f;				
+			if (n == 0 || n == 3) {
+				// if the values have been punished, the fluid level goes down with 0.3
+				dl = dlDown;				
 			}
 		}
 
 		else if(hum.travel.pastVehicle.getName() == "hybrid_car") {
-			//System.out.println("hybrid updatedd");
 			// here follows a list of the values that have been fulfilled
-			if (n == 2 || n == 0 || n == 1) {
+			if (n == 2 || n == 3 ) {
 				// if the values have been fulfilled, the fluid level rises with 0.3
-				dl = 0.3f;				
+				dl = dlUp;				
 			}
-			// here follows a list of the values that have received extra punishment
-			if (n == 7) {
-				// if the values have been punished, the fluid level goes down with 0.2
-				dl = -0.2f;				
-			}
+			// There are no punishments for this vehicle type
 		}
 
 		else if(hum.travel.pastVehicle.getName() == "bicycle") {
-			//System.out.println("bicycle updated");
-			// here follows a list of the values that have been fulfilled
-			if (n == 7 || n == 9 || n == 5 || n == 6 || n == 8) {				
-				// if the values have been fulfilled, the fluid level rises with 0.3
-				dl = 0.3f;
-				// some values have a double score for this vehicle
-				if (n == 7 || n == 9) {
-					dl *= 1.5;
-				}				
-			}
-			// here follows a list of the values that have received extra punishment
-			if (n == 1) {
-				// if the values have been punished, the fluid level goes down with 0.2
-				dl = -0.2f;				
-			}
+			//there is a neutral stance towards bikes
+			dl = 0;
 		}
 
 		else if(hum.travel.pastVehicle.getName() == "electric_bicycle") {
 			//System.out.println("e-bike updated");
-			// here follows a list of the values that have been fulfilled
-			if (n == 1 || n == 2 || n == 3) {				
-				// if the values have been fulfilled, the fluid level rises with 0.3
-				dl = 0.3f;				
+			// here follows a list of the values that have received extra punishment
+			if (n == 2) {				
+				dl = dlDown;				
 			}
 		}
 
 		else if(hum.travel.pastVehicle.getName() == "public_transport") {
-			//System.out.println("OV updatedd");
+			//System.out.println("OV updated");
 			// here follows a list of the values that have been fulfilled
-			if (n == 5) {
+			if (n == 0) {
 				// if the values have been fulfilled, the fluid level rises with 0.3
-				dl = 0.3f;
+				dl =dlUp;
 			}
 			// here follows a list of the values that have received extra punishment
-			if(n == 9 || n == 9 || n == 1 || n == 2 || n == 4 || n == 0) {
+			if(n == 1 || n == 2 || n == 3) {
 				// if the values have been punished, the fluid level goes down with 0.2
-				dl = -0.2f;
-				// some values have a double -score for this vehicle
-				if(n == 0) {
-					dl *= 1.5;
-				}
+				dl = dlDown;
 			}
 		}
 
 		else if(hum.travel.pastVehicle.getName() == "motor") {
-			//System.out.println("motor updatedd");
+			//System.out.println("motor updated");
 			// here follows a list of the values that have been fulfilled
-			if(n == 3 || n == 4) {
+			if(n == 3 ) {
 				// if the values have been fulfilled, the fluid level rises with 0.3
-				dl = 0.3f;
-				// some values have a double score for this vehicle
-				if(n == 4) {
-					dl *= 1.5;
-				}
+				dl = dlUp;
 			}
 			// here follows a list of the values that have received extra punishment
-			if(n == 6 || n == 7 || n == 8) {
+			if(n == 0 || n == 1) {
 				// if the values have been punished, the fluid level goes down with 0.2
-				dl = -0.2f;
+				dl = dlDown;
 			}
 		}
-
-		if(dl == 0)	{
-			System.out.println("Be careful: preferences are not updated");
-		}
 		
-		System.out.println("value "+  n + "is updated with " + dl);
+		//System.out.println("value "+  n + "is updated with " + dl);
 		return dl;		
 	}
 	

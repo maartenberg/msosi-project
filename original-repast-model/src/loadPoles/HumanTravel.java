@@ -21,6 +21,24 @@ public class HumanTravel {
 	Vehicle pastVehicle;
 	Route previousRoute;
 	
+	protected float usage_electric_car;
+	protected float usage_electric_bicycle;
+	protected float usage_normal_car;
+	protected float usage_hybrid_car;
+	protected float usage_bicycle;
+	protected float usage_public_transport;
+	protected float usage_motor;
+	
+	protected float avgUtil_electric_car;
+	protected float avgUtil_electric_bicycle;
+	protected float avgUtil_normal_car;
+	protected float avgUtil_hybrid_car;
+	protected float avgUtil_bicycle;
+	protected float avgUtil_public_transport;
+	protected float avgUtil_motor;
+	
+	double walkingPunishment;
+	
 	public HumanTravel(Human human, Context<Object> context, Grid<Object> grid) {
 		this.human = human;
 		this.context = context;
@@ -215,32 +233,72 @@ public class HumanTravel {
 			if(route == null) {
 				utility = 1;				
 			}
-			else {							
-				// The less comfortable, the less utility
-				utility *= vehicle.getComfort();
-				
-				// The slower it is, the less utility
-				utility *= vehicle.getSpeed();	
+			else {		
+				utility *= human.agentPreference.getUtilityFactor(vehicle);
+						
+				//extra in case value 1 is most important
+				if (human.agentPreference.agentActionType == 1)
+				{
+					if(vehicle.getActionRadius() < route.getTravelDistance() + 20)
+					{
+						double punishment = 6000;
+						utility -= punishment;
+					}
+				} 
 				
 				//If the vehicle cannot travel this distance comfortably, subtract a lot from utility			
 				if(vehicle.getActionRadius() < route.getTravelDistance()) {
 					//Get the difference between the action radius and distance to travel, and use this as punishment
-					double punishment = route.getTravelDistance() - vehicle.getActionRadius();
-					utility -= punishment * 10;
+					//double punishment = route.getTravelDistance() - vehicle.getActionRadius();
+					double punishment = 6000;
+					utility -= punishment;
 				}
 				
-				//The more emission of CO2, the worse the utility
-				utility -= human.traits.environmentFactor * (route.getTravelDistance() * vehicle.getTravelEmission());
+				// The slower it is, the less utility
+				//extra in case value 1 or 2 are most important
+				if(human.agentPreference.agentActionType == 1 || human.agentPreference.agentActionType == 2)
+				{
+				utility *= vehicle.getSpeed()*2;
+				}
+				else {
+				utility *= vehicle.getSpeed();
+				}
 				
-				//The more the cost of travelling impacts the income, the worse the utility
+				//The more emision of CO2, the worse the utility, 
+				//only in case value 0 is most important
+				if(human.agentPreference.agentActionType == 0) {
+				utility -= vehicle.getTravelEmission();
+				}
+				
+				//The more the cost of traveling impacts the income, the worse the utility
 				utility *= (1 - (route.getTravelDistance() * vehicle.getKilometerCost())/human.traits.income);
 				
-				//The more we have to walk between stops during the route, the worse the utility
-				utility -= route.getWalkingDistance() * 5;
+				if(route.getWalkingDistance() > 15)
+				{
+					walkingPunishment = route.getWalkingDistance() * 10;
+				}
+				else {
+					walkingPunishment = route.getWalkingDistance();
+				}
 				
+				//The more we have to walk between stops during the route, the worse the utility
+				//extra in case value 2 is most important
+				if(human.agentPreference.agentActionType ==2) {
+				walkingPunishment *= 10;
+				}
+				//less in case value 0 is most important
+				else if(human.agentPreference.agentActionType == 0)
+				{
+					walkingPunishment *= 2;
+				}
+				else {
+					walkingPunishment *= 5;
+				}
+				
+				utility -= walkingPunishment;
 				//Make sure utility is not lower than 1, so at least one vehicle is always chosen
-				utility = Math.max(1, utility);					
-			}
+				utility = Math.max(1, utility);		
+				}
 			
 			route.setUtility(utility);
 			
@@ -248,10 +306,15 @@ public class HumanTravel {
 				bestUtility = utility;
 				bestRoute = route;
 			}			
-		}		
+		}
+		
+		float usage = (float) (this.getUsage(bestRoute.getVehicle())+1);
+		this.setUsage(bestRoute.getVehicle(), usage);
+		float avgUtility = (float) ((this.getAvgUtil(bestRoute.getVehicle()) + bestRoute.getUtility()/5000)/this.getUsage(bestRoute.getVehicle()));
+		this.setAvgUtil(bestRoute.getVehicle(), avgUtility);
 		return bestRoute;		
 	}	
-	
+
 	// Finds a random destination for the Human to go to
 	private GridPoint getDestination() {
 		GridPoint currentLocation = grid.getLocation(human);
@@ -338,10 +401,12 @@ public class HumanTravel {
 		
 		// The following is just printing information to console. Can be deleted if obsolete
 		System.out.println( "\nHUMAN " + human.getName() + ":" +
-							"\n travelling from: (" + currentLocation.getX() + ", " + currentLocation.getY() + ")"
-							+ " to: (" + destination.getX() + ", " + destination.getY() + ")"
-							+ "\n with distance: " + grid.getDistance(currentLocation, destination) 
-							+ "\n and vehicle: " + vehicle.getName());
+							//"\n travelling from: (" + currentLocation.getX() + ", " + currentLocation.getY() + ")"
+							//+ " to: (" + destination.getX() + ", " + destination.getY() + ")"
+							 "\n with distance: " + grid.getDistance(currentLocation, destination) 
+							+ "\n and vehicle: " + vehicle.getName()
+							+"\n and utility " + route.getUtility()
+							+ "\n and value-profile: " + human.agentPreference.agentActionType);
 		
 		if(vehicle.isCar()) {
 			System.out.println(" went from parking space at: (" + currentFrom.getX() + ", " + currentFrom.getY() + ")"
@@ -371,7 +436,86 @@ public class HumanTravel {
 		journeysNetwork.addEdge(route, human);		
 		
 		previousRoute = route;
+		pastVehicle = vehicle;
 		grid.moveTo(human, destination.getX(), destination.getY());
+	}
+
+	public float getUsage(Vehicle vehicle) {
+		switch (vehicle.getName()) {
+		case "bicycle":
+			return usage_bicycle;
+		case "electric_bycicle":
+			return usage_electric_bicycle;
+		case "normal_car":
+			return usage_normal_car;
+		case "hybrid_car":
+			return usage_hybrid_car;
+		case "electric_car":
+			return usage_electric_car;
+		case "public_transport":
+			return usage_public_transport;
+		case "motor":
+			return usage_motor;
+		}
+		return 0;
+	}
+	
+	public float getAvgUtil(Vehicle vehicle) {
+		switch (vehicle.getName()) {
+		case "bicycle":
+			return avgUtil_bicycle;
+		case "electric_bycicle":
+			return avgUtil_electric_bicycle;
+		case "normal_car":
+			return avgUtil_normal_car;
+		case "hybrid_car":
+			return avgUtil_hybrid_car;
+		case "electric_car":
+			return avgUtil_electric_car;
+		case "public_transport":
+			return avgUtil_public_transport;
+		case "motor":
+			return avgUtil_motor;
+		}
+		return 0;
+	}
+
+	public void setUsage(Vehicle vehicle, float num) {
+		switch (vehicle.getName()) {
+		case "bicycle":
+			usage_bicycle = num;
+		case "electric_bycicle":
+			usage_electric_bicycle = num;
+		case "normal_car":
+			usage_normal_car = num;
+		case "hybrid_car":
+			usage_hybrid_car = num;
+		case "electric_car":
+			usage_electric_car = num;
+		case "public_transport":
+			usage_public_transport =num;
+		case "motor":
+			usage_motor = num;
+		}
+	}
+	
+	public void setAvgUtil(Vehicle vehicle, float num) {
+		switch (vehicle.getName()) {
+		case "bicycle":
+			avgUtil_bicycle = num;
+		case "electric_bycicle":
+			avgUtil_electric_bicycle = num;
+		case "normal_car":
+			avgUtil_normal_car = num;
+		case "hybrid_car":
+			avgUtil_hybrid_car = num;
+		case "electric_car":
+			avgUtil_electric_car = num;
+		case "public_transport":
+			avgUtil_public_transport =num;
+		case "motor":
+			avgUtil_motor = num;
+		}
 	}
 		
 	

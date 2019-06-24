@@ -7,6 +7,7 @@ import java.util.List;
 import repast.simphony.context.Context;
 import repast.simphony.engine.environment.RunEnvironment;
 import repast.simphony.parameter.Parameters;
+import repast.simphony.random.RandomHelper;
 import repast.simphony.space.graph.Network;
 import repast.simphony.space.graph.RepastEdge;
 
@@ -34,6 +35,7 @@ public class ConsumatModel {
 	 */
 	float satisfaction;
 	float uncertainty;
+	double socialFactor;
 	
 	/*
 	 * Represents at what threshold the agent considers itself satisfied or uncertain
@@ -52,7 +54,7 @@ public class ConsumatModel {
 		
 		consumatAction = "deliberate";
 		
-		//Initialise list of products
+		//Initialize list of products
 		this.products = new ArrayList<Vehicle>();
 		this.products.add(new Bicycle("electric"));
 		
@@ -76,7 +78,32 @@ public class ConsumatModel {
 			
 			//Number of agents in the network that have this vehicle
 			int x = findVehicleUsage(vehicle);
-			uncertainty += (1 - human.traits.socialFactor)*(1 - x);			
+			//if value 1 is the most important, the social factor is highest
+			if(human.agentType == 1)
+			{
+				socialFactor = RandomHelper.nextDoubleFromTo(0.7, 1f);
+			}
+			//if value 2 is the most important, the social factor might also be high
+			if(human.agentType == 2)
+			{
+				socialFactor = RandomHelper.nextDoubleFromTo(0.45f, 0.95f);
+			}			
+			//if value 1 is the most important, the social factor is most likely low or average
+			if(human.agentType == 1)
+			{
+				socialFactor = RandomHelper.nextDoubleFromTo(0.2f, 0.6f);
+			}
+			//if value 3 is the most important, the social factor will be low
+			if(human.agentType == 3)
+			{
+				socialFactor = RandomHelper.nextDoubleFromTo(0f, 0.35f);
+			}
+			
+			//uncertainty using the preference profiles: 
+			uncertainty += (1 - socialFactor)*(1 - x);	
+			
+			//ALTERNATIVELY: uncertainty with full control
+			//uncertainty += (1 - human.traits.socialFactor)*(1 - x);			
 		}
 		
 		// Decide whether the agent is satisfied and/or uncertain or not
@@ -228,13 +255,19 @@ public class ConsumatModel {
 		int x = findVehicleUsage(vehicle); 
 		
 		// Difference between vehicle characteristics and personal preferences
-		double productSatisfaction = human.agentPreference.getUtilityFactor(vehicle);
 		
-		// TODO Anouk: make this possibly also depend on other factors
-		// i.e. Happiness of humans when traveling
+		//Average utility of the used vehicles
+		//TODO: test if this function works as expected
+		float avgUsageUtil = human.travel.getAvgUtil(vehicle);
+		double productSatisfaction = avgUsageUtil * human.agentPreference.getUtilityFactor(vehicle);
 		
 		// Calculate expected satisfaction for this vehicle
-		double satisfaction = human.traits.socialFactor * (1 - Math.abs(productSatisfaction)) + (1 - human.traits.socialFactor) * x;
+		//with the use of the preference profiles:
+		double satisfaction = socialFactor * (1 - Math.abs(productSatisfaction)) + (1 - socialFactor) * x;
+
+		
+		//ALTERNATIVELY: with full control over the social factor
+		//double satisfaction = human.traits.socialFactor * (1 - Math.abs(productSatisfaction)) + (1 - human.traits.socialFactor) * x;
 		return satisfaction;
 	}
 	

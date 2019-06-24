@@ -48,7 +48,8 @@ public class HumanTraits {
 	boolean isemployed;
 
 	public HumanTraits() {		
-		//Initialise variables, vehicles, and preferences belonging to this human		
+		//Initialise variables, vehicles, and preferences belonging to this human	
+		//TODO Maarten: maak actief aanpasbaar?
 		socialFactor = RandomHelper.nextDoubleFromTo(0, 1);
 		environmentFactor = RandomHelper.nextDoubleFromTo(0, 1);
 		
