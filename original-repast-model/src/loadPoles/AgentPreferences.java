@@ -22,106 +22,98 @@ public class AgentPreferences {
 	float dlDown;
 	float rhighest;
 
-	public AgentPreferences(float[] valueTemps, Human hum)
-	{
+	public AgentPreferences(float[] valueTemps, Human hum) {
 		this.hum = hum;
 		fluidlevels = new float[] { 100f, 100f, 100f, 100f};
 		agentActionType =  RandomHelper.nextIntFromTo(0, 3);
 	}
 
 	public void Update(float[] valueTemps, Human hum, float[] prevFluids) {
-			//set the comparison value to the max distance 
-			rhighest = -1000;
-			System.out.println("\nHuman: " + hum.getName() + "\nagentActionType:" + agentActionType);
-			for (int n = 0; n <valueTemps.length ; n++) {
-						
+		//set the comparison value to the max distance 
+		rhighest = -1000;
+		//System.out.println("\nHuman: " + hum.getName() + "\nagentActionType:" + agentActionType);
+		for (int n = 0; n <valueTemps.length ; n++) {					
 			float temps = valueTemps[n];	
 			fluidlevels[n] = prevFluids[n] + updateFluids(n, temps);
 			
 			//determine the upper and lower levels of the fluid tanks
-			if(fluidlevels[n]> 200)
-			{
+			if(fluidlevels[n]> 200)	{
 				fluidlevels[n] =200;
 			}
-			if(fluidlevels[n] < 0)
-			{
+			if(fluidlevels[n] < 0)	{
 				fluidlevels[n] = 0;
 			}
 			
 			r = (-((fluidlevels[n] - valueTemps[n])) / valueTemps[n]) * 100;
-			System.out.print("\nvalue " + n + "\nvalueTemp: " + valueTemps [n] + "\nfluidlevels" + fluidlevels[n] + "\nr " + r +"\nfluid levels update:" + dl +"\n");
-			
+			//System.out.print("\nvalue " + n + "\nvalueTemp: " + valueTemps [n] + "\nfluidlevels" + fluidlevels[n] + "\nr " + r +"\nfluid levels update:" + dl +"\n");
+				
 			if (r > rhighest) {
 				rhighest = r;
 				t = n;
 			}
+			
+			// In case self-trancendence is the most needed value
+			if (t == 0) {
+				agentActionType = 0;
+				utilityFactor_electric_car = 1f * this.positiveFactor;
+				utilityFactor_electric_bicycle = 1f;
+				utilityFactor_normal_car = 1f * this.negativeFactor;
+				utilityFactor_hybrid_car = 1f;
+				utilityFactor_bicycle = 1f;
+				utilityFactor_public_transport = 1f * this.positiveFactor;
+				utilityFactor_motor = 1f * this.negativeFactor;
+			}
+			
+			// In case conservation is the most needed value
+			if (t == 1) {
+				agentActionType =1;
+				utilityFactor_electric_car = 1f;
+				utilityFactor_electric_bicycle = 1f;
+				utilityFactor_normal_car = 1f * 2* this.positiveFactor; 
+				utilityFactor_hybrid_car = 1f;
+				utilityFactor_bicycle = 1f;
+				utilityFactor_public_transport = 1f * this.negativeFactor;
+				utilityFactor_motor = 1f * this.negativeFactor;
+			}
+			
+			// In case self-enhancement is the most needed value
+			if (t == 2) {
+				agentActionType = 2;
+				utilityFactor_electric_car = 1f;
+				utilityFactor_electric_bicycle = 1f * this.negativeFactor;
+				utilityFactor_normal_car = 1.f * this.positiveFactor;
+				utilityFactor_hybrid_car = 1f * this.positiveFactor;
+				utilityFactor_bicycle = 1f;
+				utilityFactor_public_transport = 1f * this.negativeFactor;
+				utilityFactor_motor = 1f;		
+			}
+			
+			// In case openness to change is the most needed value
+			if (t == 3) {
+				agentActionType =3;
+				utilityFactor_electric_car = 1f;
+				utilityFactor_electric_bicycle = 1f;
+				utilityFactor_normal_car = 1f * this.negativeFactor;
+				utilityFactor_hybrid_car = 1f * this.positiveFactor;
+				utilityFactor_bicycle = 1f;
+				utilityFactor_public_transport = 1f * this.negativeFactor;
+				utilityFactor_motor = 1f * this.positiveFactor;
+			}			
 		}
-
-
-		// In case self-trancendence is the most needed value
-		if (t == 0) {
-			agentActionType = 0;
-			utilityFactor_electric_car = 1f * this.positiveFactor;
-			utilityFactor_electric_bicycle = 1f;
-			utilityFactor_normal_car = 1f * this.negativeFactor;
-			utilityFactor_hybrid_car = 1f;
-			utilityFactor_bicycle = 1f;
-			utilityFactor_public_transport = 1f * this.positiveFactor;
-			utilityFactor_motor = 1f * this.negativeFactor;
-		}
-	
-		// In case conservation is the most needed value
-	if (t == 1) {
-		agentActionType =1;
-		utilityFactor_electric_car = 1f;
-		utilityFactor_electric_bicycle = 1f;
-		utilityFactor_normal_car = 1f * 2* this.positiveFactor; 
-		utilityFactor_hybrid_car = 1f;
-		utilityFactor_bicycle = 1f;
-		utilityFactor_public_transport = 1f * this.negativeFactor;
-		utilityFactor_motor = 1f * this.negativeFactor;
-	}
-	
-	// In case self-enhancement is the most needed value
-if (t == 2) {
-	agentActionType = 2;
-	utilityFactor_electric_car = 1f;
-	utilityFactor_electric_bicycle = 1f * this.negativeFactor;
-	utilityFactor_normal_car = 1.f * this.positiveFactor;
-	utilityFactor_hybrid_car = 1f * this.positiveFactor;
-	utilityFactor_bicycle = 1f;
-	utilityFactor_public_transport = 1f * this.negativeFactor;
-	utilityFactor_motor = 1f;
-
-}
-
-// In case openness to change is the most needed value
-if (t == 3) {
-agentActionType =3;
-utilityFactor_electric_car = 1f;
-utilityFactor_electric_bicycle = 1f;
-utilityFactor_normal_car = 1f * this.negativeFactor;
-utilityFactor_hybrid_car = 1f * this.positiveFactor;
-utilityFactor_bicycle = 1f;
-utilityFactor_public_transport = 1f * this.negativeFactor;
-utilityFactor_motor = 1f * this.positiveFactor;
-
-}
-
-System.out.println("\new action profile: " + agentActionType);
+		
+		//System.out.println("\new action profile: " + agentActionType);		
 	}
 
 	private float updateFluids(int n, float temps) {
 		// fluid levels go down by -0.15 by default
 		// if a vehicle was the previous action, some values have been fulfilled
-
 		dl = -10f;
 		dlUp = (100f - temps) * 0.2f;
 		dlDown = -1 * dlUp;
 
 		if(hum.travel.pastVehicle == null) {
 			dl = 0;
-			System.out.println("no past vehicle is listed");
+			//System.out.println("no past vehicle is listed");
 		}
 		
 		else if(hum.travel.pastVehicle.getName() == "electric_car") {
@@ -208,7 +200,7 @@ System.out.println("\new action profile: " + agentActionType);
 		switch (vehicle.getName()) {
 		case "bicycle":
 			return utilityFactor_bicycle;
-		case "electric_bycicle":
+		case "electric_bicycle":
 			return utilityFactor_electric_bicycle;
 		case "normal_car":
 			return utilityFactor_normal_car;

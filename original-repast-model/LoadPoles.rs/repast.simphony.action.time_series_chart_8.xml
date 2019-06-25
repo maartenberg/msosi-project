@@ -37,8 +37,8 @@
       <SeriesData>
         <label>Hybrid Car</label>
         <color>
-          <red>255</red>
-          <green>0</green>
+          <red>0</red>
+          <green>255</green>
           <blue>255</blue>
           <alpha>255</alpha>
         </color>
@@ -49,8 +49,8 @@
       <SeriesData>
         <label>Electric Car</label>
         <color>
-          <red>255</red>
-          <green>200</green>
+          <red>0</red>
+          <green>255</green>
           <blue>0</blue>
           <alpha>255</alpha>
         </color>
@@ -62,8 +62,8 @@
         <label>Normal Car</label>
         <color>
           <red>0</red>
-          <green>255</green>
-          <blue>0</blue>
+          <green>0</green>
+          <blue>255</blue>
           <alpha>255</alpha>
         </color>
       </SeriesData>
@@ -73,7 +73,7 @@
       <SeriesData>
         <label>Electric Bicycle</label>
         <color>
-          <red>0</red>
+          <red>255</red>
           <green>0</green>
           <blue>255</blue>
           <alpha>255</alpha>

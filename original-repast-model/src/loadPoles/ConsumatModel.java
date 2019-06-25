@@ -39,6 +39,7 @@ public class ConsumatModel {
 	float satisfaction;
 	float uncertainty;
 	double socialFactor;
+	boolean socialFactorInitialised;
 	
 	/*
 	 * Represents at what threshold the agent considers itself satisfied or uncertain
@@ -59,7 +60,7 @@ public class ConsumatModel {
 		Parameters params = RunEnvironment.getInstance().getParameters();
 		uncertaintyThreshold = params.getFloat("consumatUncertaintyThreshold");
 		satisfactionThreshold = params.getFloat("consumatSatisfactionThreshold");
-		
+				
 		consumatAction = "deliberate";
 		
 		//Initialize list of products
@@ -75,9 +76,39 @@ public class ConsumatModel {
 			this.products.add(new Car("electric", 3));
 		}
 	}
+	
+	//Initialise social factor
+	private void initSocialFactor() {
+		//if value 1 is the most important, the social factor is highest
+		if(human.agentType == 1) {
+			socialFactor = RandomHelper.nextDoubleFromTo(0.7, 1);
+			socialFactorInitialised = true;
+		}
+		//if value 2 is the most important, the social factor might also be high
+		if(human.agentType == 2) {
+			socialFactor = RandomHelper.nextDoubleFromTo(0.45, 0.95);
+			socialFactorInitialised = true;
+		}			
+		//if value 1 is the most important, the social factor is most likely low or average
+		if(human.agentType == 3) {
+			socialFactor = RandomHelper.nextDoubleFromTo(0.2, 0.6);
+			socialFactorInitialised = true;
+		}
+		//if value 3 is the most important, the social factor will be low
+		if(human.agentType == 4) {
+			socialFactor = RandomHelper.nextDoubleFromTo(0, 0.35);
+			socialFactorInitialised = true;
+		}
+		else {
+			socialFactor = RandomHelper.nextDoubleFromTo(0, 1);
+		}
+	}
 			
 	// Decides which vehicle to buy, if any
-	public void buy() {	
+	public void buy() {		
+		if(!socialFactorInitialised) {
+			initSocialFactor();
+		}
 		// Calculate satisfaction and uncertainty
 		satisfaction = 0;
 		uncertainty = 0;
@@ -85,34 +116,13 @@ public class ConsumatModel {
 			satisfaction += calcVehicleSatisfaction(vehicle);
 			
 			//Number of agents in the network that have this vehicle
-			int x = findVehicleUsage(vehicle);
-			//if value 1 is the most important, the social factor is highest
-			if(human.agentType == 1)
-			{
-				socialFactor = RandomHelper.nextDoubleFromTo(0.7, 1f);
-			}
-			//if value 2 is the most important, the social factor might also be high
-			if(human.agentType == 2)
-			{
-				socialFactor = RandomHelper.nextDoubleFromTo(0.45f, 0.95f);
-			}			
-			//if value 1 is the most important, the social factor is most likely low or average
-			if(human.agentType == 1)
-			{
-				socialFactor = RandomHelper.nextDoubleFromTo(0.2f, 0.6f);
-			}
-			//if value 3 is the most important, the social factor will be low
-			if(human.agentType == 3)
-			{
-				socialFactor = RandomHelper.nextDoubleFromTo(0f, 0.35f);
-			}
-			
-			//uncertainty using the preference profiles: 
-			uncertainty += (1 - socialFactor)*(1 - x);	
-			
-			//ALTERNATIVELY: uncertainty with full control
-			//uncertainty += (1 - human.traits.socialFactor)*(1 - x);			
+			double x = findVehicleUsage(vehicle);			
+			uncertainty += (1 - socialFactor)*(1 - x);		
 		}
+		
+		System.out.println("HUMAN: " + human.getName());
+		System.out.println("  satisfaction: " + satisfaction);
+		System.out.println("  uncertainty: " + uncertainty);
 		
 		// Decide whether the agent is satisfied and/or uncertain or not
 		boolean satisfied = (satisfaction >= satisfactionThreshold);
@@ -180,7 +190,6 @@ public class ConsumatModel {
 		Vehicle bestProduct = null;
 		for(Vehicle product : products) {
 			double utility = calcVehicleSatisfaction(product);
-			System.out.println(utility);
 			if(utility > bestUtility) {
 				bestUtility = utility;
 				bestProduct = product;
@@ -255,13 +264,13 @@ public class ConsumatModel {
 	
 	// Find the most popular product in the social network
 	private Vehicle mostPopularProduct() {
-		int maxValue = 0;
+		double maxValue = 0;
 		Vehicle mostUsed = null;
 
 		//Find the most occurring vehicle in the humans social network
 		for(Vehicle product : products) 
 		{
-			int x = findVehicleUsage(product);			
+			double x = findVehicleUsage(product);			
 			if(x > maxValue) {
 				maxValue = x;
 				mostUsed = product;
@@ -274,13 +283,11 @@ public class ConsumatModel {
 	// Find the satisfaction of the given vehicle
 	private double calcVehicleSatisfaction(Vehicle vehicle) {
 		// Number of agents in the network that have this vehicle
-		int x = findVehicleUsage(vehicle); 
+		double x = findVehicleUsage(vehicle); 
 		
 		// Difference between vehicle characteristics and personal preferences
-		
+	
 		//Average utility of the used vehicles
-		//TODO: test if this function works as expected
-		//float avgUsageUtil = human.travel.getAvgUtil(vehicle);
 		float avgUsageUtil = dataUpdater.hd.getAverageHappiness(vehicle);
 		double productSatisfaction = avgUsageUtil * human.agentPreference.getUtilityFactor(vehicle);
 		
@@ -295,7 +302,7 @@ public class ConsumatModel {
 	}
 	
 	// Find how often the given vehicle occurs in the social network
-	private int findVehicleUsage(Vehicle vehicle) {
+	private double findVehicleUsage(Vehicle vehicle) {
 		// Find humans from social network
 		Network<Object> socialNetwork = (Network<Object>) this.context.getProjection("socialnetwork");
 		Iterable<RepastEdge<Object>> contacts = socialNetwork.getOutEdges(human);
@@ -303,15 +310,21 @@ public class ConsumatModel {
 		
 		// Count how many use the given vehicle
 		int count = 0;
+		int total = 0;
 		while(contactsIterator.hasNext()) {
 			Human contact = (Human) contactsIterator.next().getTarget();
+			total += contact.vehicles.size();
 			for(Vehicle v : contact.vehicles) {
 				if(vehicle.equals(v)) {
 					count++;
 					break;
 				}
 			}
-		}		
-		return count;
+		}			
+		
+		if(total != 0) {
+			return (double)count/total;
+		}
+		return 0;
 	}	
 }
