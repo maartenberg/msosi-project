@@ -32,6 +32,19 @@ public class Route {
 		this.travelDistance = this.grid.getDistance(this.from, this.to);
 	}	
 	
+	public void overwriteFrom(Route other) {
+		this.from = other.getFrom();
+		this.to = other.getTo();
+		this.vehicle = other.getVehicle();
+		this.walkingDistance = other.getWalkingDistance();
+		this.travelDistance = other.getTravelDistance();
+		this.firstStop = other.getFirstStop();
+		this.secondStop = other.getSecondStop();
+		this.firstSpace = other.getFirstSpace();
+		this.secondSpace = other.getSecondSpace();
+		this.utility = other.getUtility();
+	}
+	
 	// Sets the two stops that a human might make on a route
 	public void setTransitStops(TransitStop firstStop, TransitStop secondStop) {
 		this.firstStop = firstStop;
@@ -101,5 +114,13 @@ public class Route {
 	
 	public ParkingSpace getSecondSpace() {
 		return secondSpace;
+	}
+	
+	public GridPoint getFrom() {
+		return from;
+	}
+	
+	public GridPoint getTo() {
+		return to;
 	}
 }

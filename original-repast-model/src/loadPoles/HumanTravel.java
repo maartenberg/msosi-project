@@ -404,21 +404,20 @@ public class HumanTravel {
 							 + "\n  with total walking distance: " + route.getWalkingDistance());		
 		}
 		
-		// Remove the previousroute and add new route to the context
-		if(previousRoute != null) {
-			this.context.remove(previousRoute);
-		}
-		this.context.add(route);
-		
-		// Put Route on Human's current location, so arrows are directed in the correct way
-		this.grid.moveTo(route, currentLocation.getX(), currentLocation.getY());
-		Network<Object> journeysNetwork = (Network<Object>) this.context.getProjection("journeys");
-		journeysNetwork.addEdge(route, human);				
-
 		// Move human and update variables
 		grid.moveTo(human, destination.getX(), destination.getY());
 		human.totalEmissions += vehicle.getTravelEmission() * route.getTravelDistance();
 		human.happiness += route.getUtility();		
-		previousRoute = route;
+
+		if (previousRoute == null) {
+			previousRoute = route;
+			this.context.add(route);
+			Network<Object> journeysNetwork = (Network<Object>) this.context.getProjection("journeys");
+			journeysNetwork.addEdge(route, human);				
+		} else {
+			previousRoute.overwriteFrom(route);
+		}
+		// Put Route on Human's current location, so arrows are directed in the correct way
+		this.grid.moveTo(previousRoute, currentLocation.getX(), currentLocation.getY());
 	}	
 }
