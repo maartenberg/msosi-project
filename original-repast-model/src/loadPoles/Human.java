@@ -203,7 +203,7 @@ public class Human {
 	@ScheduledMethod(start = 1, interval = 60, priority = 1)
 	public void updateFunds() {
 		// Add small amount of monthly income to funds
-		funds += traits.income*0.10;		
+		funds += traits.income*0.20;		
 		
 		// Pay road tax
 		for (Vehicle v : vehicles) {
@@ -217,9 +217,10 @@ public class Human {
 		travel.depart();
 	}
 	
-	@ScheduledMethod(start = 2, interval = 2, priority = 3)
+	@ScheduledMethod(start = 1440, interval = 1440, priority = 3)
 	public void buy() {	
 		// See if we want to buy a product
+		System.out.println(funds);
 		consumat.buy();
 	}
 	
