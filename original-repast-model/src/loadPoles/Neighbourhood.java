@@ -169,6 +169,8 @@ public class Neighbourhood {
 			context.add(new Human(context, grid));
 		}
 		
+		
+		
 		// Initialise networks
 		NetworkBuilder<Object> dwellingNetBuilder = new NetworkBuilder<Object>("livingin", context, true);
 		Network<Object> livingin = dwellingNetBuilder.buildNetwork();
@@ -189,7 +191,7 @@ public class Neighbourhood {
 		Iterator humansIterator = humans.iterator();
 		IndexedIterable dwellings = context.getObjects(Dwelling.class);
 		IndexedIterable workplaces = context.getObjects(Workplace.class);
-		
+				
 		//And make someone live somewhere by adding an edge in the network.
 		//Also make someone work somewhere
 		while (humansIterator.hasNext())
@@ -291,10 +293,10 @@ public class Neighbourhood {
 				Iterable<RepastEdge<Object>> colleagues = workingin.getInEdges(workplace);
 				Iterator<RepastEdge<Object>> colleguesIterator = colleagues.iterator();
 				
-				// Human and colleague are added to social network with 20% chance
+				// Human and colleague are added to social network with 5% chance
 				while(colleguesIterator.hasNext()) {
 					Human colleague = (Human) colleguesIterator.next().getSource();				
-					if(RandomHelper.nextDoubleFromTo(0, 1) < 0.20) {
+					if(RandomHelper.nextDoubleFromTo(0, 1) < 0.2) {
 						RepastEdge<Object> edge = new RepastEdge(human, colleague, false);
 						if(socialnetwork.containsEdge(edge)) {
 							socialnetwork.addEdge(edge);
@@ -333,10 +335,10 @@ public class Neighbourhood {
 					Iterable<RepastEdge<Object>> neighbours = livingin.getInEdges(neighbourHouse);
 					Iterator<RepastEdge<Object>> neighboursIterator = neighbours.iterator();
 					
-					// Human and neighbour are added to social network with 30% chance
+					// Human and neighbour are added to social network with 5% chance
 					while(neighboursIterator.hasNext()) {
 						Human neighbour = (Human) neighboursIterator.next().getSource();
-						if(RandomHelper.nextDoubleFromTo(0, 1) < 0.3) {
+						if(RandomHelper.nextDoubleFromTo(0, 1) < 0.30) {
 							RepastEdge<Object> edge = new RepastEdge(human, neighbour, false);
 							if(!socialnetwork.containsEdge(edge)) {
 								socialnetwork.addEdge(edge);

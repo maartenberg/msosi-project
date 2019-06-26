@@ -204,59 +204,70 @@ public class HumanTravel {
 		double bestUtility = 0;
 		Route bestRoute = null;
 		
+		//System.out.println("\n UTILITY VALUES FOR HUMAN: " + human.getName());
 		//Calculate utility for each vehicle available to this human
 		for(Vehicle vehicle : human.vehicles) {
 			// TODO all: find a good starting value for utility
-			double utility = 5000;
+			double utility = 1000;
 			
 			// Find the corresponding route for this vehicle
 			Route route = findRoute(destination, vehicle);
 
 			// If route is null, it is an invalid route, so ignore it
 			if(route == null) {
-				utility = 1;	
 				continue;			
 			}
 			else {		
+				//System.out.println("\n Vehicle: " + vehicle.getName());
+				//if(pastVehicle != null) {
 				utility *= human.agentPreference.getUtilityFactor(vehicle);
+				//}
+				
+				//System.out.println(" -preference factor:" + utility + "      penalty:" + human.agentPreference.getUtilityFactor(vehicle));
 						
 				//extra in case value 1 is most important
 				if (human.agentPreference.agentActionType == 1)
 				{
 					if(vehicle.getActionRadius() < route.getTravelDistance() + 20)
 					{
-						double punishment = 6000;
+						//double punishment = 10;
+						double punishment = (route.getTravelDistance() + 20) - vehicle.getActionRadius();
 						utility -= punishment;
+						//System.out.println(" -punishment 1:" + utility + "      penalty:" + punishment);
 					}
 				} 
 				
 				//If the vehicle cannot travel this distance comfortably, subtract a lot from utility			
 				if(vehicle.getActionRadius() < route.getTravelDistance()) {
 					//Get the difference between the action radius and distance to travel, and use this as punishment
-					//double punishment = route.getTravelDistance() - vehicle.getActionRadius();
-					double punishment = 6000;
+					double punishment = route.getTravelDistance() - vehicle.getActionRadius();
+					//double punishment = 10;
 					utility -= punishment;
+					//System.out.println(" -punishment 2:" + utility + "      penalty:" + punishment);
 				}
 				
 				// The slower it is, the less utility
 				//extra in case value 1 or 2 are most important
 				if(human.agentPreference.agentActionType == 1 || human.agentPreference.agentActionType == 2) {
-					utility *= vehicle.getSpeed()*2;
+					utility *= (vehicle.getSpeed()-0.15);
 				} else {
-				utility *= vehicle.getSpeed();
+					utility *= vehicle.getSpeed();
 				}
+				//System.out.println(" -speed:" + utility + "      penalty:" + vehicle.getSpeed());
 				
-				//The more emision of CO2, the worse the utility, 
+				//The more emission of CO2, the worse the utility, 
 				//only in case value 0 is most important
 				if(human.agentPreference.agentActionType == 0) {
-					utility -= vehicle.getTravelEmission();
+					utility -= (vehicle.getTravelEmission() * route.getTravelDistance()/100);
+					//System.out.println(" -emission:" + utility + "      penalty:" + (vehicle.getTravelEmission() * route.getTravelDistance()/100));
 				}
-				
+								
 				//The more the cost of traveling impacts the income, the worse the utility
-				utility *= (1 - (route.getTravelDistance() * vehicle.getKilometerCost())/human.traits.income);
+				utility *= (1 - (10 * route.getTravelDistance() * vehicle.getKilometerCost()/human.traits.income));
+				//System.out.println(" -cost:" + utility + "      penalty:" + (1 -(10 * route.getTravelDistance() * vehicle.getKilometerCost()/human.traits.income)));
 				
 				if(route.getWalkingDistance() > 15)	{
-					walkingPunishment = route.getWalkingDistance() * 10;
+					walkingPunishment = route.getWalkingDistance() * 2;
 				} else {
 					walkingPunishment = route.getWalkingDistance();
 				}
@@ -264,19 +275,21 @@ public class HumanTravel {
 				//The more we have to walk between stops during the route, the worse the utility
 				//extra in case value 2 is most important
 				if(human.agentPreference.agentActionType ==2) {
-					walkingPunishment *= 10;
+					walkingPunishment *= 2;
 				}
 				//less in case value 0 is most important
 				else if(human.agentPreference.agentActionType == 0)	{
-					walkingPunishment *= 2;
+					walkingPunishment *= 1.5;
 				} else {
-					walkingPunishment *= 5;
+					walkingPunishment *= 1;
 				}				
 				utility -= walkingPunishment;
-
+				
+				//System.out.println(" -walking:" + utility + "      pentaly:" + walkingPunishment + "  start = (" + route.getWalkingDistance() +")");
+				
 				//Make sure utility is not lower than 1, so at least one vehicle is always chosen
 				utility = Math.max(1, utility);		
-				}
+			}
 			
 			route.setUtility(utility);
 			
@@ -286,10 +299,6 @@ public class HumanTravel {
 			}			
 		}
 		
-		//float usage = (float) (this.getUsage(bestRoute.getVehicle())+1);
-		//this.setUsage(bestRoute.getVehicle(), usage);
-		//float avgUtility = (float) ((this.getAvgUtil(bestRoute.getVehicle()) + bestRoute.getUtility()/5000)/this.getUsage(bestRoute.getVehicle()));
-		//this.setAvgUtil(bestRoute.getVehicle(), avgUtility);
 		return bestRoute;		
 	}	
 
@@ -378,6 +387,7 @@ public class HumanTravel {
 		}		
 		
 		// The following is just printing information to console. Can be deleted if obsolete
+		/*
 		System.out.println( "\nHUMAN " + human.getName() + ":" 
 							+ "\n travelling from: (" + currentLocation.getX() + ", " + currentLocation.getY() + ")"
 							+ " to: (" + destination.getX() + ", " + destination.getY() + ")"
@@ -402,7 +412,7 @@ public class HumanTravel {
 			System.out.println(" went from transit stop at: (" + currentFrom.getX() + ", " + currentFrom.getY() + ")"
 							 + "\n  to transit stop at: (" + currentTo.getX() + ", " + currentTo.getY() + ")"
 							 + "\n  with total walking distance: " + route.getWalkingDistance());		
-		}
+		} */
 		
 		// Move human and update variables
 		grid.moveTo(human, destination.getX(), destination.getY());

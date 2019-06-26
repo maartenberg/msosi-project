@@ -27,7 +27,7 @@
         <color>
           <red>255</red>
           <green>0</green>
-          <blue>255</blue>
+          <blue>51</blue>
           <alpha>255</alpha>
         </color>
       </SeriesData>
@@ -37,9 +37,9 @@
       <SeriesData>
         <label>Hybrid Car</label>
         <color>
-          <red>255</red>
+          <red>0</red>
           <green>255</green>
-          <blue>0</blue>
+          <blue>255</blue>
           <alpha>255</alpha>
         </color>
       </SeriesData>
@@ -51,7 +51,7 @@
         <color>
           <red>0</red>
           <green>0</green>
-          <blue>255</blue>
+          <blue>0</blue>
           <alpha>255</alpha>
         </color>
       </SeriesData>
@@ -60,7 +60,12 @@
       <string>Electric Car</string>
       <SeriesData>
         <label>Electric Car</label>
-        <color reference="../../../entry[3]/SeriesData/color"/>
+        <color>
+          <red>0</red>
+          <green>255</green>
+          <blue>0</blue>
+          <alpha>255</alpha>
+        </color>
       </SeriesData>
     </entry>
     <entry>
@@ -69,8 +74,8 @@
         <label>Normal Car</label>
         <color>
           <red>0</red>
-          <green>255</green>
-          <blue>255</blue>
+          <green>0</green>
+          <blue>204</blue>
           <alpha>255</alpha>
         </color>
       </SeriesData>
@@ -81,7 +86,7 @@
         <label>Bicycle</label>
         <color>
           <red>255</red>
-          <green>0</green>
+          <green>255</green>
           <blue>0</blue>
           <alpha>255</alpha>
         </color>
@@ -104,9 +109,9 @@
       <SeriesData>
         <label>Electric Bicycle</label>
         <color>
-          <red>0</red>
-          <green>255</green>
-          <blue>0</blue>
+          <red>255</red>
+          <green>0</green>
+          <blue>255</blue>
           <alpha>255</alpha>
         </color>
       </SeriesData>

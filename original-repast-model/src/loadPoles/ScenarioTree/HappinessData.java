@@ -55,19 +55,26 @@ public class HappinessData {
 	public float getAverageHappiness(Vehicle vehicle) {
 		switch(vehicle.getName()) {
 		case "bicycle":
-			return avgBicycleHappiness;
-		case "electric_bycicle":
-			return avgElectricBicycleHappiness;
+			return bicycleHappiness/totalHappiness;
+			//return avgBicycleHappiness;
+		case "electric_bicycle":
+			return electricBicycleHappiness/totalHappiness;
+			//return avgElectricBicycleHappiness;
 		case "motor":
-			return avgMotorHappiness;
+			return motorHappiness/totalHappiness;
+			//return avgMotorHappiness;
 		case "public_transport":
-			return avgPublicTransportHappiness;
+			return publicTransportHappiness/totalHappiness;
+			//return avgPublicTransportHappiness;
 		case "normal_car":
-			return avgNormalCarHappiness;
+			return normalCarHappiness/totalHappiness;
+			//return avgNormalCarHappiness;
 		case "hybrid_car":
-			return avgHybridCarHappiness;
+			return hybridCarHappiness/totalHappiness;
+			//return avgHybridCarHappiness;
 		case "electric_car":
-			return avgElectricCarHappiness;
+			return electricCarHappiness/totalHappiness;
+			//return avgElectricCarHappiness;
 		}		
 		return 0;
 	}

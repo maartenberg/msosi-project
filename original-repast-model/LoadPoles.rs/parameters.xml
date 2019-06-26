@@ -7,7 +7,7 @@
 									
 		/>
 				<parameter name="consumatUncertaintyThreshold" displayName="Consumat Uncertainty Threshold" type="float" 
-						defaultValue="10" 
+						defaultValue="1" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$IntConverter"
 									
@@ -56,7 +56,7 @@
 									
 		/>
 				<parameter name="consumatSatisfactionThreshold" displayName="Consumat Satisfaction Threshold" type="float" 
-						defaultValue="10.0" 
+						defaultValue="1" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$FloatConverter"
 									

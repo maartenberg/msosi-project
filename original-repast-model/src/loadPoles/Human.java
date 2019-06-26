@@ -200,32 +200,34 @@ public class Human {
 		}
 	}
 	
-	@ScheduledMethod(start = 1, interval = 1, priority = 1)
+	@ScheduledMethod(start = 1, interval = 60, priority = 1)
+	public void updateFunds() {
+		// Add small amount of monthly income to funds
+		funds += traits.income*0.10;		
+		
+		// Pay road tax
+		for (Vehicle v : vehicles) {
+			funds -= v.roadTaxCost;
+		}
+	}
+	
+	@ScheduledMethod(start = 1, interval = 1, priority = 2)
 	public void depart() {
+		// Travel somewhere
 		travel.depart();
 	}
 	
-	@ScheduledMethod(start = 2, interval = 2, priority = 2)
-	public void buy() {
-		// Update this human's preferences
-		agentPreference.Update(valueInit, this, agentPreference.fluidlevels);
-		
+	@ScheduledMethod(start = 2, interval = 2, priority = 3)
+	public void buy() {	
 		// See if we want to buy a product
 		consumat.buy();
 	}
 	
-	@ScheduledMethod(start = 1, interval = 60, priority = 1)
-	public void updateFunds() {
-		funds += traits.income*0.15;
-		
-		System.out.println("Human " + getName() + " has funds: " + funds);
-	}
 	
-	@ScheduledMethod(start=1, interval=30, priority=2)
-	public void payRoadTax() {
-		for (Vehicle v : vehicles) {
-			funds -= v.roadTaxCost;
-		}
+	@ScheduledMethod(start = 1, interval = 1, priority = 4)
+	public void updatePreferences() {
+		// Update this human's preferences
+		agentPreference.Update(valueInit, this, agentPreference.fluidlevels);
 	}
 
 	public float getHappiness() {
