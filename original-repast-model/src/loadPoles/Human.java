@@ -220,7 +220,6 @@ public class Human {
 	@ScheduledMethod(start = 1440, interval = 1440, priority = 3)
 	public void buy() {	
 		// See if we want to buy a product
-		System.out.println(funds);
 		consumat.buy();
 	}
 	
