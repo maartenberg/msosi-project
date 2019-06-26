@@ -120,9 +120,9 @@ public class ConsumatModel {
 			uncertainty += (1 - socialFactor)*(1 - x);		
 		}
 		
-		System.out.println("HUMAN: " + human.getName());
-		System.out.println("  satisfaction: " + satisfaction);
-		System.out.println("  uncertainty: " + uncertainty);
+		//System.out.println("HUMAN: " + human.getName());
+		//System.out.println("  satisfaction: " + satisfaction);
+		//System.out.println("  uncertainty: " + uncertainty);
 		
 		// Decide whether the agent is satisfied and/or uncertain or not
 		boolean satisfied = (satisfaction >= satisfactionThreshold);
@@ -169,14 +169,14 @@ public class ConsumatModel {
 		
 		//If we already have this product
 		for(Vehicle vehicle : human.vehicles) {
-			if(vehicle == mostUsed) {
+			if(vehicle.equals(mostUsed)) {
 				// No action needed.
 				return;
 			}
 		}
 		
 		//If we can afford it, buy it
-		if(canAfford(mostUsed)) {			
+		if(mostUsed != null && canAfford(mostUsed)) {			
 			buyProduct(mostUsed, false);
 		}
 	}
@@ -211,14 +211,14 @@ public class ConsumatModel {
 		
 		// If we already have this product
 		for(Vehicle vehicle : human.vehicles) {
-			if(vehicle == mostUsed) {
+			if(vehicle.equals(mostUsed)) {
 				// No action needed.
 				return;
 			}
 		}
 		
 		//If we can afford it, buy it if it increases utility
-		if(canAfford(mostUsed) || calcVehicleSatisfaction(mostUsed) > 0) {
+		if(mostUsed != null && canAfford(mostUsed) && calcVehicleSatisfaction(mostUsed) > 0) {
 			buyProduct(mostUsed, false);
 		}		
 	}
@@ -266,12 +266,12 @@ public class ConsumatModel {
 	private Vehicle mostPopularProduct() {
 		double maxValue = 0;
 		Vehicle mostUsed = null;
-
+		
 		//Find the most occurring vehicle in the humans social network
 		for(Vehicle product : products) 
 		{
-			double x = findVehicleUsage(product);			
-			if(x > maxValue) {
+			double x = findVehicleUsage(product);	
+			if(x >= maxValue) {
 				maxValue = x;
 				mostUsed = product;
 			}
@@ -285,19 +285,14 @@ public class ConsumatModel {
 		// Number of agents in the network that have this vehicle
 		double x = findVehicleUsage(vehicle); 
 		
-		// Difference between vehicle characteristics and personal preferences
-	
 		//Average utility of the used vehicles
 		float avgUsageUtil = dataUpdater.hd.getAverageHappiness(vehicle);
+
+		// Difference between vehicle characteristics and personal preferences	
 		double productSatisfaction = avgUsageUtil * human.agentPreference.getUtilityFactor(vehicle);
 		
 		// Calculate expected satisfaction for this vehicle
-		//with the use of the preference profiles:
-		double satisfaction = socialFactor * (1 - Math.abs(productSatisfaction)) + (1 - socialFactor) * x;
-
-		
-		//ALTERNATIVELY: with full control over the social factor
-		//double satisfaction = human.traits.socialFactor * (1 - Math.abs(productSatisfaction)) + (1 - human.traits.socialFactor) * x;
+		double satisfaction = socialFactor * (1 - Math.abs(productSatisfaction)) + (1 - socialFactor) * x;		
 		return satisfaction;
 	}
 	

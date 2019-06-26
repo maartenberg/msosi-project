@@ -79,6 +79,10 @@ public abstract class Vehicle {
 	 */
 	public boolean equals(Vehicle obj) 
 	{
+		if(obj == null) {
+			return false;
+		}
+		
 		if(this.getName() == obj.getName() && this.getVehicleClass() == obj.getVehicleClass()) {
 			return true;
 		}		

@@ -293,12 +293,12 @@ public class Neighbourhood {
 				Iterable<RepastEdge<Object>> colleagues = workingin.getInEdges(workplace);
 				Iterator<RepastEdge<Object>> colleguesIterator = colleagues.iterator();
 				
-				// Human and colleague are added to social network with 5% chance
+				// Human and colleague are added to social network with 20% chance
 				while(colleguesIterator.hasNext()) {
 					Human colleague = (Human) colleguesIterator.next().getSource();				
-					if(RandomHelper.nextDoubleFromTo(0, 1) < 0.2) {
+					if(colleague.getName() != human.getName() && RandomHelper.nextDoubleFromTo(0, 1) < 0.2) {
 						RepastEdge<Object> edge = new RepastEdge(human, colleague, false);
-						if(socialnetwork.containsEdge(edge)) {
+						if(!socialnetwork.containsEdge(edge)) {
 							socialnetwork.addEdge(edge);
 						}
 					}
@@ -311,18 +311,16 @@ public class Neighbourhood {
 			Iterator<RepastEdge<Object>> familyIterator = family.iterator();			
 			while(familyIterator.hasNext()) {
 				Human familyMember = (Human) familyIterator.next().getSource();
-				if(human != familyMember) {
+				if(familyMember.getName() != human.getName()) {
 					RepastEdge<Object> edge = new RepastEdge(human, familyMember, false);
 					if(!socialnetwork.containsEdge(edge)) {
 						socialnetwork.addEdge(edge);
 					}
 				}
-			}
-			
+			}			
 			
 			// Add random people from their neighbourhood to their social network
-			GridPoint pt = grid.getLocation(dwelling);
-			
+			GridPoint pt = grid.getLocation(dwelling);			
 			// Use the GridCellNgh class to create GridCells for the surrounding neighbourhood, in a 10 cell radius
 			GridCellNgh<Dwelling> nghCreator = new GridCellNgh<Dwelling>(this.grid, pt, Dwelling.class, 10, 10);
 			List<GridCell<Dwelling>> gridCells = nghCreator.getNeighborhood(false);
@@ -335,10 +333,10 @@ public class Neighbourhood {
 					Iterable<RepastEdge<Object>> neighbours = livingin.getInEdges(neighbourHouse);
 					Iterator<RepastEdge<Object>> neighboursIterator = neighbours.iterator();
 					
-					// Human and neighbour are added to social network with 5% chance
+					// Human and neighbour are added to social network with 30% chance
 					while(neighboursIterator.hasNext()) {
 						Human neighbour = (Human) neighboursIterator.next().getSource();
-						if(RandomHelper.nextDoubleFromTo(0, 1) < 0.30) {
+						if(neighbour.getName() != human.getName() && RandomHelper.nextDoubleFromTo(0, 1) < 0.30) {
 							RepastEdge<Object> edge = new RepastEdge(human, neighbour, false);
 							if(!socialnetwork.containsEdge(edge)) {
 								socialnetwork.addEdge(edge);
@@ -348,6 +346,25 @@ public class Neighbourhood {
 				}
 			}			
 		}
+		
+		// Make sure everyone has atleast one contact in their social network
+		Iterator<Object> humansIterator2 = humans.iterator();
+		while(humansIterator2.hasNext()) {
+			Human human = (Human) humansIterator2.next();			
+			Iterable<RepastEdge<Object>> contacts = socialnetwork.getOutEdges(human);
+			Iterator<RepastEdge<Object>> contactsIterator = contacts.iterator();
+			
+			if(!contactsIterator.hasNext()) {
+				Human contact = (Human) humans.get(RandomHelper.nextIntFromTo(0, humans.size()-1));
+				while(human.getName() == contact.getName()) {
+					contact = (Human) humans.get(RandomHelper.nextIntFromTo(0, humans.size()-1));
+				}
+				
+				RepastEdge<Object> edge = new RepastEdge(human, contact, false);
+				socialnetwork.addEdge(edge);
+			}
+		}
+		
 	}
 	
 	public void parkAllCars() {
