@@ -281,9 +281,6 @@ class Car extends Vehicle {
 	
 	private void initElectric() {
 		name="electric_car";
-		travelEmission = 23 * params.getFloat("electricityEmissionsFactor");  // Emission from the energy used to charge
-		// TODO Anouk: Make travelEmission configurable to represent how 'green'
-		// the electricity is.
 		upkeepCost = 0.01f;
 		kilometerCost = 0.04f;
 		purchaseEmission = 13_650_000;
@@ -293,17 +290,20 @@ class Car extends Vehicle {
 		case 1:
 			//Based on Nissan LEAF (2019)
 			purchaseCost = 38940 - params.getInteger("evSubsidy");	
-			actionRadius = 270;		
+			actionRadius = 270;
+			travelEmission = 16.5f * params.getFloat("electricityEmissionsFactor");
 			break;
 		case 2:	
 			//Based on Tesla Model 3 (Base model)
 			purchaseCost = 43500 - params.getInteger("evSubsidy");	
 			actionRadius = 335;		
+			travelEmission = 14.9f * params.getFloat("electricityEmissionsFactor");
 			break;
 		case 3:
 			//Based on Tesla Model S (Base model)
 			purchaseCost = 93020 - params.getInteger("evSubsidy");	
 			actionRadius = 525;					
+			travelEmission = 17.5f * params.getFloat("electricityEmissionsFactor");
 			break;
 		}		
 		
