@@ -47,6 +47,11 @@ public class LoadPolesBuilder implements ContextBuilder<Object> {
 		//Initialise social network
 		nbh.initSocialNetwork();
 
+		// If running in batch, we end at 20000 ticks.
+		if (RunEnvironment.getInstance().isBatch()) {
+			RunEnvironment.getInstance().endAt(20_000);
+		}
+
 		return context;
 	}
 
