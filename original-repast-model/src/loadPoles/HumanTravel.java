@@ -19,7 +19,6 @@ public class HumanTravel {
 	Grid<Object> grid;
 	Vehicle pastVehicle;
 	Route previousRoute;
-	double walkingPunishment;
 	
 	public HumanTravel(Human human, Context<Object> context, Grid<Object> grid) {
 		this.human = human;
@@ -251,10 +250,9 @@ public class HumanTravel {
 				utility *= (1 - (10 * route.getTravelDistance() * vehicle.getKilometerCost()/human.traits.income));
 				
 				// Determine walking distance punishment
+				double walkingPunishment = route.getWalkingDistance();
 				if(route.getWalkingDistance() > 15)	{
 					walkingPunishment = route.getWalkingDistance() * 2;
-				} else {
-					walkingPunishment = route.getWalkingDistance();
 				}
 				
 				// The more we have to walk between stops during the route, the worse the utility
@@ -265,9 +263,7 @@ public class HumanTravel {
 				// Less in case value 0 is most important
 				else if(human.agentPreference.agentActionType == 0)	{
 					walkingPunishment *= 1.5;
-				} else {
-					walkingPunishment *= 1;
-				}				
+				} 		
 				utility -= walkingPunishment;
 				
 				// Make sure utility is not lower than 1, so at least one vehicle is always chosen
