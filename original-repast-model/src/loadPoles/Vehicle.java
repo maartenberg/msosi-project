@@ -169,7 +169,7 @@ class Motor extends Vehicle{
 		actionRadius = 250;		
 		speed = 1;
 		travelEmission = 137;
-		purchaseEmission = 13; // TODO Anouk
+		purchaseEmission = 1_581_750;
 		roadTaxCost = 0.3f * params.getFloat("roadTax");
 	}
 }

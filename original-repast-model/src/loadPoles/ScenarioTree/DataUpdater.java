@@ -99,7 +99,8 @@ public class DataUpdater {
 	}
 	
 	public void purchaseUpdate(Vehicle vehicle, boolean initial) {
-		ed.totalEmission += vehicle.getPurchaseEmission();
+		if (!initial)
+			ed.totalEmission += vehicle.getPurchaseEmission();
 		
 		switch(vehicle.getName()) {
 		case "electric_bicycle":
