@@ -214,7 +214,7 @@ public class HumanTravel {
 			if(route != null) {
 				utility *= human.agentPreference.getUtilityFactor(vehicle);
 				
-				// If the vehicle cannot travel this distance comfortably, subtract a lot from utility			
+				// If the vehicle cannot travel this distance comfortably		
 				if(vehicle.getActionRadius() < route.getTravelDistance()) {
 					// Get the difference between the action radius and distance to travel, and use this as punishment
 					double punishment = route.getTravelDistance() - vehicle.getActionRadius();
@@ -222,10 +222,8 @@ public class HumanTravel {
 				}
 				
 				// Extra in case value 1 is most important
-				if (human.agentPreference.agentActionType == 1)
-				{
-					if(vehicle.getActionRadius() < route.getTravelDistance() + 20)
-					{
+				if (human.agentPreference.agentActionType == 1)	{
+					if(vehicle.getActionRadius() < route.getTravelDistance() + 20)	{
 						// Get the difference between the action radius and distance to travel, and use this as punishment
 						double punishment = (route.getTravelDistance() + 20) - vehicle.getActionRadius();
 						utility -= punishment;
@@ -250,19 +248,19 @@ public class HumanTravel {
 				utility *= (1 - (10 * route.getTravelDistance() * vehicle.getKilometerCost()/human.traits.income));
 				
 				// Determine walking distance punishment
-				double walkingPunishment = route.getWalkingDistance();
+				double walkingPunishment = route.getWalkingDistance() * 3;
 				if(route.getWalkingDistance() > 15)	{
-					walkingPunishment = route.getWalkingDistance() * 2;
+					walkingPunishment *= 2;
 				}
 				
 				// The more we have to walk between stops during the route, the worse the utility
 				// Extra in case value 2 is most important
-				if(human.agentPreference.agentActionType ==2) {
+				if(human.agentPreference.agentActionType == 2) {
 					walkingPunishment *= 2;
 				}
 				// Less in case value 0 is most important
 				else if(human.agentPreference.agentActionType == 0)	{
-					walkingPunishment *= 1.5;
+					walkingPunishment /= 2;
 				} 		
 				utility -= walkingPunishment;
 				
