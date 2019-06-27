@@ -195,7 +195,7 @@ class Bicycle extends Vehicle {
 			upkeepCost = 0.05f;
 			kilometerCost = 0.01f;
 			//comfort = 0.5f;
-			actionRadius = 60;	
+			actionRadius = 25;
 			speed = 0.5f;
 			travelEmission = 5 * params.getFloat("electricityEmissionsFactor"); //Emission from the energy needed to charge
 			break;
