@@ -18,11 +18,18 @@ public class LoadPolesBuilder implements ContextBuilder<Object> {
 		int humancount = params.getInteger("humancount");
 		int dwellingcount = params.getInteger("dwellingcount");
 
+		String neighbourhoodfile = "LoadPoles.rs/metropolis.wijk";
+		// If running in batch, we end at 20000 ticks, and the model is somewhere else.
+		if (RunEnvironment.getInstance().isBatch()) {
+			RunEnvironment.getInstance().endAt(20_000);
+			neighbourhoodfile = "../scenario.rs/metropolis.wijk";
+		}
+
 		DataUpdater dataUpdater = new DataUpdater(context);
 		context.add(dataUpdater);
 		
 		//build neighbourhood
-		Neighbourhood nbh = new Neighbourhood(context, "metropolis.wijk", humancount);
+		Neighbourhood nbh = new Neighbourhood(context, neighbourhoodfile, humancount);
 		
 		// Randomly assign parking spaces to dwellings
 		nbh.distributeParkingSpacesToDwelling(0.6, 0.2);		
@@ -47,10 +54,6 @@ public class LoadPolesBuilder implements ContextBuilder<Object> {
 		//Initialise social network
 		nbh.initSocialNetwork();
 
-		// If running in batch, we end at 20000 ticks.
-		if (RunEnvironment.getInstance().isBatch()) {
-			RunEnvironment.getInstance().endAt(20_000);
-		}
 
 		return context;
 	}

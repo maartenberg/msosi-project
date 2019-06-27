@@ -55,8 +55,8 @@ public class Neighbourhood {
 	 * @param fileName
 	 */
 	public Neighbourhood(Context<Object> context, String fileName, int humanCount) {
-		Path p = FileSystems.getDefault().getPath("neighborhoods", fileName);
-		System.out.println(p.toAbsolutePath());
+		Path p = FileSystems.getDefault().getPath(fileName);
+		// System.out.println(p.toAbsolutePath());
 
 		// Read neighbourhood from file
 		try {
