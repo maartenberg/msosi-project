@@ -15,19 +15,19 @@ import repast.simphony.space.grid.GridPoint;
 public class Human {
 	// A class that holds the traits for this human, such as income, gender, age, personal values, etc.
 	HumanTraits traits;
-	
-	// A class that holds the functionalities for travelling	
+
+	// A class that holds the functionalities for travelling
 	HumanTravel travel;
-	
-	// Consumat model helper class for this human	
+
+	// Consumat model helper class for this human
 	ConsumatModel consumat;
-	
-	// A class that keeps track of this human's preferences	
+
+	// A class that keeps track of this human's preferences
 	AgentPreferences agentPreference;
-	
+
 	// Represents the different vehicles available to this Human
 	List<Vehicle> vehicles;
-	
+
 	// Represents this human's main valuesection
 	protected int agentType;
 
@@ -35,139 +35,138 @@ public class Human {
 	Context<Object> context;
 	Grid<Object> grid;
 	Dwelling dwelling;
-	Workplace workplace;	
-	
+	Workplace workplace;
+
 	boolean carUser;
 	String name;
 	float happiness, funds, totalEmissions;
-	
+
 	public Human(Context<Object> context, Grid<Object> grid) {
 		this.context = context;
-		this.grid = grid;			
-		
-		traits = new HumanTraits();			
+		this.grid = grid;
+
+		traits = new HumanTraits();
 		consumat = new ConsumatModel(this, context);
 		travel = new HumanTravel(this, context, grid);
 		agentPreference = new AgentPreferences(this);
 		initVehicles();
-	
+
 		carUser = false;
-		for(Vehicle v : vehicles) {
-			if(v.isCar()) {
+		for (Vehicle v : vehicles) {
+			if (v.isCar()) {
 				carUser = true;
 				break;
 			}
-		}		
-		
+		}
+
 		name = String.valueOf(context.getObjects(Human.class).size());
 		happiness = 0;
 	}
-	
+
 	// Initialise what vehicles this human has based on their traits
 	private void initVehicles() {
-		//Add vehicles that this human already owns before the simulation
-		//For now, does not take into account social values etc.
+		// Add vehicles that this human already owns before the simulation
+		// For now, does not take into account social values etc.
 		vehicles = new ArrayList<Vehicle>();
-		
+
 		// BICYCLE AND PUBLIC TRANSPORT
-		//Always have a normal bicycle and "public transport" available
-		vehicles.add(new Bicycle("normal"));				
+		// Always have a normal bicycle and "public transport" available
+		vehicles.add(new Bicycle("normal"));
 		vehicles.add(new PublicTransport());
-		
+
 		// MOTORBIKE:
-		//If age is over 26, 20% chance of owning a motor
-		if(traits.age >= 26) {
-			if(RandomHelper.nextDoubleFromTo(0, 1) > 0.8) {
+		// If age is over 26, 20% chance of owning a motor
+		if (traits.age >= 26) {
+			if (RandomHelper.nextDoubleFromTo(0, 1) > 0.8) {
 				consumat.buyProduct(new Motor(), true);
 			}
-		}	
-		
+		}
+
 		// ELECTRIC BICYCLE
-		//If age is under 55, 10% chance of owning an electric bicycle
-		if(traits.age < 55) {
-			if(RandomHelper.nextDoubleFromTo(0, 1) > 0.9) {
+		// If age is under 55, 10% chance of owning an electric bicycle
+		if (traits.age < 55) {
+			if (RandomHelper.nextDoubleFromTo(0, 1) > 0.9) {
 				consumat.buyProduct(new Bicycle("electric"), true);
 			}
 		}
-		//If age is 55 and over, 20% chance of owning an electric bicycle
+		// If age is 55 and over, 20% chance of owning an electric bicycle
 		else {
-			if(RandomHelper.nextDoubleFromTo(0, 1) > 0.8) {
+			if (RandomHelper.nextDoubleFromTo(0, 1) > 0.8) {
 				consumat.buyProduct(new Bicycle("electric"), true);
 			}
 		}
-		
+
 		// CARS
-		//Person is age 18 or over
-		if(traits.age >= 18) {			
-			//If the person has a car license, and a decent income
-			if(traits.hasCarLicense && traits.income >= 1500) {		
-				//70% chance of owning a normal car, or own a normal car when income is on the lower side
-				if(RandomHelper.nextDoubleFromTo(0, 1) > 0.30 || traits.income < 2000) {
+		// Person is age 18 or over
+		if (traits.age >= 18) {
+			// If the person has a car license, and a decent income
+			if (traits.hasCarLicense && traits.income >= 1500) {
+				// 70% chance of owning a normal car, or own a normal car when income is on the lower side
+				if (RandomHelper.nextDoubleFromTo(0, 1) > 0.30 || traits.income < 2000) {
 					consumat.buyProduct(new Car("normal"), true);
-					
+
 				}
-				//If income is high enough, and does not own a normal car, 70% chance of owning a hybrid car
-				else if(RandomHelper.nextDoubleFromTo(0, 1) > 0.30) {
+				// If income is high enough, and does not own a normal car, 70% chance of owning a hybrid car
+				else if (RandomHelper.nextDoubleFromTo(0, 1) > 0.30) {
 					consumat.buyProduct(new Car("hybrid"), true);
 				}
-				//Else, own an electric car, with a random vehicle class
+				// Else, own an electric car, with a random vehicle class
 				else {
 					int rndVehicleClass = RandomHelper.nextIntFromTo(1, 3);
 					consumat.buyProduct(new Car("electric", rndVehicleClass), true);
 				}
 			}
 		}
-	}	
-	
+	}
+
 	// Function to park all cars of this human on initialisation
 	public void parkAllCars() {
-		if(!carUser) {
+		if (!carUser) {
 			return;
 		}
-		
-		//Park all cars
+
+		// Park all cars
 		GridPoint currentLocation = grid.getLocation(this);
-		for(Vehicle v : vehicles) {
-			if(v.isCar()) {
+		for (Vehicle v : vehicles) {
+			if (v.isCar()) {
 				ParkingSpace closest = null;
-				if(v.getName() == "electric_car") {
+				if (v.getName() == "electric_car") {
 					closest = travel.findClosestParkingSpace(currentLocation, "electric");
-				}
-				else {
+				} else {
 					closest = travel.findClosestParkingSpace(currentLocation, "normal");
 				}
 				closest.setOccupied(true);
 				v.setParkingSpace(closest);
-			}			
+			}
 		}
 	}
-	
+
 	// Update this human's funds every month (60 ticks)
 	@ScheduledMethod(start = 1, interval = 60, priority = 1)
 	public void updateFunds() {
 		// Add small amount of monthly income to funds
-		funds += traits.income*0.20;		
-		
+		funds += traits.income * 0.20;
+
 		// Pay road tax
 		for (Vehicle v : vehicles) {
 			funds -= v.roadTaxCost;
 		}
 	}
-	
+
 	// Make this human travel somewhere (every tick)
 	@ScheduledMethod(start = 1, interval = 1, priority = 2)
 	public void depart() {
 		// Travel somewhere
 		travel.depart();
 	}
-	
+
 	// Make this human buy something (or not), every 2 years (1440 ticks)
 	@ScheduledMethod(start = 1440, interval = 1440, priority = 3)
-	public void buy() {	
+	public void buy() {
 		// See if we want to buy a product
 		consumat.buy();
 	}
-		
+
 	// Update this human's preferences (every tick)
 	@ScheduledMethod(start = 1, interval = 1, priority = 4)
 	public void updatePreferences() {
@@ -182,24 +181,24 @@ public class Human {
 
 	// True if human has chargable car
 	public boolean hasChargeableCar() {
-		for(Vehicle v : vehicles) {
-			if(v.getName() == "hybrid_car" || v.getName() == "electric_car") {
+		for (Vehicle v : vehicles) {
+			if (v.getName() == "hybrid_car" || v.getName() == "electric_car") {
 				return true;
 			}
 		}
-		return false;		
+		return false;
 	}
-	
+
 	// True if human is employed
 	public boolean isEmployed() {
 		return traits.isemployed;
 	}
-	
+
 	// Set human's dwelling
 	public void setDwelling(Dwelling dwelling) {
 		this.dwelling = dwelling;
 	}
-	
+
 	// Set human's workplace
 	public void setWorkplace(Workplace workplace) {
 		this.workplace = workplace;

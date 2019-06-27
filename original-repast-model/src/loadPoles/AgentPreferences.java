@@ -11,13 +11,13 @@ public class AgentPreferences {
 	protected float utilityFactor_public_transport;
 	protected float utilityFactor_motor;
 	protected int agentActionType;
-	private Human human;	
+	private Human human;
 
 	float r, t, l;
 	float dl = -0.15f;
 	float[] valueTemps;
 	float[] fluidlevels;
-	float positiveFactor = 1.4f;//TODO Maarten: deze factoren kunnen we evt. actief aanpasbaar maken
+	float positiveFactor = 1.4f;// TODO Maarten: deze factoren kunnen we evt. actief aanpasbaar maken
 	float negativeFactor = 0.6f;
 	float dlUp;
 	float dlDown;
@@ -25,35 +25,35 @@ public class AgentPreferences {
 
 	public AgentPreferences(Human human) {
 		this.human = human;
-		fluidlevels = new float[] { 100f, 100f, 100f, 100f};
-		agentActionType =  RandomHelper.nextIntFromTo(0, 3);
+		fluidlevels = new float[] { 100f, 100f, 100f, 100f };
+		agentActionType = RandomHelper.nextIntFromTo(0, 3);
 		initAgentPreferences();
 	}
-	
+
 	// Initialise the preferences that this human has
 	private void initAgentPreferences() {
 		valueTemps = new float[4];
-		
-		int maxv = 0;
-		for (int i = 0; i < valueTemps.length/2; i ++) {
-			//assign a value to the valueWeight (i) and the contrastWeight (j) so that:
-			//i is between 0 and 150
-			//if i == 0, j >= 50 and the other way around
-			//i + j together are between 50 and 150
-			//j cannot be smaller than 0
-			int valueWeight = RandomHelper.nextIntFromTo(0, 150);
-			int contrastWeight= RandomHelper.nextIntFromTo(Math.max(0, 50-valueWeight), 150 - valueWeight);
 
-			int j = i+valueTemps.length/2;
+		int maxv = 0;
+		for (int i = 0; i < valueTemps.length / 2; i++) {
+			// assign a value to the valueWeight (i) and the contrastWeight (j) so that:
+			// i is between 0 and 150
+			// if i == 0, j >= 50 and the other way around
+			// i + j together are between 50 and 150
+			// j cannot be smaller than 0
+			int valueWeight = RandomHelper.nextIntFromTo(0, 150);
+			int contrastWeight = RandomHelper.nextIntFromTo(Math.max(0, 50 - valueWeight), 150 - valueWeight);
+
+			int j = i + valueTemps.length / 2;
 			valueTemps[i] = valueWeight;
-			valueTemps[j] = contrastWeight;				
-			
-			//determine the type of agent by logging what value has the highest temperature
-			if(valueWeight > maxv) {
+			valueTemps[j] = contrastWeight;
+
+			// determine the type of agent by logging what value has the highest temperature
+			if (valueWeight > maxv) {
 				maxv = valueWeight;
 				human.agentType = i;
 			}
-			
+
 			if (contrastWeight > maxv) {
 				maxv = contrastWeight;
 				human.agentType = j;
@@ -62,28 +62,28 @@ public class AgentPreferences {
 	}
 
 	// Update the fluidlevels
-	public void update() {		
-		//set the comparison value to the max distance 
+	public void update() {
+		// set the comparison value to the max distance
 		rhighest = -1000;
-		for (int n = 0; n < valueTemps.length; n++) {					
-			float temps = valueTemps[n];	
+		for (int n = 0; n < valueTemps.length; n++) {
+			float temps = valueTemps[n];
 			fluidlevels[n] += updateFluids(n, temps);
-			
-			//determine the upper and lower levels of the fluid tanks
-			if(fluidlevels[n] > 200) {
+
+			// determine the upper and lower levels of the fluid tanks
+			if (fluidlevels[n] > 200) {
 				fluidlevels[n] = 200;
 			}
-			if(fluidlevels[n] < 0)	{
+			if (fluidlevels[n] < 0) {
 				fluidlevels[n] = 0;
 			}
-			
+
 			r = (-((fluidlevels[n] - valueTemps[n])) / valueTemps[n]) * 100;
-				
+
 			if (r > rhighest) {
 				rhighest = r;
 				t = n;
 			}
-			
+
 			// In case self-trancendence is the most needed value
 			if (t == 0) {
 				agentActionType = 0;
@@ -95,19 +95,19 @@ public class AgentPreferences {
 				utilityFactor_public_transport = 1f * this.positiveFactor;
 				utilityFactor_motor = 1f * this.negativeFactor;
 			}
-			
+
 			// In case conservation is the most needed value
 			if (t == 1) {
-				agentActionType =1;
+				agentActionType = 1;
 				utilityFactor_electric_car = 1f;
 				utilityFactor_electric_bicycle = 1f;
-				utilityFactor_normal_car = 1f * 2* this.positiveFactor; 
+				utilityFactor_normal_car = 1f * 2 * this.positiveFactor;
 				utilityFactor_hybrid_car = 1f;
 				utilityFactor_bicycle = 1f;
 				utilityFactor_public_transport = 1f * this.negativeFactor;
 				utilityFactor_motor = 1f * this.negativeFactor;
 			}
-			
+
 			// In case self-enhancement is the most needed value
 			if (t == 2) {
 				agentActionType = 2;
@@ -117,9 +117,9 @@ public class AgentPreferences {
 				utilityFactor_hybrid_car = 1f * this.positiveFactor;
 				utilityFactor_bicycle = 1f;
 				utilityFactor_public_transport = 1f * this.negativeFactor;
-				utilityFactor_motor = 1f;		
+				utilityFactor_motor = 1f;
 			}
-			
+
 			// In case openness to change is the most needed value
 			if (t == 3) {
 				agentActionType = 3;
@@ -130,7 +130,7 @@ public class AgentPreferences {
 				utilityFactor_bicycle = 1f;
 				utilityFactor_public_transport = 1f * this.negativeFactor;
 				utilityFactor_motor = 1f * this.positiveFactor;
-			}			
+			}
 		}
 	}
 
@@ -141,11 +141,11 @@ public class AgentPreferences {
 		dlUp = (100f - temps) * 0.2f;
 		dlDown = -1 * dlUp;
 
-		if(human.travel.pastVehicle == null) {
+		if (human.travel.pastVehicle == null) {
 			dl = 0;
 		}
-		
-		else if(human.travel.pastVehicle.getName() == "electric_car") {
+
+		else if (human.travel.pastVehicle.getName() == "electric_car") {
 			// here follows a list of the values that are positively linked to this action
 			if (n == 0) {
 				// if the values have been fulfilled, the fluid level OF THIS VALUE rises with 0.3
@@ -154,73 +154,73 @@ public class AgentPreferences {
 			// There are no punishments for electric cars
 		}
 
-		else if(human.travel.pastVehicle.getName() == "normal_car") {
+		else if (human.travel.pastVehicle.getName() == "normal_car") {
 			// here follows a list of the values that have been fulfilled
-			if (n == 1|| n == 2) {
+			if (n == 1 || n == 2) {
 				// if the values have been fulfilled, the fluid level rises with 0.3
 				dl = dlUp;
 				// some values have a double score for this vehicle
 				if (n == 1) {
 					dl *= 1.5;
-				}				
+				}
 			}
 			// here follows a list of the values that have received extra punishment
 			if (n == 0 || n == 3) {
 				// if the values have been punished, the fluid level goes down with 0.3
-				dl = dlDown;				
+				dl = dlDown;
 			}
 		}
 
-		else if(human.travel.pastVehicle.getName() == "hybrid_car") {
+		else if (human.travel.pastVehicle.getName() == "hybrid_car") {
 			// here follows a list of the values that have been fulfilled
-			if (n == 2 || n == 3 ) {
+			if (n == 2 || n == 3) {
 				// if the values have been fulfilled, the fluid level rises with 0.3
-				dl = dlUp;				
+				dl = dlUp;
 			}
 			// There are no punishments for this vehicle type
 		}
 
-		else if(human.travel.pastVehicle.getName() == "bicycle") {
-			//there is a neutral stance towards bikes
+		else if (human.travel.pastVehicle.getName() == "bicycle") {
+			// there is a neutral stance towards bikes
 			dl = 0;
 		}
 
-		else if(human.travel.pastVehicle.getName() == "electric_bicycle") {
+		else if (human.travel.pastVehicle.getName() == "electric_bicycle") {
 			// here follows a list of the values that have received extra punishment
-			if (n == 2) {				
-				dl = dlDown;				
-			}
-		}
-
-		else if(human.travel.pastVehicle.getName() == "public_transport") {
-			// here follows a list of the values that have been fulfilled
-			if (n == 0) {
-				// if the values have been fulfilled, the fluid level rises with 0.3
-				dl =dlUp;
-			}
-			// here follows a list of the values that have received extra punishment
-			if(n == 1 || n == 2 || n == 3) {
-				// if the values have been punished, the fluid level goes down with 0.2
+			if (n == 2) {
 				dl = dlDown;
 			}
 		}
 
-		else if(human.travel.pastVehicle.getName() == "motor") {
+		else if (human.travel.pastVehicle.getName() == "public_transport") {
 			// here follows a list of the values that have been fulfilled
-			if(n == 3 ) {
+			if (n == 0) {
 				// if the values have been fulfilled, the fluid level rises with 0.3
 				dl = dlUp;
 			}
 			// here follows a list of the values that have received extra punishment
-			if(n == 0 || n == 1) {
+			if (n == 1 || n == 2 || n == 3) {
 				// if the values have been punished, the fluid level goes down with 0.2
 				dl = dlDown;
 			}
 		}
-		
-		return dl;		
+
+		else if (human.travel.pastVehicle.getName() == "motor") {
+			// here follows a list of the values that have been fulfilled
+			if (n == 3) {
+				// if the values have been fulfilled, the fluid level rises with 0.3
+				dl = dlUp;
+			}
+			// here follows a list of the values that have received extra punishment
+			if (n == 0 || n == 1) {
+				// if the values have been punished, the fluid level goes down with 0.2
+				dl = dlDown;
+			}
+		}
+
+		return dl;
 	}
-	
+
 	// Find the utility factor for a given vehicle
 	public float getUtilityFactor(Vehicle vehicle) {
 		switch (vehicle.getName()) {
