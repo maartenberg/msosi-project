@@ -56,7 +56,7 @@
 									
 		/>
 				<parameter name="consumatSatisfactionThreshold" displayName="Consumat Satisfaction Threshold" type="float" 
-						defaultValue="1" 
+						defaultValue="1.0" 
 						isReadOnly="false" 
 						converter="repast.simphony.parameter.StringConverterFactory$FloatConverter"
 									
