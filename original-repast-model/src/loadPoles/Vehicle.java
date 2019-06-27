@@ -198,6 +198,7 @@ class Bicycle extends Vehicle {
 			actionRadius = 25;
 			speed = 0.5f;
 			travelEmission = 5 * params.getFloat("electricityEmissionsFactor"); //Emission from the energy needed to charge
+			purchaseEmission = 180_000;
 			break;
 		}
 	}
@@ -273,9 +274,7 @@ class Car extends Vehicle {
 		kilometerCost = 0.10f + 0.5f * params.getFloat("fuelTax");
 		actionRadius = 1200;
 		travelEmission = 127;
-		// TODO Anouk: Find better value for Hybrid's purchaseEmissions.
-		// (Currently average of EV and normal car, random assumption.)
-		purchaseEmission = (6_450_000 + 13_650_000) / 2;
+		purchaseEmission = 19_220_960;
 		roadTaxCost = 0.5f * params.getFloat("roadTax");
 	}
 	
