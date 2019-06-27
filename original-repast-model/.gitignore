@@ -2,3 +2,6 @@
 *.log
 Repast.settings
 output
+EmissionsData.*
+VehicleOwnership.*
+HappinessData.*

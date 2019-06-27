@@ -1,9 +1,9 @@
 <repast.simphony.chart2.engine.TimeSeriesChartDescriptor simphonyVersion="2.6.0">
-  <name>Average Happiness</name>
-  <dataSet>Average Happiness Data</dataSet>
+  <name>Vehicle Possession</name>
+  <dataSet>Vehicle Possession Data</dataSet>
   <xAxisLabel>Tick Count</xAxisLabel>
-  <yAxisLabel>happiness/vehicle usage</yAxisLabel>
-  <chartTitle>Average happiness over time</chartTitle>
+  <yAxisLabel>Amount in possession</yAxisLabel>
+  <chartTitle>Vehicle possession over time</chartTitle>
   <type>TIME_SERIES</type>
   <background>
     <red>192</red>
@@ -64,30 +64,6 @@
           <red>0</red>
           <green>0</green>
           <blue>255</blue>
-          <alpha>255</alpha>
-        </color>
-      </SeriesData>
-    </entry>
-    <entry>
-      <string>Bicycle</string>
-      <SeriesData>
-        <label>Bicycle</label>
-        <color>
-          <red>255</red>
-          <green>255</green>
-          <blue>0</blue>
-          <alpha>255</alpha>
-        </color>
-      </SeriesData>
-    </entry>
-    <entry>
-      <string>Public Transport</string>
-      <SeriesData>
-        <label>Public Transport</label>
-        <color>
-          <red>255</red>
-          <green>153</green>
-          <blue>0</blue>
           <alpha>255</alpha>
         </color>
       </SeriesData>
