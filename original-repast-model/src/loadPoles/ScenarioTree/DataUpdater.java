@@ -44,6 +44,7 @@ public class DataUpdater {
 			double utility = route.getUtility();
 			
 			ed.totalEmission += emission;
+			ed.totalDistance += route.getTravelDistance();
 			hd.totalHappiness += utility;
 			
 			switch(vehicle.getName()) {

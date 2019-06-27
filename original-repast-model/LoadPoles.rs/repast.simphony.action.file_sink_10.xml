@@ -1,10 +1,12 @@
 <repast.simphony.data2.engine.FileSinkDescriptor simphonyVersion="2.6.0">
-  <name>Average Emissions Data</name>
-  <dataSet>Average Emission Data</dataSet>
+  <name>Total Emissions Data</name>
+  <dataSet>Total Emission Data</dataSet>
   <delimiter>,</delimiter>
   <format>TABULAR</format>
   <sourceIds class="linked-hash-set">
     <string>tick</string>
+    <string>Total</string>
+    <string>TotalDistance</string>
     <string>Normal Car</string>
     <string>Hybrid Car</string>
     <string>Electric Car</string>
@@ -12,6 +14,6 @@
     <string>Motor</string>
     <string>Electric Bicycle</string>
   </sourceIds>
-  <fileName>AverageEmissionsData.txt</fileName>
+  <fileName>TotalEmissions.txt</fileName>
   <addTimeStamp>true</addTimeStamp>
 </repast.simphony.data2.engine.FileSinkDescriptor>

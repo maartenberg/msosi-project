@@ -2,6 +2,7 @@ package loadPoles.ScenarioTree;
 
 public class EmissionData {
 	protected float totalEmission;
+	protected float totalDistance;
 	protected float electricBicycleEmission;
 	protected float motorEmission;
 	protected float publicTransportEmission;
@@ -10,6 +11,7 @@ public class EmissionData {
 	protected float electricCarEmission;	
 	
 	protected float avgTotalEmission;
+	protected float avgTotalDistance;
 	protected float avgElectricBicycleEmission;
 	protected float avgMotorEmission;
 	protected float avgPublicTransportEmission;
@@ -19,6 +21,10 @@ public class EmissionData {
 		
 	public float getTotalEmission() {
 		return totalEmission;
+	}
+	
+	public float getTotalDistance() {
+		return totalDistance;
 	}
 	
 	public float getElectricBicycleEmission() {
@@ -71,5 +77,9 @@ public class EmissionData {
 	
 	public float getAvgElectricCarEmission() {
 		return avgElectricCarEmission;
+	}
+	
+	public float getAvgTotalDistance() {
+		return avgTotalDistance;
 	}
 }

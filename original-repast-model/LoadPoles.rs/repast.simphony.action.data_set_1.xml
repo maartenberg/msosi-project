@@ -78,6 +78,15 @@
         <aggType>SUM</aggType>
       </repast.simphony.data2.engine.MethodDataSourceDefinition>
     </entry>
+    <entry>
+      <string>TotalDistance</string>
+      <repast.simphony.data2.engine.MethodDataSourceDefinition>
+        <id>TotalDistance</id>
+        <className>loadPoles.ScenarioTree.EmissionData</className>
+        <methodName>getTotalDistance</methodName>
+        <aggType>SUM</aggType>
+      </repast.simphony.data2.engine.MethodDataSourceDefinition>
+    </entry>
   </methodDataSources>
   <countSources class="linked-hash-map"/>
   <customNADataSources class="linked-hash-map"/>

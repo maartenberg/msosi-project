@@ -1,5 +1,5 @@
 <repast.simphony.visualization.engine.CartesianDisplayDescriptor simphonyVersion="2.6.0">
-  <name>JourneyGrid</name>
+  <name>NeighbourhoodGrid</name>
   <type>2D</type>
   <styles>
     <entry>
@@ -19,6 +19,10 @@
       <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
     </entry>
     <entry>
+      <string>loadPoles.PublicTransport</string>
+      <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
+    </entry>
+    <entry>
       <string>loadPoles.GridObjects.Road</string>
       <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
     </entry>
@@ -29,58 +33,44 @@
     <entry>
       <string>loadPoles.GridObjects.ParkingLot</string>
       <string>repast.simphony.visualization.editedStyle.EditedStyle2D</string>
-    </entry>
-    <entry>
-      <string>loadPoles.Route</string>
-      <string>repast.simphony.visualizationOGL2D.DefaultStyleOGL2D</string>
     </entry>
   </styles>
   <editedStyles>
     <entry>
       <string>loadPoles.GridObjects.PublicBuilding</string>
-      <string>loadPoles.GridObjects.PublicBuilding.style_2.xml</string>
+      <string>loadPoles.GridObjects.PublicBuilding.style_0.xml</string>
     </entry>
     <entry>
       <string>loadPoles.GridObjects.Workplace</string>
-      <string>loadPoles.GridObjects.Workplace.style_2.xml</string>
+      <string>loadPoles.GridObjects.Workplace.style_0.xml</string>
     </entry>
     <entry>
       <string>loadPoles.GridObjects.Dwelling</string>
-      <string>loadPoles.GridObjects.Dwelling.style_2.xml</string>
+      <string>loadPoles.GridObjects.Dwelling.style_0.xml</string>
     </entry>
     <entry>
       <string>loadPoles.GridObjects.TransitStop</string>
-      <string>loadPoles.GridObjects.TransitStop.style_2.xml</string>
+      <string>loadPoles.GridObjects.TransitStop.style_0.xml</string>
+    </entry>
+    <entry>
+      <string>loadPoles.PublicTransport</string>
+      <string>loadPoles.PublicTransport.style_1.xml</string>
     </entry>
     <entry>
       <string>loadPoles.GridObjects.Road</string>
-      <string>loadPoles.GridObjects.Road.style_2.xml</string>
+      <string>loadPoles.GridObjects.Road.style_0.xml</string>
     </entry>
     <entry>
       <string>loadPoles.Human</string>
-      <string>loadPoles.Human.style_13.xml</string>
+      <string>loadPoles.Human.style_10.xml</string>
     </entry>
     <entry>
       <string>loadPoles.GridObjects.ParkingLot</string>
-      <string>loadPoles.GridObjects.ParkingLot.style_2.xml</string>
-    </entry>
-    <entry>
-      <string>loadPoles.Route</string>
-      <null/>
+      <string>loadPoles.GridObjects.ParkingLot.style_0.xml</string>
     </entry>
   </editedStyles>
-  <netStyles>
-    <entry>
-      <string>journeys</string>
-      <string>loadPoles.ScenarioTree.JourneyNetworkStyle</string>
-    </entry>
-  </netStyles>
-  <editedNetStyles>
-    <entry>
-      <string>journeys</string>
-      <null/>
-    </entry>
-  </editedNetStyles>
+  <netStyles/>
+  <editedNetStyles/>
   <frequency>ON_MOVE</frequency>
   <schedParams>
     <start>1.0</start>
@@ -97,7 +87,7 @@
   <layerOrder>
     <entry>
       <string>loadPoles.GridObjects.PublicBuilding</string>
-      <int>3</int>
+      <int>4</int>
     </entry>
     <entry>
       <string>loadPoles.GridObjects.Workplace</string>
@@ -105,11 +95,15 @@
     </entry>
     <entry>
       <string>loadPoles.GridObjects.Dwelling</string>
-      <int>5</int>
+      <int>6</int>
     </entry>
     <entry>
       <string>loadPoles.GridObjects.TransitStop</string>
-      <int>6</int>
+      <int>3</int>
+    </entry>
+    <entry>
+      <string>loadPoles.PublicTransport</string>
+      <int>0</int>
     </entry>
     <entry>
       <string>loadPoles.GridObjects.Road</string>
@@ -121,11 +115,7 @@
     </entry>
     <entry>
       <string>loadPoles.GridObjects.ParkingLot</string>
-      <int>4</int>
-    </entry>
-    <entry>
-      <string>loadPoles.Route</string>
-      <int>0</int>
+      <int>5</int>
     </entry>
   </layerOrder>
   <projections>
@@ -134,23 +124,11 @@
       <attributes/>
       <type>grid</type>
     </repast.simphony.scenario.data.ProjectionData>
-    <repast.simphony.scenario.data.ProjectionData>
-      <id>journeys</id>
-      <attributes/>
-      <type>network</type>
-    </repast.simphony.scenario.data.ProjectionData>
   </projections>
   <visualizationProperties class="repast.simphony.visualization.UnitSizeLayoutProperties">
     <unitSize>15.0</unitSize>
   </visualizationProperties>
   <projectionDescriptors>
-    <entry>
-      <string>journeys</string>
-      <repast.simphony.visualization.engine.DefaultProjectionDescriptor>
-        <proj reference="../../../../projections/repast.simphony.scenario.data.ProjectionData[2]"/>
-        <props/>
-      </repast.simphony.visualization.engine.DefaultProjectionDescriptor>
-    </entry>
     <entry>
       <string>grid</string>
       <repast.simphony.visualization.grid.GridProjectionDescriptor>
