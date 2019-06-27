@@ -1,67 +1,46 @@
 package loadPoles;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import loadPoles.GridObjects.Dwelling;
-import loadPoles.GridObjects.ParkingLot;
 import loadPoles.GridObjects.ParkingSpace;
-import loadPoles.GridObjects.PublicBuilding;
 import loadPoles.GridObjects.Workplace;
 import repast.simphony.context.Context;
 import repast.simphony.engine.schedule.ScheduledMethod;
-import repast.simphony.query.space.grid.GridCell;
-import repast.simphony.query.space.grid.GridCellNgh;
 import repast.simphony.random.RandomHelper;
-import repast.simphony.space.graph.Network;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
-import repast.simphony.util.SimUtilities;
-import repast.simphony.util.collections.IndexedIterable;
 
 public class Human {
-	/**
-	 * A class that holds the traits for this human, such as income, gender, age, personal values, etc.
-	 */
+	// A class that holds the traits for this human, such as income, gender, age, personal values, etc.
 	HumanTraits traits;
 	
-	/**
-	 * A class that holds the functionalities for travelling
-	 */
+	// A class that holds the functionalities for travelling	
 	HumanTravel travel;
 	
-	/**
-	 * Consumat model helper class for this human
-	 */
+	// Consumat model helper class for this human	
 	ConsumatModel consumat;
 	
-	/**
-	 * Represents the different vehicles available to this Human.
-	 */
+	// A class that keeps track of this human's preferences	
+	AgentPreferences agentPreference;
+	
+	// Represents the different vehicles available to this Human
 	List<Vehicle> vehicles;
 	
-	/*
-	 * Represents an array in which this humans values can be stored 
-	 */
-	float[] valueInit = new float[4];
-	
-	/* Represents this human's CO2 footprint. */
-	public float totalEmissions = 0;
-	
-	/* Represents this human's main valuesection */
+	// Represents this human's main valuesection
 	protected int agentType;
+
+	// Context, grid, human's dwelling and workplace on grid
+	Context<Object> context;
+	Grid<Object> grid;
+	Dwelling dwelling;
+	Workplace workplace;	
 	
 	boolean carUser;
 	String name;
-	Context<Object> context;
-	float happiness, funds;
-	AgentPreferences agentPreference;
-	Dwelling dwelling;
-	Workplace workplace;	
-	Grid<Object> grid;
-
+	float happiness, funds, totalEmissions;
+	
 	public Human(Context<Object> context, Grid<Object> grid) {
 		this.context = context;
 		this.grid = grid;			
@@ -69,8 +48,8 @@ public class Human {
 		traits = new HumanTraits();			
 		consumat = new ConsumatModel(this, context);
 		travel = new HumanTravel(this, context, grid);
+		agentPreference = new AgentPreferences(this);
 		initVehicles();
-		initAgentPreferences();
 	
 		carUser = false;
 		for(Vehicle v : vehicles) {
@@ -80,7 +59,6 @@ public class Human {
 			}
 		}		
 		
-		name = String.valueOf(RandomHelper.nextDoubleFromTo(0, 2));
 		name = String.valueOf(context.getObjects(Human.class).size());
 		happiness = 0;
 	}
@@ -141,42 +119,6 @@ public class Human {
 		}
 	}	
 	
-	// Initialise the preferences that this human has
-	private void initAgentPreferences() {
-
-		int maxv = 0;
-		for (int i = 0; i < valueInit.length/2; i ++) {
-			//assign a value to the valueWeight (i) and the contrastWeight (j) so that:
-			//i is between 0 and 150
-			//if i == 0, j >= 50 and the other way around
-			//i + j together are between 50 and 150
-			//j cannot be smaller than 0
-			int valueWeight = RandomHelper.nextIntFromTo(0, 150);
-			int contrastWeight= RandomHelper.nextIntFromTo(Math.max(0, 50-valueWeight), 150 - valueWeight);
-
-			int j = i+valueInit.length/2;
-			valueInit[i] = valueWeight;
-			valueInit[j] = contrastWeight;	
-			
-			
-			//determine the type of agent by logging what value has the highest temperature
-			if(valueWeight > maxv)
-			{
-				maxv = valueWeight;
-				this.agentType = i;
-			}
-			
-			if (contrastWeight > maxv)
-			{
-				maxv = contrastWeight;
-				this.agentType = j;
-			}
-		}
-		//System.out.println("This hums values are" + valueInit);
-		
-		this.agentPreference = new AgentPreferences(valueInit, this);
-	}
-	
 	// Function to park all cars of this human on initialisation
 	public void parkAllCars() {
 		if(!carUser) {
@@ -200,6 +142,7 @@ public class Human {
 		}
 	}
 	
+	// Update this human's funds every month (60 ticks)
 	@ScheduledMethod(start = 1, interval = 60, priority = 1)
 	public void updateFunds() {
 		// Add small amount of monthly income to funds
@@ -211,33 +154,33 @@ public class Human {
 		}
 	}
 	
+	// Make this human travel somewhere (every tick)
 	@ScheduledMethod(start = 1, interval = 1, priority = 2)
 	public void depart() {
 		// Travel somewhere
 		travel.depart();
 	}
 	
+	// Make this human buy something (or not), every 2 years (1440 ticks)
 	@ScheduledMethod(start = 1440, interval = 1440, priority = 3)
 	public void buy() {	
 		// See if we want to buy a product
 		consumat.buy();
 	}
-	
-	
+		
+	// Update this human's preferences (every tick)
 	@ScheduledMethod(start = 1, interval = 1, priority = 4)
 	public void updatePreferences() {
 		// Update this human's preferences
-		agentPreference.Update(valueInit, this, agentPreference.fluidlevels);
+		agentPreference.update();
 	}
 
-	public float getHappiness() {
-		return this.happiness;
-	}	
-
+	// Get the name of this human
 	public String getName() {
 		return this.name;
 	}
 
+	// True if human has chargable car
 	public boolean hasChargeableCar() {
 		for(Vehicle v : vehicles) {
 			if(v.getName() == "hybrid_car" || v.getName() == "electric_car") {
@@ -247,14 +190,17 @@ public class Human {
 		return false;		
 	}
 	
+	// True if human is employed
 	public boolean isEmployed() {
 		return traits.isemployed;
 	}
 	
+	// Set human's dwelling
 	public void setDwelling(Dwelling dwelling) {
 		this.dwelling = dwelling;
 	}
 	
+	// Set human's workplace
 	public void setWorkplace(Workplace workplace) {
 		this.workplace = workplace;
 	}

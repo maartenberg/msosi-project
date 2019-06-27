@@ -1,27 +1,8 @@
 package loadPoles;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import loadPoles.GridObjects.Dwelling;
-import loadPoles.GridObjects.Workplace;
-import repast.simphony.context.Context;
 import repast.simphony.random.RandomHelper;
-import repast.simphony.space.grid.Grid;
 
 public class HumanTraits {
-	/**
-	 * Represents how much influence the neighbors have on this Human's decision to buy an EV.
-	 * Ranges from 0 to 1, inclusive.
-	 */
-	double socialFactor;
-
-	/**
-	 * Represents how much influence the environmental effects have on this Human's decision to buy an EV.
-	 * Ranges from 0 to 1, inclusive.
-	 */
-	double environmentFactor;
-
 	/**
 	 * Represents whether or not this Human has a license to drive a car.
 	 */
@@ -48,14 +29,10 @@ public class HumanTraits {
 	boolean isemployed;
 
 	public HumanTraits() {		
-		//Initialise variables, vehicles, and preferences belonging to this human	
-		//TODO Maarten: maak actief aanpasbaar?
-		socialFactor = RandomHelper.nextDoubleFromTo(0, 1);
-		environmentFactor = RandomHelper.nextDoubleFromTo(0, 1);
-		
 		initFeatures();		
 	}
 	
+	// Initialise this human's features based on data from CBS
 	private void initFeatures() {
 		//Choose a random gender with 50% chance
 		if(RandomHelper.nextDoubleFromTo(0, 1) > 0.5) {
@@ -114,6 +91,7 @@ public class HumanTraits {
 		}		
 	}
 	
+	// Sets the income for this human based on an employment rate, minimum income and maximum income
 	private void setIncome(double employmentRate, int minIncome, int maxIncome) {
 		//If the person is employed, set income randomly between minimum and maximum income
 		if(RandomHelper.nextDoubleFromTo(0,1) > (1-employmentRate)) {

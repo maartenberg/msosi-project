@@ -15,7 +15,6 @@ import repast.simphony.util.collections.IndexedIterable;
 
 public class ConsumatModel {
 	Context<Object> context;
-	Network<Object> consumerMarket;
 	DataUpdater dataUpdater;
 
 	/**
@@ -51,19 +50,20 @@ public class ConsumatModel {
 		this.human = human;		
 		this.context = context;
 
+		// Initialise data updater
 		IndexedIterable<Object> dataUpdaters = context.getObjects(DataUpdater.class);
 		Iterator<Object> dataUpdaterIterator = dataUpdaters.iterator();
 		while(dataUpdaterIterator.hasNext()) {
 			this.dataUpdater = (DataUpdater) dataUpdaterIterator.next();
 		}		
 		
+		// Initialise parameters
 		Parameters params = RunEnvironment.getInstance().getParameters();
 		uncertaintyThreshold = params.getFloat("consumatUncertaintyThreshold");
-		satisfactionThreshold = params.getFloat("consumatSatisfactionThreshold");
-				
+		satisfactionThreshold = params.getFloat("consumatSatisfactionThreshold");				
 		consumatAction = "deliberate";
 		
-		//Initialize list of products
+		// Initialise list of products
 		this.products = new ArrayList<Vehicle>();
 		this.products.add(new Bicycle("electric"));
 		
@@ -77,7 +77,7 @@ public class ConsumatModel {
 		}
 	}
 	
-	//Initialise social factor
+	// Initialise social factor
 	private void initSocialFactor() {
 		//if value 1 is the most important, the social factor is highest
 		if(human.agentType == 1) {
@@ -119,10 +119,6 @@ public class ConsumatModel {
 			double x = findVehicleUsage(vehicle);			
 			uncertainty += (1 - socialFactor)*(1 - x);		
 		}
-		
-		//System.out.println("HUMAN: " + human.getName());
-		//System.out.println("  satisfaction: " + satisfaction);
-		//System.out.println("  uncertainty: " + uncertainty);
 		
 		// Decide whether the agent is satisfied and/or uncertain or not
 		boolean satisfied = (satisfaction >= satisfactionThreshold);

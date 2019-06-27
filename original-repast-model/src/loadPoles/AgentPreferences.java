@@ -11,41 +11,73 @@ public class AgentPreferences {
 	protected float utilityFactor_public_transport;
 	protected float utilityFactor_motor;
 	protected int agentActionType;
-	private Human hum;	
+	private Human human;	
 
 	float r, t, l;
 	float dl = -0.15f;
-	float fluidlevels[];
+	float[] valueTemps;
+	float[] fluidlevels;
 	float positiveFactor = 1.4f;//TODO Maarten: deze factoren kunnen we evt. actief aanpasbaar maken
 	float negativeFactor = 0.6f;
 	float dlUp;
 	float dlDown;
 	float rhighest;
 
-	public AgentPreferences(float[] valueTemps, Human hum) {
-		this.hum = hum;
+	public AgentPreferences(Human human) {
+		this.human = human;
 		fluidlevels = new float[] { 100f, 100f, 100f, 100f};
 		agentActionType =  RandomHelper.nextIntFromTo(0, 3);
+		initAgentPreferences();
+	}
+	
+	// Initialise the preferences that this human has
+	private void initAgentPreferences() {
+		valueTemps = new float[4];
+		
+		int maxv = 0;
+		for (int i = 0; i < valueTemps.length/2; i ++) {
+			//assign a value to the valueWeight (i) and the contrastWeight (j) so that:
+			//i is between 0 and 150
+			//if i == 0, j >= 50 and the other way around
+			//i + j together are between 50 and 150
+			//j cannot be smaller than 0
+			int valueWeight = RandomHelper.nextIntFromTo(0, 150);
+			int contrastWeight= RandomHelper.nextIntFromTo(Math.max(0, 50-valueWeight), 150 - valueWeight);
+
+			int j = i+valueTemps.length/2;
+			valueTemps[i] = valueWeight;
+			valueTemps[j] = contrastWeight;				
+			
+			//determine the type of agent by logging what value has the highest temperature
+			if(valueWeight > maxv) {
+				maxv = valueWeight;
+				human.agentType = i;
+			}
+			
+			if (contrastWeight > maxv) {
+				maxv = contrastWeight;
+				human.agentType = j;
+			}
+		}
 	}
 
-	public void Update(float[] valueTemps, Human hum, float[] prevFluids) {
+	// Update the fluidlevels
+	public void update() {		
 		//set the comparison value to the max distance 
 		rhighest = -1000;
-		//System.out.println("\nHuman: " + hum.getName() + "\nagentActionType:" + agentActionType);
-		for (int n = 0; n <valueTemps.length ; n++) {					
+		for (int n = 0; n < valueTemps.length; n++) {					
 			float temps = valueTemps[n];	
-			fluidlevels[n] = prevFluids[n] + updateFluids(n, temps);
+			fluidlevels[n] += updateFluids(n, temps);
 			
 			//determine the upper and lower levels of the fluid tanks
-			if(fluidlevels[n]> 200)	{
-				fluidlevels[n] =200;
+			if(fluidlevels[n] > 200) {
+				fluidlevels[n] = 200;
 			}
 			if(fluidlevels[n] < 0)	{
 				fluidlevels[n] = 0;
 			}
 			
 			r = (-((fluidlevels[n] - valueTemps[n])) / valueTemps[n]) * 100;
-			//System.out.print("\nvalue " + n + "\nvalueTemp: " + valueTemps [n] + "\nfluidlevels" + fluidlevels[n] + "\nr " + r +"\nfluid levels update:" + dl +"\n");
 				
 			if (r > rhighest) {
 				rhighest = r;
@@ -90,7 +122,7 @@ public class AgentPreferences {
 			
 			// In case openness to change is the most needed value
 			if (t == 3) {
-				agentActionType =3;
+				agentActionType = 3;
 				utilityFactor_electric_car = 1f;
 				utilityFactor_electric_bicycle = 1f;
 				utilityFactor_normal_car = 1f * this.negativeFactor;
@@ -100,8 +132,6 @@ public class AgentPreferences {
 				utilityFactor_motor = 1f * this.positiveFactor;
 			}			
 		}
-		
-		//System.out.println("\new action profile: " + agentActionType);		
 	}
 
 	private float updateFluids(int n, float temps) {
@@ -111,12 +141,11 @@ public class AgentPreferences {
 		dlUp = (100f - temps) * 0.2f;
 		dlDown = -1 * dlUp;
 
-		if(hum.travel.pastVehicle == null) {
+		if(human.travel.pastVehicle == null) {
 			dl = 0;
-			//System.out.println("no past vehicle is listed");
 		}
 		
-		else if(hum.travel.pastVehicle.getName() == "electric_car") {
+		else if(human.travel.pastVehicle.getName() == "electric_car") {
 			// here follows a list of the values that are positively linked to this action
 			if (n == 0) {
 				// if the values have been fulfilled, the fluid level OF THIS VALUE rises with 0.3
@@ -125,7 +154,7 @@ public class AgentPreferences {
 			// There are no punishments for electric cars
 		}
 
-		else if(hum.travel.pastVehicle.getName() == "normal_car") {
+		else if(human.travel.pastVehicle.getName() == "normal_car") {
 			// here follows a list of the values that have been fulfilled
 			if (n == 1|| n == 2) {
 				// if the values have been fulfilled, the fluid level rises with 0.3
@@ -142,7 +171,7 @@ public class AgentPreferences {
 			}
 		}
 
-		else if(hum.travel.pastVehicle.getName() == "hybrid_car") {
+		else if(human.travel.pastVehicle.getName() == "hybrid_car") {
 			// here follows a list of the values that have been fulfilled
 			if (n == 2 || n == 3 ) {
 				// if the values have been fulfilled, the fluid level rises with 0.3
@@ -151,21 +180,19 @@ public class AgentPreferences {
 			// There are no punishments for this vehicle type
 		}
 
-		else if(hum.travel.pastVehicle.getName() == "bicycle") {
+		else if(human.travel.pastVehicle.getName() == "bicycle") {
 			//there is a neutral stance towards bikes
 			dl = 0;
 		}
 
-		else if(hum.travel.pastVehicle.getName() == "electric_bicycle") {
-			//System.out.println("e-bike updated");
+		else if(human.travel.pastVehicle.getName() == "electric_bicycle") {
 			// here follows a list of the values that have received extra punishment
 			if (n == 2) {				
 				dl = dlDown;				
 			}
 		}
 
-		else if(hum.travel.pastVehicle.getName() == "public_transport") {
-			//System.out.println("OV updated");
+		else if(human.travel.pastVehicle.getName() == "public_transport") {
 			// here follows a list of the values that have been fulfilled
 			if (n == 0) {
 				// if the values have been fulfilled, the fluid level rises with 0.3
@@ -178,8 +205,7 @@ public class AgentPreferences {
 			}
 		}
 
-		else if(hum.travel.pastVehicle.getName() == "motor") {
-			//System.out.println("motor updated");
+		else if(human.travel.pastVehicle.getName() == "motor") {
 			// here follows a list of the values that have been fulfilled
 			if(n == 3 ) {
 				// if the values have been fulfilled, the fluid level rises with 0.3
@@ -192,10 +218,10 @@ public class AgentPreferences {
 			}
 		}
 		
-		//System.out.println("value "+  n + "is updated with " + dl);
 		return dl;		
 	}
 	
+	// Find the utility factor for a given vehicle
 	public float getUtilityFactor(Vehicle vehicle) {
 		switch (vehicle.getName()) {
 		case "bicycle":
@@ -213,7 +239,6 @@ public class AgentPreferences {
 		case "motor":
 			return utilityFactor_motor;
 		}
-
 		return 0;
 	}
 }

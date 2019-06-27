@@ -2,7 +2,6 @@ package loadPoles.ScenarioTree;
 
 import java.util.Iterator;
 
-import loadPoles.Human;
 import loadPoles.Route;
 import loadPoles.Vehicle;
 import repast.simphony.context.Context;
@@ -32,6 +31,7 @@ public class DataUpdater {
 		this.context.add(vpd);
 	}
 	
+	// Update data values every tick
 	@ScheduledMethod(start=1, interval=1, priority = 5)
 	public void travelUpdate() {
 		IndexedIterable<Object> allRoutes = context.getObjects(Route.class);
@@ -98,6 +98,7 @@ public class DataUpdater {
 		}	
 	}
 	
+	// Update data values every time something is purchased
 	public void purchaseUpdate(Vehicle vehicle, boolean initial) {
 		if (!initial)
 			ed.totalEmission += vehicle.getPurchaseEmission();

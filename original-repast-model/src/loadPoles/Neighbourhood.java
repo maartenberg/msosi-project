@@ -29,14 +29,11 @@ import repast.simphony.space.graph.RepastEdge;
 import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridBuilderParameters;
 import repast.simphony.space.grid.GridPoint;
-import repast.simphony.space.grid.RandomGridAdder;
 import repast.simphony.space.grid.SimpleGridAdder;
 import repast.simphony.space.grid.StrictBorders;
-import repast.simphony.util.SimUtilities;
 import repast.simphony.util.collections.IndexedIterable;
 
 public class Neighbourhood {
-
 	Context<Object> context;
 	Grid<Object> grid;
 	
@@ -56,8 +53,7 @@ public class Neighbourhood {
 	 */
 	public Neighbourhood(Context<Object> context, String fileName, int humanCount) {
 		Path p = FileSystems.getDefault().getPath(fileName);
-		// System.out.println(p.toAbsolutePath());
-
+				
 		// Read neighbourhood from file
 		try {
 			// Get the X and Y dimensions from the file
@@ -146,30 +142,13 @@ public class Neighbourhood {
 			} 
 
 		} catch (IOException e) {
-			// Build an empty neighbourhood as a fallback.
-			gridX = 10;
-			gridY = 10;
-
-			GridFactory factory = GridFactoryFinder.createGridFactory(null);
-			
-			GridBuilderParameters<Object> gridParameters = new GridBuilderParameters<Object>(
-					new StrictBorders(),
-					new SimpleGridAdder<Object>(),
-					true,
-					gridX,
-					gridY
-			);		
-		
-			grid = factory.createGrid("grid", context, gridParameters);
 			System.out.println("You're missing the neighbourhood file! Please try again.");
 		}
 			
-		//Add people
+		// Add people
 		for(int i = 0; i < humanCount; i++) {
 			context.add(new Human(context, grid));
 		}
-		
-		
 		
 		// Initialise networks
 		NetworkBuilder<Object> dwellingNetBuilder = new NetworkBuilder<Object>("livingin", context, true);
@@ -183,9 +162,6 @@ public class Neighbourhood {
 		
 		NetworkBuilder<Object> socialNetworkBuilder = new NetworkBuilder<Object>("socialnetwork", context, true);
 		Network<Object> socialnetwork = socialNetworkBuilder.buildNetwork();
-		
-		NetworkBuilder<Object> consumerMarketBuilder = new NetworkBuilder<Object>("consumermarket", context, true);
-		Network<Object> consumerMarket = consumerMarketBuilder.buildNetwork();
 
 		IndexedIterable humans = context.getObjects(Human.class);
 		Iterator humansIterator = humans.iterator();
@@ -194,8 +170,7 @@ public class Neighbourhood {
 				
 		//And make someone live somewhere by adding an edge in the network.
 		//Also make someone work somewhere
-		while (humansIterator.hasNext())
-		{		
+		while (humansIterator.hasNext()) {		
 			Human h = (Human)humansIterator.next();
 			
 			// Assign human to a random dwelling
@@ -218,7 +193,7 @@ public class Neighbourhood {
 		this.context = context;		
 	}
 
-	//Distribute B type parking spaces at random given a ratio of B to A.
+	// Distribute B type parking spaces at random given a ratio of B to A.
 	public void distributeParkingSpaceRandom(double ratio) {
 		IndexedIterable parkingLots = this.context.getObjects(ParkingLot.class);
 		Iterator parkingLotsIterator = parkingLots.iterator();
@@ -246,6 +221,7 @@ public class Neighbourhood {
 		} 		
 	}
 	
+	// Distribute parking spaces to dwellings
 	public void distributeParkingSpacesToDwelling(double normalSpotChance, double loadingPoleChance){
 		IndexedIterable dwellings = this.context.getObjects(Dwelling.class);
 		Iterator dwellingsIterator = dwellings.iterator();
@@ -274,6 +250,7 @@ public class Neighbourhood {
 		}		
 	}
 	
+	// Initialise social network
 	public void initSocialNetwork() {
 		// Get all humans, and networks that we need
 		IndexedIterable<Object> humans = this.context.getObjects(Human.class);
@@ -367,6 +344,7 @@ public class Neighbourhood {
 		
 	}
 	
+	// Parks all car upon initialisation
 	public void parkAllCars() {
 		//Every human has his car parked somewhere
 		IndexedIterable humans = this.context.getObjects(Human.class);
@@ -376,6 +354,5 @@ public class Neighbourhood {
 			Human h = (Human) humansIterator.next();
 			h.parkAllCars();
 		}
-	}
-	
+	}	
 }

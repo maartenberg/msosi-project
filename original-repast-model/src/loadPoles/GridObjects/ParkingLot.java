@@ -2,7 +2,6 @@ package loadPoles.GridObjects;
 
 import java.util.*;
 
-import repast.simphony.context.Context;
 import repast.simphony.space.grid.Grid;
 
 public class ParkingLot {

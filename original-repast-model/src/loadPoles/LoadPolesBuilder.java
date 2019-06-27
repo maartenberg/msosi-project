@@ -5,7 +5,6 @@ import repast.simphony.context.Context;
 import repast.simphony.dataLoader.ContextBuilder;
 import repast.simphony.engine.environment.RunEnvironment;
 import repast.simphony.parameter.Parameters;
-import repast.simphony.space.grid.Grid;
 
 public class LoadPolesBuilder implements ContextBuilder<Object> {
 
@@ -16,7 +15,6 @@ public class LoadPolesBuilder implements ContextBuilder<Object> {
 		//Get initializing params
 		Parameters params = RunEnvironment.getInstance().getParameters();
 		int humancount = params.getInteger("humancount");
-		int dwellingcount = params.getInteger("dwellingcount");
 
 		String neighbourhoodfile = "LoadPoles.rs/metropolis.wijk";
 		// If running in batch, we end at 20000 ticks, and the model is somewhere else.
@@ -25,16 +23,17 @@ public class LoadPolesBuilder implements ContextBuilder<Object> {
 			neighbourhoodfile = "../scenario.rs/metropolis.wijk";
 		}
 
+		// Add dataupdater to context
 		DataUpdater dataUpdater = new DataUpdater(context);
 		context.add(dataUpdater);
 		
-		//build neighbourhood
+		// Build neighbourhood
 		Neighbourhood nbh = new Neighbourhood(context, neighbourhoodfile, humancount);
 		
 		// Randomly assign parking spaces to dwellings
 		nbh.distributeParkingSpacesToDwelling(0.6, 0.2);		
 		
-		//Assign b (electric) types to parking spaces in parking lots. Check from the params how we want to do it.
+		// Assign b (electric) types to parking spaces in parking lots. Check from the params how we want to do it.
 		String assignTypeB = params.getString("assignTypeB");
 		switch(assignTypeB) {
 			case "ratio" : 
@@ -48,12 +47,11 @@ public class LoadPolesBuilder implements ContextBuilder<Object> {
 				break;
 		} 
 		
-		//Every human has their car parked somewhere
+		// Every human has their car parked somewhere
 		nbh.parkAllCars();
 		
-		//Initialise social network
+		// Initialise social network
 		nbh.initSocialNetwork();
-
 
 		return context;
 	}

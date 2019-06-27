@@ -32,6 +32,7 @@ public class Route {
 		this.travelDistance = this.grid.getDistance(this.from, this.to);
 	}	
 	
+	// Given a route, overwrite its information to this route
 	public void overwriteFrom(Route other) {
 		this.from = other.getFrom();
 		this.to = other.getTo();
@@ -52,6 +53,7 @@ public class Route {
 		calculateDistances();
 	}
 	
+	// Sets the two parking spaces that a human might use on a route
 	public void setParkingSpaces(ParkingSpace firstSpace, ParkingSpace secondSpace) {
 		this.firstSpace = firstSpace;
 		this.secondSpace = secondSpace;
@@ -75,7 +77,6 @@ public class Route {
 		travelDistance = grid.getDistance(firstLoc, secondLoc);
 	}	
 
-	// Set found utility for this route
 	public void setUtility(double utility) {
 		this.utility = utility;
 	}

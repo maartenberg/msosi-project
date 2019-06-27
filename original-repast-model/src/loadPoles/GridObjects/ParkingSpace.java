@@ -1,7 +1,5 @@
 package loadPoles.GridObjects;
 
-import repast.simphony.context.Context;
-import repast.simphony.space.grid.Grid;
 import repast.simphony.space.grid.GridPoint;
 
 public class ParkingSpace {

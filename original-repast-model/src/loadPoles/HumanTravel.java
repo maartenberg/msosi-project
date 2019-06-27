@@ -7,7 +7,6 @@ import loadPoles.GridObjects.ParkingSpace;
 import loadPoles.GridObjects.PublicBuilding;
 import loadPoles.GridObjects.TransitStop;
 import repast.simphony.context.Context;
-import repast.simphony.engine.schedule.ScheduledMethod;
 import repast.simphony.random.RandomHelper;
 import repast.simphony.space.graph.Network;
 import repast.simphony.space.grid.Grid;
@@ -35,7 +34,7 @@ public class HumanTravel {
 		ParkingSpace closest = null;
 		double minDistance = Integer.MAX_VALUE;
 		
-		//Find closest parking lot with an available parking space
+		// Find closest parking lot with an available parking space
 		while(parkingLotsIterator.hasNext()) {
 			ParkingLot pl = (ParkingLot) parkingLotsIterator.next();
 			GridPoint plLocation = grid.getLocation(pl);						
@@ -48,7 +47,7 @@ public class HumanTravel {
 			}	
 		}
 		
-		//If home has an available parking space for this car, keep it as an option
+		// If home has an available parking space for this car, keep it as an option
 		if(human.dwelling.hasParkingSpace()) {
 			ParkingSpace homeParking = human.dwelling.getAvailable(type);
 			if(homeParking != null) {
@@ -200,84 +199,70 @@ public class HumanTravel {
 	
 	// Calculate the utility for each vehicle and corresponding route, and return the best one 
 	private Route findBestRoute(GridPoint destination) {		
-		//Keep track of the best route (which includes the best vehicle)
+		// Keep track of the best route (which includes the best vehicle)
 		double bestUtility = 0;
 		Route bestRoute = null;
 		
-		//System.out.println("\n UTILITY VALUES FOR HUMAN: " + human.getName());
-		//Calculate utility for each vehicle available to this human
+		// Calculate utility for each vehicle available to this human
 		for(Vehicle vehicle : human.vehicles) {
-			// TODO all: find a good starting value for utility
+			// Starting value
 			double utility = 1000;
 			
 			// Find the corresponding route for this vehicle
 			Route route = findRoute(destination, vehicle);
 
 			// If route is null, it is an invalid route, so ignore it
-			if(route == null) {
-				continue;			
-			}
-			else {		
-				//System.out.println("\n Vehicle: " + vehicle.getName());
-				//if(pastVehicle != null) {
+			if(route != null) {
 				utility *= human.agentPreference.getUtilityFactor(vehicle);
-				//}
 				
-				//System.out.println(" -preference factor:" + utility + "      penalty:" + human.agentPreference.getUtilityFactor(vehicle));
-						
-				//extra in case value 1 is most important
+				// If the vehicle cannot travel this distance comfortably, subtract a lot from utility			
+				if(vehicle.getActionRadius() < route.getTravelDistance()) {
+					// Get the difference between the action radius and distance to travel, and use this as punishment
+					double punishment = route.getTravelDistance() - vehicle.getActionRadius();
+					utility -= punishment;
+				}
+				
+				// Extra in case value 1 is most important
 				if (human.agentPreference.agentActionType == 1)
 				{
 					if(vehicle.getActionRadius() < route.getTravelDistance() + 20)
 					{
-						//double punishment = 10;
+						// Get the difference between the action radius and distance to travel, and use this as punishment
 						double punishment = (route.getTravelDistance() + 20) - vehicle.getActionRadius();
 						utility -= punishment;
-						//System.out.println(" -punishment 1:" + utility + "      penalty:" + punishment);
 					}
-				} 
-				
-				//If the vehicle cannot travel this distance comfortably, subtract a lot from utility			
-				if(vehicle.getActionRadius() < route.getTravelDistance()) {
-					//Get the difference between the action radius and distance to travel, and use this as punishment
-					double punishment = route.getTravelDistance() - vehicle.getActionRadius();
-					//double punishment = 10;
-					utility -= punishment;
-					//System.out.println(" -punishment 2:" + utility + "      penalty:" + punishment);
-				}
+				} 			
 				
 				// The slower it is, the less utility
-				//extra in case value 1 or 2 are most important
+				// Extra in case value 1 or 2 are most important
 				if(human.agentPreference.agentActionType == 1 || human.agentPreference.agentActionType == 2) {
 					utility *= (vehicle.getSpeed()-0.15);
 				} else {
 					utility *= vehicle.getSpeed();
 				}
-				//System.out.println(" -speed:" + utility + "      penalty:" + vehicle.getSpeed());
 				
-				//The more emission of CO2, the worse the utility, 
-				//only in case value 0 is most important
+				// The more emission of CO2, the worse the utility, 
+				// Only in case value 0 is most important
 				if(human.agentPreference.agentActionType == 0) {
 					utility -= (vehicle.getTravelEmission() * route.getTravelDistance()/100);
-					//System.out.println(" -emission:" + utility + "      penalty:" + (vehicle.getTravelEmission() * route.getTravelDistance()/100));
 				}
 								
-				//The more the cost of traveling impacts the income, the worse the utility
+				// The more the cost of traveling impacts the income, the worse the utility
 				utility *= (1 - (10 * route.getTravelDistance() * vehicle.getKilometerCost()/human.traits.income));
-				//System.out.println(" -cost:" + utility + "      penalty:" + (1 -(10 * route.getTravelDistance() * vehicle.getKilometerCost()/human.traits.income)));
 				
+				// Determine walking distance punishment
 				if(route.getWalkingDistance() > 15)	{
 					walkingPunishment = route.getWalkingDistance() * 2;
 				} else {
 					walkingPunishment = route.getWalkingDistance();
 				}
 				
-				//The more we have to walk between stops during the route, the worse the utility
-				//extra in case value 2 is most important
+				// The more we have to walk between stops during the route, the worse the utility
+				// Extra in case value 2 is most important
 				if(human.agentPreference.agentActionType ==2) {
 					walkingPunishment *= 2;
 				}
-				//less in case value 0 is most important
+				// Less in case value 0 is most important
 				else if(human.agentPreference.agentActionType == 0)	{
 					walkingPunishment *= 1.5;
 				} else {
@@ -285,18 +270,17 @@ public class HumanTravel {
 				}				
 				utility -= walkingPunishment;
 				
-				//System.out.println(" -walking:" + utility + "      pentaly:" + walkingPunishment + "  start = (" + route.getWalkingDistance() +")");
-				
-				//Make sure utility is not lower than 1, so at least one vehicle is always chosen
+				// Make sure utility is not lower than 1, so at least one vehicle is always chosen
 				utility = Math.max(1, utility);		
-			}
-			
-			route.setUtility(utility);
-			
-			if(utility > bestUtility) {
-				bestUtility = utility;
-				bestRoute = route;
-			}			
+				
+				// Update values
+				route.setUtility(utility);
+				
+				if(utility > bestUtility) {
+					bestUtility = utility;
+					bestRoute = route;
+				}					
+			}		
 		}
 		
 		return bestRoute;		
@@ -306,13 +290,13 @@ public class HumanTravel {
 	private GridPoint getDestination() {
 		GridPoint currentLocation = grid.getLocation(human);
 		
-		//If not home, go home
+		// If not home, go home
 		GridPoint homeLocation = grid.getLocation(human.dwelling);
 		if(currentLocation.getX() != homeLocation.getX() && currentLocation.getY() != homeLocation.getY()) {
 			return homeLocation;
 		}
 		
-		//Go to work if employed (40% chance)
+		// Go to work if employed (40% chance)
 		if(human.isEmployed()) {
 			double goingToWork = 0.4;		
 			if(RandomHelper.nextDoubleFromTo(0,1) < goingToWork) {
@@ -321,7 +305,7 @@ public class HumanTravel {
 			}
 		}
 		
-		//Find all public building that one can go to, and pick a random one
+		// Find all public building that one can go to, and pick a random one
 		IndexedIterable<Object> publicBuildings = context.getObjects(PublicBuilding.class);
 		if(publicBuildings.size() > 0) {
 			PublicBuilding pb = (PublicBuilding) publicBuildings.get(RandomHelper.nextIntFromTo(0, publicBuildings.size() - 1));
@@ -349,8 +333,8 @@ public class HumanTravel {
 		}		
 		
 		Vehicle vehicle = route.getVehicle();
-		GridPoint currentFrom = null; //Only for console printing
-		GridPoint currentTo = null; //Only for console printing
+		GridPoint currentFrom = null; //Only for console printing, see below
+		GridPoint currentTo = null; //Only for console printing, see below
 		
 		// Handle parking and un-parking cars
 		if(vehicle.isCar()) {		
@@ -368,7 +352,7 @@ public class HumanTravel {
 			to.setOccupied(true);
 			vehicle.setParkingSpace(to);
 			
-			//Only for console printing:
+			//Only for console printing, see below:
 			currentFrom = from.getLocation();
 			currentTo = to.getLocation();
 			
@@ -384,9 +368,25 @@ public class HumanTravel {
 					vehicle.setRemainingRange(remainingRange - route.getTravelDistance());
 				}
 			}			
-		}		
+		}
 		
-		// The following is just printing information to console. Can be deleted if obsolete
+		// Move human and update variables
+		grid.moveTo(human, destination.getX(), destination.getY());
+		human.totalEmissions += vehicle.getTravelEmission() * route.getTravelDistance();
+		human.happiness += route.getUtility();		
+
+		if (previousRoute == null) {
+			previousRoute = route;
+			this.context.add(route);
+			Network<Object> journeysNetwork = (Network<Object>) this.context.getProjection("journeys");
+			journeysNetwork.addEdge(route, human);				
+		} else {
+			previousRoute.overwriteFrom(route);
+		}
+		// Put Route on Human's current location, so arrows are directed in the correct way
+		this.grid.moveTo(previousRoute, currentLocation.getX(), currentLocation.getY());
+		
+		// The following is just printing information to console. Can be uncommented if you want the console to show information
 		/*
 		System.out.println( "\nHUMAN " + human.getName() + ":" 
 							+ "\n travelling from: (" + currentLocation.getX() + ", " + currentLocation.getY() + ")"
@@ -414,20 +414,5 @@ public class HumanTravel {
 							 + "\n  with total walking distance: " + route.getWalkingDistance());		
 		} */
 		
-		// Move human and update variables
-		grid.moveTo(human, destination.getX(), destination.getY());
-		human.totalEmissions += vehicle.getTravelEmission() * route.getTravelDistance();
-		human.happiness += route.getUtility();		
-
-		if (previousRoute == null) {
-			previousRoute = route;
-			this.context.add(route);
-			Network<Object> journeysNetwork = (Network<Object>) this.context.getProjection("journeys");
-			journeysNetwork.addEdge(route, human);				
-		} else {
-			previousRoute.overwriteFrom(route);
-		}
-		// Put Route on Human's current location, so arrows are directed in the correct way
-		this.grid.moveTo(previousRoute, currentLocation.getX(), currentLocation.getY());
 	}	
 }
