@@ -143,4 +143,18 @@ public class DataUpdater {
 			break;
 		}
 	}
+	
+	public void carRemoveUpdate(Vehicle vehicle) {
+		switch(vehicle.getName()) {
+		case "normal_car":
+			vpd.normalCarPossession--;
+			break;		
+		case "hybrid_car":
+			vpd.hybridCarPossession--;
+			break;		
+		case "electric_car":
+			vpd.electricCarPossession--;
+			break;			
+		}
+	}
 }

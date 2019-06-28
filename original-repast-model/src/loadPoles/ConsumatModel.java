@@ -248,6 +248,7 @@ public class ConsumatModel {
 
 		if (oldCar != null) {
 			products.add(oldCar);
+			dataUpdater.carRemoveUpdate(oldCar);
 		}
 
 		dataUpdater.purchaseUpdate(vehicle, initial);
