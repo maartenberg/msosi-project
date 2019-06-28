@@ -17,7 +17,7 @@ public class AgentPreferences {
 	float dl = -0.15f;
 	float[] valueTemps;
 	float[] fluidlevels;
-	float positiveFactor = 1.4f;// TODO Maarten: deze factoren kunnen we evt. actief aanpasbaar maken
+	float positiveFactor = 1.4f;
 	float negativeFactor = 0.6f;
 	float dlUp;
 	float dlDown;
@@ -84,7 +84,7 @@ public class AgentPreferences {
 				t = n;
 			}
 
-			// In case self-trancendence is the most needed value
+			// In case self-transcendence is the most needed value
 			if (t == 0) {
 				agentActionType = 0;
 				utilityFactor_electric_car = 1f * this.positiveFactor;
@@ -135,7 +135,7 @@ public class AgentPreferences {
 	}
 
 	private float updateFluids(int n, float temps) {
-		// fluid levels go down by -0.15 by default
+		// Fluid levels go down by -0.15 by default
 		// if a vehicle was the previous action, some values have been fulfilled
 		dl = -10f;
 		dlUp = (100f - temps) * 0.2f;
@@ -146,33 +146,33 @@ public class AgentPreferences {
 		}
 
 		else if (human.travel.pastVehicle.getName() == "electric_car") {
-			// here follows a list of the values that are positively linked to this action
+			// Here follows a list of the values that are positively linked to this action
 			if (n == 0) {
-				// if the values have been fulfilled, the fluid level OF THIS VALUE rises with 0.3
+				// If the values have been fulfilled, the fluid level OF THIS VALUE rises with 0.3
 				dl = dlUp;
 			}
 			// There are no punishments for electric cars
 		}
 
 		else if (human.travel.pastVehicle.getName() == "normal_car") {
-			// here follows a list of the values that have been fulfilled
+			// Here follows a list of the values that have been fulfilled
 			if (n == 1 || n == 2) {
-				// if the values have been fulfilled, the fluid level rises with 0.3
+				// If the values have been fulfilled, the fluid level rises with 0.3
 				dl = dlUp;
-				// some values have a double score for this vehicle
+				// Some values have a double score for this vehicle
 				if (n == 1) {
 					dl *= 1.5;
 				}
 			}
-			// here follows a list of the values that have received extra punishment
+			// Here follows a list of the values that have received extra punishment
 			if (n == 0 || n == 3) {
-				// if the values have been punished, the fluid level goes down with 0.3
+				// If the values have been punished, the fluid level goes down with 0.3
 				dl = dlDown;
 			}
 		}
 
 		else if (human.travel.pastVehicle.getName() == "hybrid_car") {
-			// here follows a list of the values that have been fulfilled
+			// Here follows a list of the values that have been fulfilled
 			if (n == 2 || n == 3) {
 				// if the values have been fulfilled, the fluid level rises with 0.3
 				dl = dlUp;
@@ -181,39 +181,39 @@ public class AgentPreferences {
 		}
 
 		else if (human.travel.pastVehicle.getName() == "bicycle") {
-			// there is a neutral stance towards bikes
+			// There is a neutral stance towards bikes
 			dl = 0;
 		}
 
 		else if (human.travel.pastVehicle.getName() == "electric_bicycle") {
-			// here follows a list of the values that have received extra punishment
+			// Here follows a list of the values that have received extra punishment
 			if (n == 2) {
 				dl = dlDown;
 			}
 		}
 
 		else if (human.travel.pastVehicle.getName() == "public_transport") {
-			// here follows a list of the values that have been fulfilled
+			// Here follows a list of the values that have been fulfilled
 			if (n == 0) {
-				// if the values have been fulfilled, the fluid level rises with 0.3
+				// If the values have been fulfilled, the fluid level rises with 0.3
 				dl = dlUp;
 			}
-			// here follows a list of the values that have received extra punishment
+			// Here follows a list of the values that have received extra punishment
 			if (n == 1 || n == 2 || n == 3) {
-				// if the values have been punished, the fluid level goes down with 0.2
+				// If the values have been punished, the fluid level goes down with 0.2
 				dl = dlDown;
 			}
 		}
 
 		else if (human.travel.pastVehicle.getName() == "motor") {
-			// here follows a list of the values that have been fulfilled
+			// Here follows a list of the values that have been fulfilled
 			if (n == 3) {
-				// if the values have been fulfilled, the fluid level rises with 0.3
+				// If the values have been fulfilled, the fluid level rises with 0.3
 				dl = dlUp;
 			}
-			// here follows a list of the values that have received extra punishment
+			// Here follows a list of the values that have received extra punishment
 			if (n == 0 || n == 1) {
-				// if the values have been punished, the fluid level goes down with 0.2
+				// If the values have been punished, the fluid level goes down with 0.2
 				dl = dlDown;
 			}
 		}

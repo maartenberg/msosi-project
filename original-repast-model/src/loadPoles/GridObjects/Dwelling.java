@@ -1,7 +1,5 @@
 package loadPoles.GridObjects;
 
-import java.util.List;
-
 import loadPoles.Human;
 import repast.simphony.context.Context;
 import repast.simphony.space.graph.Network;

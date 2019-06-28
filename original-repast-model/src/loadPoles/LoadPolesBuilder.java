@@ -16,7 +16,9 @@ public class LoadPolesBuilder implements ContextBuilder<Object> {
 		Parameters params = RunEnvironment.getInstance().getParameters();
 		int humancount = params.getInteger("humancount");
 
+		// Load neighbourhood from file
 		String neighbourhoodfile = "LoadPoles.rs/metropolis.wijk";
+		
 		// If running in batch, we end at 20000 ticks, and the model is somewhere else.
 		if (RunEnvironment.getInstance().isBatch()) {
 			RunEnvironment.getInstance().endAt(20_000);

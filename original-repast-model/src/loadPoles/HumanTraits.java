@@ -3,29 +3,19 @@ package loadPoles;
 import repast.simphony.random.RandomHelper;
 
 public class HumanTraits {
-	/**
-	 * Represents whether or not this Human has a license to drive a car.
-	 */
+	// Represents whether or not this Human has a license to drive a car.
 	boolean hasCarLicense;
 
-	/*
-	 * Represents the gender of this person
-	 */
+	// Represents the gender of this person
 	String gender;
 
-	/*
-	 * Represents the age of this person
-	 */
+	// Represents the age of this person
 	int age;
 
-	/*
-	 * Represents the current income of this person per year
-	 */
+	// Represents the current income of this person per year
 	int income;
 
-	/*
-	 * Represents whether or not this human is employed
-	 */
+	// Represents whether or not this human is employed
 	boolean isemployed;
 
 	public HumanTraits() {
@@ -63,22 +53,22 @@ public class HumanTraits {
 		hasCarLicense = false;
 		if (18 <= age && age < 20) {
 			// Between the ages of 18 to 20, 40% chance of owning a car license
-			if (RandomHelper.nextDoubleFromTo(0, 1) > 0.6) {
+			if (RandomHelper.nextDoubleFromTo(0, 1) < 0.4) {
 				hasCarLicense = true;
 			}
 		} else if (20 <= age && age < 30) {
 			// Between the ages of 20 and 30, 75% chance of owning a car license
-			if (RandomHelper.nextDoubleFromTo(0, 1) > 0.25) {
+			if (RandomHelper.nextDoubleFromTo(0, 1) < 0.75) {
 				hasCarLicense = true;
 			}
 		} else if (30 <= age && age < 70) {
 			// Between the ages of 20 and 30, 86% chance of owning a car license
-			if (RandomHelper.nextDoubleFromTo(0, 1) > 0.14) {
+			if (RandomHelper.nextDoubleFromTo(0, 1) < 0.86) {
 				hasCarLicense = true;
 			}
 		} else {
 			// From ages 70 and up, 61% chance of owning a car license
-			if (RandomHelper.nextDoubleFromTo(0, 1) > 0.39) {
+			if (RandomHelper.nextDoubleFromTo(0, 1) < 0.61) {
 				hasCarLicense = true;
 			}
 		}
@@ -87,11 +77,11 @@ public class HumanTraits {
 	// Sets the income for this human based on an employment rate, minimum income and maximum income
 	private void setIncome(double employmentRate, int minIncome, int maxIncome) {
 		// If the person is employed, set income randomly between minimum and maximum income
-		if (RandomHelper.nextDoubleFromTo(0, 1) > (1 - employmentRate)) {
+		if (RandomHelper.nextDoubleFromTo(0, 1) < employmentRate) {
 			income = RandomHelper.nextIntFromTo(minIncome, maxIncome);
 			isemployed = true;
 		}
-		// Else, the person is unemployed, and thus give a low income (so they can atleast travel a bit)
+		// Else, the person is unemployed, and thus give a low income (so they can at least travel a bit)
 		else {
 			income = 500;
 		}

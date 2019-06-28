@@ -11,14 +11,10 @@ public class Route {
 	private Vehicle vehicle;
 	private GridPoint from, to;
 
-	/*
-	 * For car: represents the two closest parking spaces from beginning and end locations on route
-	 */
+	// For car: represents the two closest parking spaces from beginning and end locations on route
 	ParkingSpace firstSpace, secondSpace;
 
-	/**
-	 * For public transport: Represents the two closest transit stops from beginning and end locations on route
-	 */
+	// For public transport: Represents the two closest transit stops from beginning and end locations on route
 	TransitStop firstStop, secondStop;
 
 	public Route(Grid<Object> grid, GridPoint from, GridPoint to, Vehicle vehicle) {

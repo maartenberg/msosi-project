@@ -17,32 +17,24 @@ public class ConsumatModel {
 	Context<Object> context;
 	DataUpdater dataUpdater;
 
-	/**
-	 * Human "parent" of this class
-	 */
+	// Human "parent" of this class
 	Human human;
 
-	/*
-	 * Represents the list of all vehicles that can be bought
-	 */
+	// Represents the list of all vehicles that can be bought
 	List<Vehicle> products;
 
-	/*
-	 * Represents the action taken by this human
-	 */
+	// Represents the action taken by this human
 	String consumatAction;
 
-	/*
-	 * Represents the current satisfaction and uncertainty levels for this agent
-	 */
+	// Represents the current satisfaction and uncertainty levels and thresholds for this agent
 	float satisfaction;
 	float uncertainty;
+	
+	// Represents to what extend an agent is influence by others in their social network
 	double socialFactor;
 	boolean socialFactorInitialised;
 
-	/*
-	 * Represents at what threshold the agent considers itself satisfied or uncertain
-	 */
+	// Represents at what threshold the agent considers itself satisfied or uncertain
 	float satisfactionThreshold;
 	float uncertaintyThreshold;
 
@@ -50,7 +42,7 @@ public class ConsumatModel {
 		this.human = human;
 		this.context = context;
 
-		// Initialise data updater
+		// Initialise data updater from context
 		IndexedIterable<Object> dataUpdaters = context.getObjects(DataUpdater.class);
 		Iterator<Object> dataUpdaterIterator = dataUpdaters.iterator();
 		while (dataUpdaterIterator.hasNext()) {
@@ -67,6 +59,7 @@ public class ConsumatModel {
 		this.products = new ArrayList<Vehicle>();
 		this.products.add(new Bicycle("electric"));
 
+		// Only add motor and cars as available products if human has a car license
 		if (human.traits.hasCarLicense) {
 			this.products.add(new Motor());
 			this.products.add(new Car("normal"));
@@ -89,13 +82,13 @@ public class ConsumatModel {
 			socialFactor = RandomHelper.nextDoubleFromTo(0.45, 0.95);
 			socialFactorInitialised = true;
 		}
-		// if value 1 is the most important, the social factor is most likely low or average
-		if (human.agentType == 3) {
+		// if value 0 is the most important, the social factor is most likely low or average
+		if (human.agentType == 0) {
 			socialFactor = RandomHelper.nextDoubleFromTo(0.2, 0.6);
 			socialFactorInitialised = true;
 		}
 		// if value 3 is the most important, the social factor will be low
-		if (human.agentType == 4) {
+		if (human.agentType == 3) {
 			socialFactor = RandomHelper.nextDoubleFromTo(0, 0.35);
 			socialFactorInitialised = true;
 		} else {
@@ -143,7 +136,6 @@ public class ConsumatModel {
 
 	// Repeat the action from before
 	private void repeat() {
-		// Simply choose the previous action
 		switch (consumatAction) {
 		case "imitate":
 			imitate();
@@ -162,10 +154,9 @@ public class ConsumatModel {
 		consumatAction = "imitate";
 		Vehicle mostUsed = mostPopularProduct();
 
-		// If we already have this product
+		// If we already have this product, no action needed
 		for (Vehicle vehicle : human.vehicles) {
 			if (vehicle.equals(mostUsed)) {
-				// No action needed.
 				return;
 			}
 		}
@@ -180,7 +171,7 @@ public class ConsumatModel {
 	private void deliberate() {
 		consumatAction = "deliberate";
 
-		// Find product with highest expected utility
+		// Find available product with highest expected utility
 		double bestUtility = 0;
 		Vehicle bestProduct = null;
 		for (Vehicle product : products) {
@@ -221,11 +212,12 @@ public class ConsumatModel {
 
 	// Buy a product
 	public void buyProduct(Vehicle vehicle, boolean initial) {
-		// Human can only have one car
+		// Humans can only have one car, so if this vehicle is a car, check if humans have one already
 		Vehicle oldCar = null;
 		if (vehicle.isCar()) {
 			for (Vehicle v : human.vehicles) {
 				if (v.isCar()) {
+					// Save the old car in a temporary variable, and remove it from their vehicles
 					oldCar = v;
 					human.vehicles.removeIf(obj -> obj.equals(v));
 					break;
@@ -233,9 +225,10 @@ public class ConsumatModel {
 			}
 		}
 
-		// Remove product from list of products and add to available vehicles
+		// Remove product we want to buy from list of products and add to available vehicles
 		for (Vehicle product : products) {
 			if (product.equals(vehicle)) {
+				// If we are not at initialisation, then update human variables
 				if (!initial) {
 					human.totalEmissions += vehicle.getPurchaseEmission();
 					human.funds -= vehicle.getPurchaseCost();
@@ -246,11 +239,13 @@ public class ConsumatModel {
 			}
 		}
 
+		// If we did have a car before, then add it back to the list of products, and update data
 		if (oldCar != null) {
 			products.add(oldCar);
 			dataUpdater.carRemoveUpdate(oldCar);
 		}
-
+		
+		// Update data
 		dataUpdater.purchaseUpdate(vehicle, initial);
 	}
 
@@ -272,7 +267,7 @@ public class ConsumatModel {
 				mostUsed = product;
 			}
 		}
-
+		
 		return mostUsed;
 	}
 
@@ -281,7 +276,7 @@ public class ConsumatModel {
 		// Number of agents in the network that have this vehicle
 		double x = findVehicleUsage(vehicle);
 
-		// Average utility of the used vehicles
+		// Average happiness ('utility') of the used vehicles
 		float avgUsageUtil = dataUpdater.hd.getAverageHappiness(vehicle);
 
 		// Difference between vehicle characteristics and personal preferences
@@ -299,7 +294,8 @@ public class ConsumatModel {
 		Iterable<RepastEdge<Object>> contacts = socialNetwork.getOutEdges(human);
 		Iterator<RepastEdge<Object>> contactsIterator = contacts.iterator();
 
-		// Count how many use the given vehicle
+		// Count how many people in this human's social network use the given vehicle
+		// and how many vehicles there are in total
 		int count = 0;
 		int total = 0;
 		while (contactsIterator.hasNext()) {

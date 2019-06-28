@@ -16,10 +16,10 @@ public class Human {
 	// A class that holds the traits for this human, such as income, gender, age, personal values, etc.
 	HumanTraits traits;
 
-	// A class that holds the functionalities for travelling
+	// A class that holds the functionalities for traveling
 	HumanTravel travel;
 
-	// Consumat model helper class for this human
+	// CONSUMAT model helper class for this human
 	ConsumatModel consumat;
 
 	// A class that keeps track of this human's preferences
@@ -28,7 +28,7 @@ public class Human {
 	// Represents the different vehicles available to this Human
 	List<Vehicle> vehicles;
 
-	// Represents this human's main valuesection
+	// Represents this human's main value section
 	protected int agentType;
 
 	// Context, grid, human's dwelling and workplace on grid
@@ -36,7 +36,7 @@ public class Human {
 	Grid<Object> grid;
 	Dwelling dwelling;
 	Workplace workplace;
-
+	
 	boolean carUser;
 	String name;
 	float happiness, funds, totalEmissions;
@@ -51,6 +51,7 @@ public class Human {
 		agentPreference = new AgentPreferences(this);
 		initVehicles();
 
+		// Set car user to true if human has a car
 		carUser = false;
 		for (Vehicle v : vehicles) {
 			if (v.isCar()) {
@@ -59,6 +60,7 @@ public class Human {
 			}
 		}
 
+		// Get unique name for this human
 		name = String.valueOf(context.getObjects(Human.class).size());
 		happiness = 0;
 	}
@@ -66,7 +68,6 @@ public class Human {
 	// Initialise what vehicles this human has based on their traits
 	private void initVehicles() {
 		// Add vehicles that this human already owns before the simulation
-		// For now, does not take into account social values etc.
 		vehicles = new ArrayList<Vehicle>();
 
 		// BICYCLE AND PUBLIC TRANSPORT
@@ -77,7 +78,7 @@ public class Human {
 		// MOTORBIKE:
 		// If age is over 26, 20% chance of owning a motor
 		if (traits.age >= 26) {
-			if (RandomHelper.nextDoubleFromTo(0, 1) > 0.8) {
+			if (RandomHelper.nextDoubleFromTo(0, 1) < 0.2) {
 				consumat.buyProduct(new Motor(), true);
 			}
 		}
@@ -85,13 +86,13 @@ public class Human {
 		// ELECTRIC BICYCLE
 		// If age is under 55, 10% chance of owning an electric bicycle
 		if (traits.age < 55) {
-			if (RandomHelper.nextDoubleFromTo(0, 1) > 0.9) {
+			if (RandomHelper.nextDoubleFromTo(0, 1) < 0.1) {
 				consumat.buyProduct(new Bicycle("electric"), true);
 			}
 		}
 		// If age is 55 and over, 20% chance of owning an electric bicycle
 		else {
-			if (RandomHelper.nextDoubleFromTo(0, 1) > 0.8) {
+			if (RandomHelper.nextDoubleFromTo(0, 1) < 0.2) {
 				consumat.buyProduct(new Bicycle("electric"), true);
 			}
 		}
@@ -102,12 +103,12 @@ public class Human {
 			// If the person has a car license, and a decent income
 			if (traits.hasCarLicense && traits.income >= 1500) {
 				// 70% chance of owning a normal car, or own a normal car when income is on the lower side
-				if (RandomHelper.nextDoubleFromTo(0, 1) > 0.30 || traits.income < 2000) {
+				if (RandomHelper.nextDoubleFromTo(0, 1) < 0.70 || traits.income < 2000) {
 					consumat.buyProduct(new Car("normal"), true);
 
 				}
 				// If income is high enough, and does not own a normal car, 70% chance of owning a hybrid car
-				else if (RandomHelper.nextDoubleFromTo(0, 1) > 0.30) {
+				else if (RandomHelper.nextDoubleFromTo(0, 1) < 0.70) {
 					consumat.buyProduct(new Car("hybrid"), true);
 				}
 				// Else, own an electric car, with a random vehicle class
@@ -129,6 +130,7 @@ public class Human {
 		GridPoint currentLocation = grid.getLocation(this);
 		for (Vehicle v : vehicles) {
 			if (v.isCar()) {
+				// Find closest parking space. Loading pole if car is electric, else normal space
 				ParkingSpace closest = null;
 				if (v.getName() == "electric_car") {
 					closest = travel.findClosestParkingSpace(currentLocation, "electric");
@@ -156,21 +158,18 @@ public class Human {
 	// Make this human travel somewhere (every tick)
 	@ScheduledMethod(start = 1, interval = 1, priority = 2)
 	public void depart() {
-		// Travel somewhere
 		travel.depart();
 	}
 
 	// Make this human buy something (or not), every 2 years (1440 ticks)
 	@ScheduledMethod(start = 1440, interval = 1440, priority = 3)
 	public void buy() {
-		// See if we want to buy a product
 		consumat.buy();
 	}
 
 	// Update this human's preferences (every tick)
 	@ScheduledMethod(start = 1, interval = 1, priority = 4)
 	public void updatePreferences() {
-		// Update this human's preferences
 		agentPreference.update();
 	}
 

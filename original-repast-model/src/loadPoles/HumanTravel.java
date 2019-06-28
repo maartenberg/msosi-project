@@ -17,6 +17,8 @@ public class HumanTravel {
 	Human human;
 	Context<Object> context;
 	Grid<Object> grid;
+	
+	// Keeps track of the vehicle and route used in the previous tick
 	Vehicle pastVehicle;
 	Route previousRoute;
 
@@ -38,6 +40,8 @@ public class HumanTravel {
 			ParkingLot pl = (ParkingLot) parkingLotsIterator.next();
 			GridPoint plLocation = grid.getLocation(pl);
 			double distance = grid.getDistance(location, plLocation);
+			
+			// Check if this parking lot has a parking space available of given type
 			ParkingSpace available = pl.getAvailable(type);
 
 			if (available != null && distance < minDistance) {
@@ -48,6 +52,7 @@ public class HumanTravel {
 
 		// If home has an available parking space for this car, keep it as an option
 		if (human.dwelling.hasParkingSpace()) {
+			// Check if there is an available parking space at home of a given type
 			ParkingSpace homeParking = human.dwelling.getAvailable(type);
 			if (homeParking != null) {
 				GridPoint homeLocation = grid.getLocation(human.dwelling);
@@ -137,7 +142,9 @@ public class HumanTravel {
 		GridPoint currentLocation = grid.getLocation(human);
 		GridPoint homeLocation = grid.getLocation(human.dwelling);
 
+		// Use vehicle's current parking space as the from parking space
 		ParkingSpace from = vehicle.getParkingSpace();
+		// Or find a new one if it has none
 		if (from == null) {
 			if (vehicle.getName() == "electric_car") {
 				from = findClosestParkingSpace(currentLocation, "electric");
@@ -145,10 +152,12 @@ public class HumanTravel {
 				from = findClosestParkingSpace(currentLocation, "normal");
 			}
 		}
+		
+		// Find parking space closest to destination
 		ParkingSpace to = null;
 		// Check if the electric car has enough range
 		if (vehicle.getName() == "electric_car") {
-			// Find closest charging space, normal space locations
+			// Find closest charging and normal parking spaces to destination
 			ParkingSpace closestChargingSpace = findClosestParkingSpace(destination, "electric");
 			ParkingSpace closestNormalSpace = findClosestParkingSpace(destination, "normal");
 
@@ -216,18 +225,16 @@ public class HumanTravel {
 
 				// If the vehicle cannot travel this distance comfortably
 				if (vehicle.getActionRadius() < route.getTravelDistance()) {
-					// Get the difference between the action radius and distance to travel, and use this as punishment
-					double punishment = route.getTravelDistance() - vehicle.getActionRadius();
-					utility -= punishment;
+					// Subtract the difference between the action radius and distance to trave
+					utility -= route.getTravelDistance() - vehicle.getActionRadius();;
 				}
 
 				// Extra in case value 1 is most important
 				if (human.agentPreference.agentActionType == 1) {
+					// Have a 20 kilometer safety net
 					if (vehicle.getActionRadius() < route.getTravelDistance() + 20) {
-						// Get the difference between the action radius and distance to travel, and use this as
-						// punishment
-						double punishment = (route.getTravelDistance() + 20) - vehicle.getActionRadius();
-						utility -= punishment;
+						// Subtract the difference between the action radius and distance to travel
+						utility -= (route.getTravelDistance() + 20) - vehicle.getActionRadius();;
 					}
 				}
 
@@ -248,13 +255,13 @@ public class HumanTravel {
 				// The more the cost of traveling impacts the income, the worse the utility
 				utility *= (1 - (10 * route.getTravelDistance() * vehicle.getKilometerCost() / human.traits.income));
 
-				// Determine walking distance punishment
+				// The more we have to walk between stops during the route, the worse the utility
 				double walkingPunishment = route.getWalkingDistance() * 3;
+				// If we have to walk 15 km or more, double the punishment
 				if (route.getWalkingDistance() > 15) {
 					walkingPunishment *= 2;
 				}
 
-				// The more we have to walk between stops during the route, the worse the utility
 				// Extra in case value 2 is most important
 				if (human.agentPreference.agentActionType == 2) {
 					walkingPunishment *= 2;
@@ -384,7 +391,7 @@ public class HumanTravel {
 		this.grid.moveTo(previousRoute, currentLocation.getX(), currentLocation.getY());
 
 		// The following is just printing information to console. Can be uncommented if you want the console to show
-		// information
+		// travel information for each human at each tick
 		/*
 		 * System.out.println( "\nHUMAN " + human.getName() + ":" + "\n travelling from: (" + currentLocation.getX() +
 		 * ", " + currentLocation.getY() + ")" + " to: (" + destination.getX() + ", " + destination.getY() + ")" +
